@@ -138,7 +138,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
           var room = this.rooms[rooms[i]];
           if (room == null) continue;
           var sockets = room.sockets;
-          for (var id in sockets) {
+          for (var id in sockets.keys) {
             if (sockets.containsKey(id)) {
               if (ids[id] != null || except.indexOf(id) >= 0) continue;
               socket = this.nsp.connected[id];

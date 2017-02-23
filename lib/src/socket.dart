@@ -187,7 +187,11 @@ class Socket extends EventEmitter {
    * @api private
    */
   packet(packet, [opts]) {
-    packet['nsp'] = this.nsp.name;
+
+    // ignore preEncoded = true.
+    if (packet is Map) {
+      packet['nsp'] = this.nsp.name;
+    }
     opts = opts ?? {};
     opts['compress'] = false != opts['compress'];
     this.client.packet(packet, opts);

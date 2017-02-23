@@ -57,8 +57,8 @@ class Server {
     this.serveClient(false != options['serveClient']);
     this.adapter = options.containsKey('adapter') ? options['adapter'] : 'default';
     this.origins(options.containsKey('origins') ? options['origins'] : '*:*');
-    this.sockets = this.of('/');
     this.encoder = new Encoder();
+    this.sockets = this.of('/');
     if (server != null) {
       this.attach(server, options);
     }
