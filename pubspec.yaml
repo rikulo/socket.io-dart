@@ -1,0 +1,14 @@
+name: socket_io
+description: Dartlang port of socket.io
+version: 0.8.0
+author: jumperchen <jumperchen@potix.com>
+homepage: https://www.zkoss.org
+
+environment:
+  sdk: '>=1.0.0'
+
+dependencies:
+  logging: any
+dev_dependencies:
+  unittest: any
+  test: '>=0.12.0 <0.13.0'
