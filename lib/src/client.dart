@@ -39,7 +39,7 @@ class Client {
     this.encoder = new Encoder();
     this.decoder = new Decoder();
     this.id = conn.id;
-    this.request = conn.req;
+    this.request = conn.connect.request;
     this.setup();
   }
 

@@ -344,10 +344,10 @@ class Socket extends EventEmitter {
    * @api private
    */
   onack(packet) {
-    var ack = this.acks[packet['id']];
+    Function ack = this.acks[packet['id']];
     if (ack is Function) {
 //      debug('calling ack %s with %j', packet.id, packet.data);
-      ack.apply(this, packet['data']);
+      Function.apply(ack, packet['data']);
       this.acks.remove(packet['id']);
     } else {
 //      debug('bad ack %s', packet.id);

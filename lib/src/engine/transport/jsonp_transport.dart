@@ -12,14 +12,15 @@
  */
 import 'dart:convert';
 import 'dart:io';
+import 'package:socket_io/src/engine/connect.dart';
 import 'package:socket_io/src/engine/transport/polling_transport.dart';
 
 class JSONPTransport extends PollingTransport {
   String head;
   String foot;
-  JSONPTransport(HttpRequest req): super(req) {
+  JSONPTransport(SocketConnect connect): super(connect) {
 
-    this.head = '___eio[' + (req.uri.queryParameters['j'] ?? '').replaceAll(new RegExp('[^0-9]'), '') + '](';
+    this.head = '___eio[' + (connect.request.uri.queryParameters['j'] ?? '').replaceAll(new RegExp('[^0-9]'), '') + '](';
     this.foot = ');';
   }
 

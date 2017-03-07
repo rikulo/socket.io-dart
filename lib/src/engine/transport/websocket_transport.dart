@@ -12,6 +12,7 @@
  */
 import 'dart:io';
 import 'package:logging/logging.dart';
+import 'package:socket_io/src/engine/connect.dart';
 import 'package:socket_io/src/engine/parser/packet.dart';
 import 'package:socket_io/src/engine/parser/parser.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
@@ -20,13 +21,11 @@ class WebSocketTransport extends Transport {
   static Logger _logger = new Logger('socket_io:transport/WebSocketTransport');
   String name = 'websocket';
   bool writable;
-  HttpRequest req;
-  WebSocket socket;
   bool get handlesUpgrades => true;
   bool get supportsFraming => true;
-
-  WebSocketTransport(this.req, this.socket) {
-    socket.listen(this.onData, onError: this.onError, onDone: this.onClose);
+  WebSocketTransport(connect): super(connect) {
+    this.connect = connect;
+    connect.websocket.listen(this.onData, onError: this.onError, onDone: this.onClose);
     writable = true;
   }
 
@@ -48,7 +47,7 @@ class WebSocketTransport extends Transport {
 //      }
 
 //      this.writable = false;
-      this.socket.add(data);
+      this.connect.websocket.add(data);
     };
 
 //    function onEnd (err) {
@@ -64,7 +63,7 @@ class WebSocketTransport extends Transport {
     }
   }
   void doClose([fn]) {
-    this.socket.close();
+    this.connect.websocket.close();
     if (fn != null)
       fn();
   }

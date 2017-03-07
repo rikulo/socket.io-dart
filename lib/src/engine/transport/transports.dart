@@ -13,6 +13,7 @@
 import 'dart:io';
 
 import 'package:logging/logging.dart';
+import 'package:socket_io/src/engine/connect.dart';
 import 'package:socket_io/src/engine/parser/packet.dart';
 import 'package:socket_io/src/engine/parser/parser.dart';
 import 'package:socket_io/src/engine/transport/jsonp_transport.dart';
@@ -28,15 +29,14 @@ class Transports {
     return [];
   }
 
-  static Transport newInstance(String name, HttpRequest req,
-                               [WebSocket webSocket]) {
+  static Transport newInstance(String name, SocketConnect connect) {
     if ('websocket' == name) {
-      return new WebSocketTransport(req, webSocket);
+      return new WebSocketTransport(connect);
     } else if ('polling' == name ) {
-      if (req.uri.queryParameters.containsKey('j')) {
-        return new JSONPTransport(req);
+      if (connect.request.uri.queryParameters.containsKey('j')) {
+        return new JSONPTransport(connect);
       } else {
-        return new XHRTransport(req);
+        return new XHRTransport(connect);
       }
     } else {
       throw new UnsupportedError('Unknown transport $name');
@@ -55,9 +55,9 @@ abstract class Transport extends EventEmitter {
   bool writable;
   String readyState;
   bool discarded;
-  HttpRequest req;
+  SocketConnect connect;
 
-  Transport([HttpRequest req]) {
+  Transport(connect) {
     this.readyState = 'open';
     this.discarded = false;
   }
@@ -66,8 +66,8 @@ abstract class Transport extends EventEmitter {
     this.discarded = true;
   }
 
-  void onRequest(HttpRequest req) {
-    this.req = req;
+  void onRequest(SocketConnect connect) {
+    this.connect = connect;
   }
 
   void close([closeFn()]) {

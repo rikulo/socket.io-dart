@@ -300,7 +300,7 @@ class PacketParser {
 
       var msgLength = int.parse(strLen);
 
-      var msg = bufferTail.getRange(1, msgLength + 1);
+      dynamic msg = bufferTail.getRange(1, msgLength + 1);
       if (isString == true) msg = new String.fromCharCodes(msg);
       buffers.add(msg);
       bufferTail = bufferTail.skip(msgLength + 1).toList();

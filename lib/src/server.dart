@@ -16,6 +16,7 @@ import 'package:socket_io/src/client.dart';
 import 'package:socket_io/src/engine/engine.dart';
 import 'package:socket_io/src/namespace.dart';
 import 'package:socket_io/src/parser/parser.dart';
+import 'package:stream/stream.dart';
 /**
  * Socket.IO client source.
  */
@@ -37,7 +38,7 @@ class Server {
   bool _serveClient;
   String _path;
   String _adapter;
-  HttpServer httpServer;
+  StreamServer httpServer;
   Engine engine;
   Encoder encoder;
 
@@ -229,7 +230,7 @@ class Server {
       srv = int.parse(srv.toString());
     }
     if (opts == null) {
-      opts = new Map();
+      opts = {};
     }
     // set engine.io path to `/socket.io`
     if (!opts.containsKey('path')) {
@@ -241,14 +242,16 @@ class Server {
     if (srv is num) {
       _logger.info('creating http server and binding to $srv');
       int port = srv;
-      HttpServer.bind(InternetAddress.ANY_IP_V4, port).then((
-          HttpServer server) {
-        this.httpServer = server;
-//                server.listen((HttpRequest request) {
-//                    HttpResponse response = request.response;
-//                    response.statusCode = HttpStatus.NOT_FOUND;
-//                    response.close();
-//                });
+      StreamServer server = new StreamServer();
+      server.start(port: port);
+//      HttpServer.bind(InternetAddress.ANY_IP_V4, port).then((
+//          HttpServer server) {
+//        this.httpServer = server;
+////                server.listen((HttpRequest request) {
+////                    HttpResponse response = request.response;
+////                    response.statusCode = HttpStatus.NOT_FOUND;
+////                    response.close();
+////                });
 
         var connectPacket = { 'type': CONNECT, 'nsp': '/'};
         this.encoder.encode(connectPacket, (encodedPacket) {
@@ -269,7 +272,7 @@ class Server {
           // bind to engine events
           this.bind(this.engine);
         });
-      });
+//      });
     } else {
       var connectPacket = { 'type': CONNECT, 'nsp': '/'};
       this.encoder.encode(connectPacket, (encodedPacket) {
@@ -408,7 +411,7 @@ class Server {
     this.engine.close();
 
     if (this.httpServer != null) {
-      this.httpServer.close();
+      this.httpServer.stop();
     }
   }
 

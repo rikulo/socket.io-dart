@@ -17,8 +17,8 @@ import 'package:socket_io/src/util/event_emitter.dart';
 
 abstract class Adapter {
   Map nsps = {};
-  Map rooms = {};
-  Map sids = {};
+  Map<String, _Room> rooms;
+  Map<String, Map> sids;
 
   add(String id, String room, [fn([_])]);
   del(String id, String room, [fn([_])]);
@@ -94,7 +94,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   delAll(String id, [fn([_])]) {
     var rooms = this.sids[id];
     if (rooms != null) {
-      for (var room in rooms) {
+      for (var room in rooms.keys) {
         if (this.rooms.containsKey(room)) {
           this.rooms[room].del(id);
           if (this.rooms[room].length == 0)
@@ -178,7 +178,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
         var room = this.rooms[rooms[i]];
         if (room == null) continue;
         var sockets = room.sockets;
-        for (var id in sockets) {
+        for (var id in sockets.keys) {
           if (sockets.containsKey(id)) {
             if (ids[id] != null) continue;
             socket = this.nsp.connected[id];
@@ -208,7 +208,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
    */
   clientRooms(String id, [fn(err, [_])]) {
     var rooms = this.sids[id];
-    if (fn != null) Timer.run(() => fn(null, rooms ? rooms.keys : null));
+    if (fn != null) Timer.run(() => fn(null, rooms?.keys));
   }
 }
   /**

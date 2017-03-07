@@ -185,7 +185,7 @@ class Decoder extends EventEmitter {
     var i = 0;
     var endLen = str.length - 1;
     // look up type
-    var p = {
+    var p = <String, dynamic> {
       'type': num.parse(str[0])
     };
 

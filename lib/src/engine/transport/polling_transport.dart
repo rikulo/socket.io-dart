@@ -14,6 +14,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:logging/logging.dart';
+import 'package:socket_io/src/engine/connect.dart';
 import 'package:socket_io/src/engine/parser/packet.dart';
 import 'package:socket_io/src/engine/parser/parser.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
@@ -28,65 +29,59 @@ class PollingTransport extends Transport {
   static final Logger _logger = new Logger('socket_io:engine/transport/PollingTransport');
   int closeTimeout;
   Function shouldClose;
-  HttpRequest dataReq;
-  PollingTransport(req) : super(req) {
+  SocketConnect dataReq;
+  PollingTransport(connect) : super(connect) {
     this.closeTimeout = 30 * 1000;
     this.maxHttpBufferSize = null;
     this.httpCompression = null;
+    this.name = 'polling';
   }
 
-  /**
-   * Transport name
-   *
-   * @api public
-   */
-  String name = 'polling';
+  onRequest(SocketConnect connect) {
+    var res = connect.response;
 
-  onRequest(HttpRequest req) {
-    var res = req.response;
-
-    if ('GET' == req.method) {
-      this.onPollRequest(req, res);
-    } else if ('POST' == req.method) {
-      this.onDataRequest(req);
+    if ('GET' == connect.request.method) {
+      this.onPollRequest(connect);
+    } else if ('POST' == connect.request.method) {
+      this.onDataRequest(connect);
     } else {
       res.statusCode = 500;
       res.close();
     }
   }
-  Map<HttpRequest, Function> _reqCleanups = {};
-  Map<HttpRequest, Function> _reqCloses = {};
+  Map<SocketConnect, Function> _reqCleanups = {};
+  Map<SocketConnect, Function> _reqCloses = {};
 
   /**
    * The client sends a request awaiting for us to send data.
    *
    * @api private
    */
-  onPollRequest(HttpRequest req, HttpResponse res) {
-    if (this.req != null) {
+  onPollRequest(SocketConnect connect) {
+    if (this.connect != null) {
     _logger.info('request overlap');
       // assert: this.res, '.req and .res should be (un)set together'
       this.onError('overlap from client');
-      res.statusCode = 500;
-      res.close();
+      this.connect.response.statusCode = 500;
+      this.connect.close();
       return;
     }
 
       _logger.info('setting request');
 
-    this.req = req;
+    this.connect = connect;
 
     var onClose = () {
       this.onError('poll connection closed prematurely');
     };
 
     var cleanup = () {
-      _reqCloses.remove(req);
-      this.req = null;
+      _reqCloses.remove(connect);
+      this.connect = null;
     };
 
-    _reqCleanups[req] = cleanup;
-    _reqCloses[req] = onClose;
+    _reqCleanups[connect] = cleanup;
+    _reqCloses[connect] = onClose;
 
 
     this.writable = true;
@@ -104,19 +99,20 @@ class PollingTransport extends Transport {
    *
    * @api private
    */
-  onDataRequest(HttpRequest req) {
+  onDataRequest(SocketConnect connect) {
     if (this.dataReq != null) {
       // assert: this.dataRes, '.dataReq and .dataRes should be (un)set together'
       this.onError('data request overlap from client');
-      req.response..statusCode = 500..close();
+      connect.response.statusCode = 500;
+      connect.close();
       return;
     }
 
-    var isBinary = 'application/octet-stream' == req.headers.value('content-type');
+    var isBinary = 'application/octet-stream' == connect.request.headers.value('content-type');
 
-    this.dataReq = req;
+    this.dataReq = connect;
 
-    var chunks = isBinary ? [0] : '';
+    dynamic chunks = isBinary ? [0] : '';
     var self = this;
     StreamSubscription subscription;
     var cleanup = () {
@@ -132,7 +128,7 @@ class PollingTransport extends Transport {
       self.onError('data request connection closed prematurely');
     };
 
-    var onData = (data) {
+    var onData = (List<int> data) {
       var contentLength;
       if (data is String) {
         chunks += data;
@@ -150,7 +146,7 @@ class PollingTransport extends Transport {
 
       if (contentLength > self.maxHttpBufferSize) {
         chunks = '';
-//      req.connection.destroy();
+        connect.close();
       }
     };
 
@@ -162,25 +158,26 @@ class PollingTransport extends Transport {
       'Content-Length': 2
       };
 
-      HttpResponse res = req.response;
+      HttpResponse res = connect.response;
 
       res.statusCode = 200;
 
       res.headers.clear();
       // text/html is required instead of text/plain to avoid an
       // unwanted download dialog on certain user-agents (GH-43)
-      self.headers(req, headers).forEach((key, value) {
+      self.headers(connect, headers).forEach((key, value) {
         res.headers.set(key, value);
       });
-      res..write('ok')..close();
+      res.write('ok');
+      connect.close();
       cleanup();
     };
 
-    subscription = req.listen(
+    subscription = connect.request.listen(
         onData,
         onDone: onEnd);
     if (!isBinary) {
-      req.response.headers.contentType
+      connect.response.headers.contentType
       = ContentType.TEXT; // for encoding utf-8
     }
   }
@@ -255,10 +252,9 @@ class PollingTransport extends Transport {
    * @api private
    */
   write(data, [options]) {
-    _logger.info('writing "%s"', data);
-    var self = this;
+    _logger.info('writing "$data"');
     this.doWrite(data, options, () {
-      Function fn = _reqCleanups.remove(self.req);
+      Function fn = _reqCleanups.remove(this.connect);
       if (fn != null)
         fn();
     });
@@ -284,25 +280,25 @@ class PollingTransport extends Transport {
 
     var respond = (data) {
       headers['Content-Length'] = data is String ? UTF8.encode(data).length : data.length;
-      HttpResponse res = self.req.response;
+      HttpResponse res = self.connect.response;
       res.statusCode = 200;
 
       res.headers.clear(); // remove all default headers.
-      this.headers(this.req, headers).forEach((k, v) {
+      this.headers(this.connect, headers).forEach((k, v) {
         res.headers.set(k, v);
       });
       try {
         if (data is String) {
           res
-            ..write(data)
-            ..close();
+            .write(data);
+          connect.close();
         } else {
           res
-            ..write(new String.fromCharCodes(data))
-            ..close();
+            .write(new String.fromCharCodes(data));
+            connect.close();
         }
       } catch (e) {
-        Function fn = _reqCloses.remove(req);
+        Function fn = _reqCloses.remove(connect);
         if (fn != null)
           fn();
         rethrow;
@@ -322,7 +318,7 @@ class PollingTransport extends Transport {
     }
 
 
-    var encodings = this.req.headers.value(HttpHeaders.ACCEPT_ENCODING);
+    var encodings = this.connect.request.headers.value(HttpHeaders.ACCEPT_ENCODING);
     var gzip = encodings.contains('gzip');
     if (!gzip && !encodings.contains('deflate')) {
       respond(data);
@@ -386,12 +382,12 @@ class PollingTransport extends Transport {
    * @param {Object} extra headers
    * @api private
    */
-  headers(HttpRequest req, [Map headers]) {
+  headers(SocketConnect connect, [Map headers]) {
     headers = headers ?? {};
 
     // prevent XSS warnings on IE
     // https://github.com/LearnBoost/socket.io/pull/1333
-    var ua = req.headers.value('user-agent');
+    var ua = connect.request.headers.value('user-agent');
     if (ua != null && (ua.indexOf(';MSIE') >= 0 || ua.indexOf('Trident/') >= 0)) {
       headers['X-XSS-Protection'] = '0';
     }

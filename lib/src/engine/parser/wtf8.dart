@@ -26,7 +26,7 @@ class WTF8 {
   }
 
   static List<int> _ucs2decode(String string) {
-    List output = [];
+    List<int> output = [];
     var counter = 0;
     var length = string.length;
     var value;

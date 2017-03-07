@@ -14,9 +14,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' hide Socket;
 import 'package:logging/logging.dart';
+import 'package:socket_io/src/engine/connect.dart';
 import 'package:socket_io/src/engine/engine.dart';
 import 'package:socket_io/src/engine/socket.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
+import 'package:stream/stream.dart';
 /**
  * Server constructor.
  *
@@ -134,8 +136,9 @@ class Server extends Engine {
    * @api private
    */
 
-  verify(HttpRequest req, bool upgrade, fn) {
+  verify(SocketConnect connect, bool upgrade, fn) {
     // transport check
+    var req = connect.request;
     var transport = req.uri.queryParameters['transport'];
     if (this.transports.indexOf(transport) == -1) {
       _logger.info('unknown transport "%s"', transport);
@@ -191,13 +194,14 @@ class Server extends Engine {
    * @api public
    */
 
-  handleRequest(HttpRequest req) {
+  handleRequest(SocketConnect connect) {
+    var req = connect.request;
     _logger.info('handling ${req.method} http request ${req.uri.path}');
 //  this.prepare(req);
 //  req.res = res;
 
     var self = this;
-    this.verify(req, false, (err, success) {
+    this.verify(connect, false, (err, success) {
       if (!success) {
         sendErrorMessage(req, err);
         return;
@@ -205,9 +209,9 @@ class Server extends Engine {
 //print('sid ${req.uri.queryParameters['sid']}');
       if (req.uri.queryParameters['sid'] != null) {
         _logger.info('setting new request for existing client');
-        self.clients[req.uri.queryParameters['sid']].transport.onRequest(req);
+        self.clients[req.uri.queryParameters['sid']].transport.onRequest(connect);
       } else {
-        self.handshake(req.uri.queryParameters['transport'], req);
+        self.handshake(req.uri.queryParameters['transport'], connect);
       }
     });
   }
@@ -251,8 +255,8 @@ class Server extends Engine {
    * @param {Object} request object
    * @api public
    */
-  generateId(HttpRequest req) {
-    return req.session.id;
+  generateId(SocketConnect connect) {
+    return connect.request.session.id;
   }
 
   /**
@@ -262,13 +266,14 @@ class Server extends Engine {
    * @param {Object} request object
    * @api private
    */
-  handshake(String transportName, HttpRequest req, [WebSocket webSocket]) {
-    var id = this.generateId(req);
+  handshake(String transportName, SocketConnect connect) {
+    var id = this.generateId(connect);
 
     _logger.info('handshaking client $id');
     var transport;
+    var req = connect.request;
     try {
-       transport = Transports.newInstance(transportName, req, webSocket);
+       transport = Transports.newInstance(transportName, connect);
       if ('polling' == transportName) {
         transport.maxHttpBufferSize = this.maxHttpBufferSize;
         transport.httpCompression = this.httpCompression;
@@ -285,7 +290,7 @@ class Server extends Engine {
       sendErrorMessage(req, ServerErrors.BAD_REQUEST);
       return;
     }
-    var socket = new Socket(id, this, transport, req);
+    var socket = new Socket(id, this, transport, connect);
 
     if (false != this.cookie) {
       transport.on('headers', (headers) {
@@ -297,7 +302,7 @@ class Server extends Engine {
       });
     }
 
-    transport.onRequest(req);
+    transport.onRequest(connect);
 
     this.clients[id] = socket;
     this.clientsCount++;
@@ -315,13 +320,13 @@ class Server extends Engine {
    *
    * @api public
    */
-  handleUpgrade(HttpRequest req, WebSocket socket) {
+  handleUpgrade(SocketConnect connect) {
 //  this.prepare(req);
 
     var self = this;
-    this.verify(req, true, (err, success) {
+    this.verify(connect, true, (err, success) {
       if (!success) {
-        abortConnection(socket, err);
+        abortConnection(connect, err);
         return;
       }
 
@@ -331,7 +336,7 @@ class Server extends Engine {
 
       // delegate to ws
 //  self.ws.handleUpgrade(req, socket, head, function (conn) {
-      this.onWebSocket(req, socket);
+      this.onWebSocket(connect);
 //  });
     });
   }
@@ -343,7 +348,7 @@ class Server extends Engine {
    * @api private
    */
 
-  onWebSocket(HttpRequest req, WebSocket webSocket) {
+  onWebSocket(SocketConnect connect) {
 //    socket.listen((_) {},
 //        onError: () => _logger.info('websocket error before upgrade'));
 
@@ -354,7 +359,7 @@ class Server extends Engine {
 //  }
 
     // get client id
-    var id = req.uri.queryParameters['sid'];
+    var id = connect.request.uri.queryParameters['sid'];
 
     // keep a reference to the ws.Socket
 //  req.websocket = socket;
@@ -363,18 +368,18 @@ class Server extends Engine {
       var client = this.clients[id];
       if (client == null) {
         _logger.info('upgrade attempt for closed client');
-        webSocket.close();
+        connect.websocket.close();
       } else if (client.upgrading == true) {
         _logger.info('transport has already been trying to upgrade');
-        webSocket.close();
+        connect.websocket.close();
       } else if (client.upgraded == true) {
         _logger.info('transport had already been upgraded');
-        webSocket.close();
+        connect.websocket.close();
       } else {
         _logger.info('upgrading existing transport');
-
+        var req = connect.request;
         var transport = Transports.newInstance(
-            req.uri.queryParameters['transport'], req, webSocket);
+            req.uri.queryParameters['transport'], connect);
         if (req.uri.queryParameters['b64'] == true) {
           transport.supportsBinary = false;
         } else {
@@ -384,7 +389,7 @@ class Server extends Engine {
         client.maybeUpgrade(transport);
       }
     } else {
-      this.handshake(req.uri.queryParameters['transport'], req, webSocket);
+      this.handshake(connect.request.uri.queryParameters['transport'], connect);
     }
   }
 
@@ -395,7 +400,7 @@ class Server extends Engine {
    * @param {Object} options
    * @api public
    */
-  attachTo(HttpServer server, Map options) {
+  attachTo(StreamServer server, Map options) {
     var self = this;
     options = options ?? {};
     var path = (options['path'] ?? '/engine.io').replaceFirst(new RegExp(r"\/$"), '');
@@ -405,36 +410,23 @@ class Server extends Engine {
     // normalize path
     path += '/';
 
-    var check = (HttpRequest req) {
-      return req.uri.path.indexOf(path) == 0;
-    };
-
     // cache and clean up listeners
-    var listen = server.asBroadcastStream().listen((HttpRequest req) async {
-      if (check(req)) {
+    server.map('$path.*', (HttpConnect connect) async {
+      var req = connect.request;
+
         _logger.info('intercepting request for path "%s"', path);
-        if (WebSocketTransformer.isUpgradeRequest(req) && this.transports.contains('websocket')) {
+        if (WebSocketTransformer.isUpgradeRequest(req) &&
+            this.transports.contains('websocket')) {
           var socket = await WebSocketTransformer.upgrade(req);
-          this.handleUpgrade(req, socket);
+          var socketConnect = new SocketConnect.fromWebSocket(connect, socket);
+          this.handleUpgrade(socketConnect);
+          return socketConnect.done;
         } else {
-          this.handleRequest(req);
+          var socketConnect = new SocketConnect(connect);
+          this.handleRequest(socketConnect);
+          return socketConnect.done;
         }
-      } else {
-        if (this.transports.contains('websocket')) {
-          if (WebSocketTransformer.isUpgradeRequest(req)) {
-            if (false != options['destroyUpgrade']) {
-              var socket = await WebSocketTransformer.upgrade(req);
-              new Timer(
-                  new Duration(milliseconds: destroyUpgradeTimeout), () async {
-                if (await socket.isEmpty) {
-                  socket.close();
-                }
-              });
-            }
-          }
-        }
-      }
-    }, onDone: self.close());
+    });
   }
 
   /**
@@ -445,7 +437,8 @@ class Server extends Engine {
    * @api private
    */
 
-  static abortConnection(WebSocket socket, code) {
+  static abortConnection(SocketConnect connect, code) {
+    var socket = connect.websocket;
     if (socket.readyState == HttpStatus.OK) {
       var message = ServerErrorMessages.containsKey(code)
                     ? ServerErrorMessages[code] : code;
@@ -453,7 +446,7 @@ class Server extends Engine {
           .encode(message)
           .length;
       socket.add('HTTP/1.1 400 Bad Request\r\n' + 'Connection: close\r\n' +
-          'Content-type: text/html\r\n' + 'Content-Length: ' + length + '\r\n' +
+          'Content-type: text/html\r\n' + 'Content-Length: $length\r\n' +
           '\r\n' + message);
     }
     socket.close();

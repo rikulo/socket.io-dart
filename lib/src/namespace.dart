@@ -209,8 +209,6 @@ class Namespace extends EventEmitter {
       this.rooms = null;
       this.flags = null;
     }
-
-    return this;
   }
 
   /**
@@ -224,8 +222,7 @@ class Namespace extends EventEmitter {
   }
 
   write([args]) {
-    args.unshift('message');
-    this.emit(this, args);
+    this.emit('message', args);
     return this;
   }
 

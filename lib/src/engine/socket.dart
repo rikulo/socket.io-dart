@@ -14,6 +14,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:logging/logging.dart';
+import 'package:socket_io/src/engine/connect.dart';
 import 'package:socket_io/src/engine/server.dart';
 import 'package:socket_io/src/engine/parser/packet.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
@@ -36,13 +37,13 @@ class Socket extends EventEmitter {
   List<Function> packetsFn;
   List<Function> sentCallbackFn;
   List cleanupFn;
-  HttpRequest req;
+  SocketConnect connect;
   InternetAddress remoteAddress;
   Timer checkIntervalTimer;
   Timer upgradeTimeoutTimer;
   Timer pingTimeoutTimer;
 
-  Socket(this.id, this.server, this.transport, this.req) {
+  Socket(this.id, this.server, this.transport, this.connect) {
     this.upgrading = false;
     this.upgraded = false;
     this.readyState = 'opening';
@@ -52,7 +53,7 @@ class Socket extends EventEmitter {
     this.cleanupFn = [];
 
     // Cache IP since it might not be in the req later
-    this.remoteAddress = req.connectionInfo.remoteAddress;
+    this.remoteAddress = connect.request.connectionInfo.remoteAddress;
 
     this.checkIntervalTimer = null;
     this.upgradeTimeoutTimer = null;
@@ -208,7 +209,7 @@ class Socket extends EventEmitter {
     var check = () {
       if ('polling' == this.transport.name && this.transport.writable == true) {
         _logger.info('writing a noop packet to polling for fast upgrade');
-        this.transport.send([{ 'type': 'noop'}]);
+        this.transport.send([new Packet.fromJSON({ 'type': 'noop'})]);
       }
     };
 

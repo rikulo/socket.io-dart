@@ -1,6 +1,3 @@
-import 'dart:io';
-import 'package:socket_io/src/engine/transport/polling_transport.dart';
-
 /**
  * xhr_transport.dart
  *
@@ -13,8 +10,12 @@ import 'package:socket_io/src/engine/transport/polling_transport.dart';
  *
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
+import 'dart:io';
+import 'package:socket_io/src/engine/connect.dart';
+import 'package:socket_io/src/engine/transport/polling_transport.dart';
+
 class XHRTransport extends PollingTransport {
-  XHRTransport(HttpRequest req): super(req);
+  XHRTransport(SocketConnect connect): super(connect);
 
   /**
    * Overrides `onRequest` to handle `OPTIONS`..
@@ -22,19 +23,20 @@ class XHRTransport extends PollingTransport {
    * @param {http.IncomingMessage}
    * @api private
    */
-  onRequest(HttpRequest req) {
+  onRequest(SocketConnect connect) {
+    HttpRequest req = connect.request;
     if ('OPTIONS' == req.method) {
       var res = req.response;
-      Map headers = this.headers(req);
+      Map headers = this.headers(connect);
       headers['Access-Control-Allow-Headers'] = 'Content-Type';
       headers.forEach((key, value) {
         res.headers.set(key, value);
       });
       res.statusCode = 200;
 
-      res.close();
+      connect.close();
     } else {
-      super.onRequest(req);
+      super.onRequest(connect);
     }
   }
 
@@ -45,15 +47,15 @@ class XHRTransport extends PollingTransport {
    * @param {Object} extra headers
    * @api private
    */
-  headers(HttpRequest req, [Map headers]) {
+  headers(SocketConnect connect, [Map headers]) {
     headers = headers ?? {};
-
+  var req = connect.request;
   if (req.headers.value('origin') != null) {
     headers['Access-Control-Allow-Credentials'] = 'true';
     headers['Access-Control-Allow-Origin'] = req.headers.value('origin');
   } else {
     headers['Access-Control-Allow-Origin'] = '*';
   }
-    return super.headers(req, headers);
+    return super.headers(connect, headers);
   }
 }
