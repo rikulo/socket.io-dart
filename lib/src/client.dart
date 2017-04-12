@@ -62,7 +62,7 @@ class Client {
    * @api private
    */
   connect(name) {
-    _logger.info('connecting to namespace $name');
+    _logger.fine('connecting to namespace $name');
     if (!this.server.nsps.containsKey(name)) {
       this.packet(
           {'type': ERROR, 'nsp': name, 'data': 'Invalid namespace'});
@@ -115,7 +115,7 @@ class Client {
       this.sockets.removeAt(i);
       this.nsps.remove(nsp);
     } else {
-      _logger.info('ignoring remove for ${socket.id}');
+      _logger.fine('ignoring remove for ${socket.id}');
     }
   }
 
@@ -126,7 +126,7 @@ class Client {
    */
   close() {
     if ('open' == this.conn.readyState) {
-      _logger.info('forcing transport close');
+      _logger.fine('forcing transport close');
       this.conn.close();
       this.onclose('forced server close');
     }
@@ -151,7 +151,7 @@ class Client {
     }
 
     if ('open' == this.conn.readyState) {
-      _logger.info('writing packet $packet');
+      _logger.fine('writing packet $packet');
       if (opts['preEncoded'] != true) { // not broadcasting, need to encode
         this.encoder.encode(
             packet, (encodedPackets) { // encode, then write results to engine
@@ -161,7 +161,7 @@ class Client {
         writeToEngine(packet);
       }
     } else {
-      _logger.info('ignoring packet write $packet');
+      _logger.fine('ignoring packet write $packet');
     }
   }
 
@@ -175,6 +175,7 @@ class Client {
     try {
       this.decoder.add(data);
     } catch (e) {
+      _logger.severe(e);
       this.onerror(e);
     }
   }
@@ -192,7 +193,7 @@ class Client {
       if (socket != null) {
         socket.onpacket(packet);
       } else {
-        _logger.info('no socket for namespace packet.nsp');
+        _logger.fine('no socket for namespace packet.nsp');
       }
     }
   }
@@ -217,7 +218,7 @@ class Client {
    * @api private
    */
   onclose(reason) {
-    _logger.info('client close with reason $reason');
+    _logger.fine('client close with reason $reason');
 
     // ignore a potential subsequent `close` event
     this.destroy();

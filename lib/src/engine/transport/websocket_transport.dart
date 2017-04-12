@@ -18,12 +18,11 @@ import 'package:socket_io/src/engine/parser/parser.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
 
 class WebSocketTransport extends Transport {
-  static Logger _logger = new Logger('socket_io:transport/WebSocketTransport');
-  String name = 'websocket';
-  bool writable;
+  static Logger _logger = new Logger('socket_io:transport.WebSocketTransport');
   bool get handlesUpgrades => true;
   bool get supportsFraming => true;
   WebSocketTransport(connect): super(connect) {
+    this.name = 'websocket';
     this.connect = connect;
     connect.websocket.listen(this.onData, onError: this.onError, onDone: this.onClose);
     writable = true;
@@ -31,7 +30,7 @@ class WebSocketTransport extends Transport {
 
   void send(List<Packet> packets) {
     var send = (String data, Packet packet) {
-      _logger.info('writing "$data"');
+      _logger.fine('writing "$data"');
 
       // always creates a new object since ws modifies it
 //      var opts = {};
@@ -57,8 +56,9 @@ class WebSocketTransport extends Transport {
 //    }
     for (var i = 0; i < packets.length; i++) {
       var packet = packets[i];
-      if (packet is Map)
-        packet = new Packet.fromJSON(packet);
+      if (packet is Map) {
+        packet = new Packet.fromJSON(packet as Map);
+      }
       PacketParser.encodePacket(packet, supportsBinary: this.supportsBinary, callback: (_) => send(_, packet));
     }
   }

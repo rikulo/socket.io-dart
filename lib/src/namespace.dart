@@ -14,6 +14,7 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:socket_io/src/adapter/adapter.dart';
 import 'package:socket_io/src/client.dart';
+import 'package:socket_io/src/parser/parser.dart';
 import 'package:socket_io/src/server.dart';
 import 'package:socket_io/src/socket.dart';
 import 'package:socket_io/src/util/event_emitter.dart';
@@ -30,12 +31,6 @@ List<String> events = ['connect', // for symmetry with client
  * Flags.
  */
 List<String> flags = ['json', 'volatile'];
-
-
-enum ParserType {
-  event,
-  binaryEvent
-}
 
 class Namespace extends EventEmitter {
   String name;
@@ -129,7 +124,7 @@ class Namespace extends EventEmitter {
    * @api public
    */
   to(String name) {
-    rooms = this.rooms.isEmpty ? this.rooms : [];
+    rooms = this.rooms?.isNotEmpty == true ? this.rooms : [];
     if (!rooms.contains(name)) this.rooms.add(name);
     return this;
   }
@@ -141,7 +136,7 @@ class Namespace extends EventEmitter {
    * @api private
    */
   add(Client client, fn) {
-    _logger.info('adding socket to nsp ${this.name}');
+    _logger.fine('adding socket to nsp ${this.name}');
     var socket = new Socket(this, client);
     var self = this;
     this.run(socket, (err)
@@ -164,7 +159,7 @@ class Namespace extends EventEmitter {
           self.emit('connect', socket);
           self.emit('connection', socket);
         } else {
-          _logger.info('next called after client was closed - ignoring socket');
+          _logger.fine('next called after client was closed - ignoring socket');
         }
       });
     });
@@ -180,7 +175,7 @@ class Namespace extends EventEmitter {
     if (this.sockets.contains(socket)) {
       this.sockets.remove(socket);
     } else {
-      _logger.info('ignoring remove for ${socket.id}');
+      _logger.fine('ignoring remove for ${socket.id}');
     }
   }
 
@@ -195,16 +190,23 @@ class Namespace extends EventEmitter {
       super.emit(ev, arg);
     } else {
       // set up packet object
-      ParserType parserType = ParserType.event; // default
+      var parserType = EVENT; // default
       // @todo check how to handle it with Dart
       // if (hasBin(args)) { parserType = ParserType.binaryEvent; } // binary
 
-      Map packet = {'type': parserType, 'data': arg};
+      List data = [ev];
+      if (arg is List) {
+        data.addAll(arg);
+      } else {
+        data.add(arg);
+      }
 
-            this.adapter.broadcast(packet, {
-                'rooms': this.rooms,
-                'flags': this.flags
-            });
+      Map packet = {'type': EVENT, 'data': data};
+
+      this.adapter.broadcast(packet, {
+          'rooms': this.rooms,
+          'flags': this.flags
+      });
 
       this.rooms = null;
       this.flags = null;

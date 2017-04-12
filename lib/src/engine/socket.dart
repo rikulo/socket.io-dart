@@ -26,7 +26,7 @@ import 'package:socket_io/src/util/event_emitter.dart';
  * @api private
  */
 class Socket extends EventEmitter {
-  static final Logger _logger = new Logger("socket_io:engine/Socket");
+  static final Logger _logger = new Logger("socket_io:engine.Socket");
   String id;
   Server server;
   Transport transport;
@@ -99,16 +99,15 @@ class Socket extends EventEmitter {
   onPacket(Packet packet) {
     if ('open' == this.readyState) {
       // export packet event
-      _logger.info('packet');
+      _logger.fine('packet');
       this.emit('packet', packet);
 
       // Reset ping timeout on any packet, incoming data is a good sign of
       // other side's liveness
       this.setPingTimeout();
-
       switch (packet.type) {
         case 'ping':
-          _logger.info('got ping');
+          _logger.fine('got ping');
           this.sendPacket('pong');
           this.emit('heartbeat');
           break;
@@ -123,7 +122,7 @@ class Socket extends EventEmitter {
           break;
       }
     } else {
-      _logger.info('packet received with closed socket');
+      _logger.fine('packet received with closed socket');
     }
   }
 
@@ -134,7 +133,7 @@ class Socket extends EventEmitter {
    * @api private
    */
   onError(err) {
-    _logger.info('transport error');
+    _logger.fine('transport error');
     this.onClose('transport error', err);
   }
 
@@ -190,7 +189,7 @@ class Socket extends EventEmitter {
    * @api private
    */
   maybeUpgrade(transport) {
-    _logger.info('might upgrade socket transport from ${this.transport
+    _logger.fine('might upgrade socket transport from ${this.transport
         .name} to ${transport.name}');
 
     this.upgrading = true;
@@ -198,7 +197,7 @@ class Socket extends EventEmitter {
     // set transport upgrade timer
     this.upgradeTimeoutTimer =
     new Timer(new Duration(milliseconds: this.server.upgradeTimeout), () {
-      _logger.info('client did not complete upgrade - closing transport');
+      _logger.fine('client did not complete upgrade - closing transport');
       cleanupFn['cleanup']();
       if ('open' == transport.readyState) {
         transport.close();
@@ -208,7 +207,7 @@ class Socket extends EventEmitter {
     // we force a polling cycle to ensure a fast upgrade
     var check = () {
       if ('polling' == this.transport.name && this.transport.writable == true) {
-        _logger.info('writing a noop packet to polling for fast upgrade');
+        _logger.fine('writing a noop packet to polling for fast upgrade');
         this.transport.send([new Packet.fromJSON({ 'type': 'noop'})]);
       }
     };
@@ -223,7 +222,7 @@ class Socket extends EventEmitter {
         this.checkIntervalTimer =
         new Timer.periodic(new Duration(milliseconds: 100), (_) => check());
       } else if ('upgrade' == packet.type && this.readyState != 'closed') {
-        _logger.info('got upgrade packet - upgrading');
+        _logger.fine('got upgrade packet - upgrading');
         cleanupFn['cleanup']();
         this.transport.discard();
         this.upgraded = true;
@@ -244,7 +243,7 @@ class Socket extends EventEmitter {
     };
 
     var onError = (err) {
-      _logger.info('client did not complete upgrade - %s', err);
+      _logger.fine('client did not complete upgrade - $err');
       cleanupFn['cleanup']();
       transport.close();
       transport = null;
@@ -297,7 +296,7 @@ class Socket extends EventEmitter {
 
     // silence further transport errors and prevent uncaught exceptions
     this.transport.on('error', (_) {
-      _logger.info('error triggered by discarded transport');
+      _logger.fine('error triggered by discarded transport');
     });
 
     // ensure transport won't stay open
@@ -342,10 +341,10 @@ class Socket extends EventEmitter {
       if (this.sentCallbackFn.isNotEmpty) {
         var seqFn = this.sentCallbackFn[0];
         if (seqFn is Function) {
-          _logger.info('executing send callback');
+          _logger.fine('executing send callback');
           seqFn(this.transport);
         } /** else if (Array.isArray(seqFn)) {
-            _logger.info('executing batch send callback');
+            _logger.fine('executing batch send callback');
             for (var l = seqFn.length, i = 0; i < l; i++) {
             if ('function' === typeof seqFn[i]) {
             seqFn[i](self.transport);
@@ -390,7 +389,7 @@ class Socket extends EventEmitter {
     options['compress'] = false != options['compress'];
 
     if ('closing' != this.readyState && 'closed' != this.readyState) {
-//      _logger.info('sending packet "%s" (%s)', type, data);
+//      _logger.fine('sending packet "%s" (%s)', type, data);
 
       var packet = {'type': type, 'options': options};
       if (data != null) packet['data'] = data;
@@ -415,7 +414,7 @@ class Socket extends EventEmitter {
   flush() {
     if ('closed' != this.readyState && this.transport.writable == true &&
         this.writeBuffer.length > 0) {
-      _logger.info('flushing buffer to transport');
+      _logger.fine('flushing buffer to transport');
       this.emit('flush', this.writeBuffer);
       this.server.emit('flush', [this, this.writeBuffer]);
       var wbuf = this.writeBuffer;

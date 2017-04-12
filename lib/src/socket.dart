@@ -119,21 +119,29 @@ class Socket extends EventEmitter {
       super.emit(event, data);
     } else {
       var packet = {};
+      List sendData = [event];
+      if (data is List) {
+        sendData.addAll(data);
+      } else {
+        sendData.add(data);
+      }
+
       packet['type'] = /*hasBin(args) ? parser.BINARY_EVENT :*/ EVENT;
-      packet['data'] = [event, data];
+      packet['data'] = sendData;
       var flags = this.flags ?? {};
 
       // access last argument to see if it's an ACK callback
-//            TODO:
-//            if ('function' == typeof args[args.length - 1]) {
-//                if (this.roomList.isNotEmpty || flags['broadcast'] == true) {
-//                    throw new Error('Callbacks are not supported when broadcasting');
-//                }
-//
-//                debug('emitting packet with ack id %d', this.nsp.ids);
-//                this.acks[this.nsp.ids] = args.pop();
-//                packet.id = this.nsp.ids++;
-//            }
+      if (sendData is List && sendData.last is Function) {
+          if (this.roomList.isNotEmpty || flags['broadcast'] == true) {
+              throw new UnsupportedError('Callbacks are not supported when broadcasting');
+          }
+
+//          debug('emitting packet with ack id %d', this.nsp.ids);
+          this.acks['${this.nsp.ids}'] = sendData.removeLast();
+          packet['id'] = '${this.nsp.ids++}';
+          if (sendData.length == 1)
+            packet['data'] = sendData.first;
+      }
 
       if (this.roomList.isNotEmpty || flags['broadcast'] == true) {
         this.adapter.broadcast(
@@ -315,7 +323,12 @@ class Socket extends EventEmitter {
       args.add(this.ack(packet['id']));
     }
 
-    super.emit(args[0], args.sublist(1));
+    // dart doesn't support "String... rest" syntax.
+    if (args.length > 2) {
+      Function.apply(super.emit, [args.first, args.sublist(1)]);
+    } else {
+      Function.apply(super.emit, args);
+    }
   }
 
   /**
@@ -334,7 +347,8 @@ class Socket extends EventEmitter {
 //      debug('sending ack %j', args);
 
       var type = /*hasBin(args) ? parser.BINARY_ACK : parser.*/ACK;
-      self.packet({'id': id, 'type': type, 'data': _});
+      self.packet({'id': id, 'type': type, 'data': [_]});
+      sent = true;
     };
   }
 

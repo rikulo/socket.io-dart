@@ -26,7 +26,7 @@ class PollingTransport extends Transport {
   @override
   bool get supportsFraming => false;
 
-  static final Logger _logger = new Logger('socket_io:engine/transport/PollingTransport');
+  static final Logger _logger = new Logger('socket_io:engine.transport.PollingTransport');
   int closeTimeout;
   Function shouldClose;
   SocketConnect dataReq;
@@ -59,7 +59,7 @@ class PollingTransport extends Transport {
    */
   onPollRequest(SocketConnect connect) {
     if (this.connect != null) {
-    _logger.info('request overlap');
+    _logger.fine('request overlap');
       // assert: this.res, '.req and .res should be (un)set together'
       this.onError('overlap from client');
       this.connect.response.statusCode = 500;
@@ -67,7 +67,7 @@ class PollingTransport extends Transport {
       return;
     }
 
-      _logger.info('setting request');
+      _logger.fine('setting request');
 
     this.connect = connect;
 
@@ -89,7 +89,7 @@ class PollingTransport extends Transport {
 
     // if we're still writable but had a pending close, trigger an empty send
     if (this.writable && this.shouldClose != null) {
-    _logger.info('triggering empty send to append close packet');
+    _logger.fine('triggering empty send to append close packet');
       this.send([{ 'type': 'noop' }]);
     }
   }
@@ -189,11 +189,11 @@ class PollingTransport extends Transport {
    * @api private
    */
   onData(data) {
-    _logger.info('received "$data"');
+    _logger.fine('received "$data"');
     var self = this;
     var callback = (Map packet, [foo, bar]) {
       if ('close' == packet['type']) {
-      _logger.info('got xhr close packet');
+      _logger.fine('got xhr close packet');
         self.onClose();
         return false;
       }
@@ -227,7 +227,7 @@ class PollingTransport extends Transport {
     this.writable = false;
 
     if (this.shouldClose != null) {
-      _logger.info('appending close packet to payload');
+      _logger.fine('appending close packet to payload');
       packets.add({ 'type': 'close' });
       this.shouldClose();
       this.shouldClose = null;
@@ -252,7 +252,7 @@ class PollingTransport extends Transport {
    * @api private
    */
   write(data, [options]) {
-    _logger.info('writing "$data"');
+    _logger.fine('writing "$data"');
     this.doWrite(data, options, () {
       Function fn = _reqCleanups.remove(this.connect);
       if (fn != null)
@@ -343,13 +343,13 @@ class PollingTransport extends Transport {
    * @api private
    */
   doClose([fn()]) {
-    _logger.info('closing');
+    _logger.fine('closing');
 
     var self = this;
     Timer closeTimeoutTimer;
 
     if (this.dataReq != null) {
-    _logger.info('aborting ongoing data request');
+    _logger.fine('aborting ongoing data request');
       this.dataReq = null;
     }
 
@@ -362,14 +362,14 @@ class PollingTransport extends Transport {
       self.onClose();
     };
     if (this.writable == true) {
-    _logger.info('transport writable - closing right away');
+    _logger.fine('transport writable - closing right away');
       this.send([{ 'type': 'close' }]);
       onClose();
     } else if (this.discarded) {
-    _logger.info('transport discarded - closing right away');
+    _logger.fine('transport discarded - closing right away');
       onClose();
     } else {
-    _logger.info('transport not writable - buffering orderly close');
+    _logger.fine('transport not writable - buffering orderly close');
       this.shouldClose = onClose;
       closeTimeoutTimer = new Timer(new Duration(milliseconds: this.closeTimeout), onClose);
     }

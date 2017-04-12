@@ -42,7 +42,7 @@ const Map<int, String> ServerErrorMessages = const {
 };
 
 class Server extends Engine {
-  static final Logger _logger = new Logger("socket_io:engine/Server");
+  static final Logger _logger = new Logger("socket_io:engine.Server");
   Map clients;
   int clientsCount;
   int pingTimeout;
@@ -141,7 +141,7 @@ class Server extends Engine {
     var req = connect.request;
     var transport = req.uri.queryParameters['transport'];
     if (this.transports.indexOf(transport) == -1) {
-      _logger.info('unknown transport "%s"', transport);
+      _logger.fine('unknown transport "%s"', transport);
       return fn(ServerErrors.UNKNOWN_TRANSPORT, false);
     }
 
@@ -152,7 +152,7 @@ class Server extends Engine {
         return fn(ServerErrors.UNKNOWN_SID, false);
       }
       if (!upgrade && this.clients[sid].transport.name != transport) {
-        _logger.info('bad request: unexpected transport without upgrade');
+        _logger.fine('bad request: unexpected transport without upgrade');
         return fn(ServerErrors.BAD_REQUEST, false);
       }
     } else {
@@ -173,14 +173,14 @@ class Server extends Engine {
    */
 
   close() {
-    _logger.info('closing all open clients');
+    _logger.fine('closing all open clients');
     for (var key in this.clients.keys) {
       if (this.clients[key] != null) {
         this.clients[key].close(true);
       }
     }
 //  if (this.ws) {
-//    _logger.info('closing webSocketServer');
+//    _logger.fine('closing webSocketServer');
 //    this.ws.close();
 //    // don't delete this.ws because it can be used again if the http server starts listening again
 //  }
@@ -196,7 +196,7 @@ class Server extends Engine {
 
   handleRequest(SocketConnect connect) {
     var req = connect.request;
-    _logger.info('handling ${req.method} http request ${req.uri.path}');
+    _logger.fine('handling ${req.method} http request ${req.uri.path}');
 //  this.prepare(req);
 //  req.res = res;
 
@@ -208,7 +208,7 @@ class Server extends Engine {
       }
 //print('sid ${req.uri.queryParameters['sid']}');
       if (req.uri.queryParameters['sid'] != null) {
-        _logger.info('setting new request for existing client');
+        _logger.fine('setting new request for existing client');
         self.clients[req.uri.queryParameters['sid']].transport.onRequest(connect);
       } else {
         self.handshake(req.uri.queryParameters['transport'], connect);
@@ -269,7 +269,7 @@ class Server extends Engine {
   handshake(String transportName, SocketConnect connect) {
     var id = this.generateId(connect);
 
-    _logger.info('handshaking client $id');
+    _logger.fine('handshaking client $id');
     var transport;
     var req = connect.request;
     try {
@@ -350,10 +350,10 @@ class Server extends Engine {
 
   onWebSocket(SocketConnect connect) {
 //    socket.listen((_) {},
-//        onError: () => _logger.info('websocket error before upgrade'));
+//        onError: () => _logger.fine('websocket error before upgrade'));
 
 //  if (!transports[req._query.transport].handlesUpgrades) {
-//    _logger.info('transport doesnt handle upgraded requests');
+//    _logger.fine('transport doesnt handle upgraded requests');
 //    socket.close();
 //    return;
 //  }
@@ -367,16 +367,16 @@ class Server extends Engine {
     if (id != null) {
       var client = this.clients[id];
       if (client == null) {
-        _logger.info('upgrade attempt for closed client');
+        _logger.fine('upgrade attempt for closed client');
         connect.websocket.close();
       } else if (client.upgrading == true) {
-        _logger.info('transport has already been trying to upgrade');
+        _logger.fine('transport has already been trying to upgrade');
         connect.websocket.close();
       } else if (client.upgraded == true) {
-        _logger.info('transport had already been upgraded');
+        _logger.fine('transport had already been upgraded');
         connect.websocket.close();
       } else {
-        _logger.info('upgrading existing transport');
+        _logger.fine('upgrading existing transport');
         var req = connect.request;
         var transport = Transports.newInstance(
             req.uri.queryParameters['transport'], connect);
@@ -414,7 +414,7 @@ class Server extends Engine {
     server.map('$path.*', (HttpConnect connect) async {
       var req = connect.request;
 
-        _logger.info('intercepting request for path "%s"', path);
+        _logger.fine('intercepting request for path "$path"');
         if (WebSocketTransformer.isUpgradeRequest(req) &&
             this.transports.contains('websocket')) {
           var socket = await WebSocketTransformer.upgrade(req);
@@ -426,7 +426,7 @@ class Server extends Engine {
           this.handleRequest(socketConnect);
           return socketConnect.done;
         }
-    });
+    }, preceding: true);
   }
 
   /**

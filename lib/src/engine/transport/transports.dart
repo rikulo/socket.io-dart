@@ -45,7 +45,7 @@ class Transports {
 }
 
 abstract class Transport extends EventEmitter {
-  static Logger _logger = new Logger('socket_io:transport/Transport');
+  static Logger _logger = new Logger('socket_io:transport.Transport');
   double maxHttpBufferSize;
   Map httpCompression;
   Map perMessageDeflate;
@@ -83,7 +83,7 @@ abstract class Transport extends EventEmitter {
     if (this.hasListeners('error')) {
       this.emit('error', {'msg': msg, 'desc': desc, 'type': 'TransportError'});
     } else {
-      _logger.info('ignored transport error $msg ($desc)');
+      _logger.fine('ignored transport error $msg ($desc)');
     }
   }
 

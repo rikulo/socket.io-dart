@@ -240,7 +240,7 @@ class Server {
     opts['allowRequest'] = this.checkRequest;
 
     if (srv is num) {
-      _logger.info('creating http server and binding to $srv');
+      _logger.fine('creating http server and binding to $srv');
       int port = srv;
       StreamServer server = new StreamServer();
       server.start(port: port);
@@ -259,7 +259,7 @@ class Server {
           // to reduce the number of round trips
           opts['initialPacket'] = encodedPacket;
 
-          _logger.info('creating engine.io instance with opts $opts');
+          _logger.fine('creating engine.io instance with opts $opts');
           // initialize engine
           this.engine = Engine.attach(server, opts);
 
@@ -280,7 +280,7 @@ class Server {
         // to reduce the number of round trips
         opts['initialPacket'] = encodedPacket;
 
-        _logger.info('creating engine.io instance with opts $opts');
+        _logger.fine('creating engine.io instance with opts $opts');
         // initialize engine
         this.engine = Engine.attach(srv, opts);
 
@@ -306,7 +306,7 @@ class Server {
    * @todo Include better way to serve files
    */
 //    attachServe(srv){
-//        _logger.info('attaching client serving req handler');
+//        _logger.fine()('attaching client serving req handler');
 //        var url = this._path + '/socket.io.js';
 //        var evs = srv.listeners('request').slice(0);
 //        var self = this;
@@ -370,7 +370,7 @@ class Server {
    * @api public
    */
   onconnection(conn) {
-    _logger.info('incoming connection with id ${conn.id}');
+    _logger.fine('incoming connection with id ${conn.id}');
     Client client = new Client(this, conn);
     client.connect('/');
     return this;
@@ -390,7 +390,7 @@ class Server {
     }
 
     if (!this.nsps.containsKey(name)) {
-      _logger.info('initializing namespace $name');
+      _logger.fine('initializing namespace $name');
       Namespace nsp = new Namespace(this, name);
       this.nsps[name] = nsp;
     }

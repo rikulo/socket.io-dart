@@ -40,7 +40,7 @@ List<String> PacketTypes = <String> [
 
 class Encoder {
 
-  static final Logger _logger = new Logger('socket_io:parser/Encoder');
+  static final Logger _logger = new Logger('socket_io:parser.Encoder');
 
   /**
    * Encode a packet as a single string if non-binary, or as a
@@ -53,7 +53,7 @@ class Encoder {
    */
 
   encode(obj, callback) {
-    _logger.info('encoding packet $obj');
+    _logger.fine('encoding packet $obj');
 
     if (BINARY_EVENT == obj['type'] || BINARY_ACK == obj['type']) {
       // TODO: encodeAsBinary(obj, callback);
@@ -88,7 +88,7 @@ class Encoder {
 
     // immediately followed by the id
     if (null != obj['id']) {
-      str += obj['id'];
+      str += '${obj['id']}';
     }
 
     // json data
@@ -96,7 +96,7 @@ class Encoder {
       str += JSON.encode(obj['data']);
     }
 
-    _logger.info('encoded $obj as $str');
+    _logger.fine('encoded $obj as $str');
     return str;
   }
 

@@ -11,7 +11,6 @@
  * Copyright (C) 2016 Potix Corporation. All Rights Reserved.
  */
 import 'dart:collection' show HashMap;
-import 'package:logging/logging.dart' show Logger;
 
 /**
  * Handler type for handling the event emitted by an [EventEmitter].
@@ -22,8 +21,6 @@ typedef dynamic EventHandler(data);
  * Generic event emitting and handling.
  */
 class EventEmitter {
-  static final _logger = new Logger('util/event_emitter.dart');
-
   /**
    * Mapping of events to a list of event handlers
    */
