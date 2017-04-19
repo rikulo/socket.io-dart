@@ -196,7 +196,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
       }
     }
 
-    if (fn != null) Timer.run(() => fn(null));
+    if (fn != null) Timer.run(() => fn(sids));
   }
 
   /**

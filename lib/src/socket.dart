@@ -108,40 +108,37 @@ class Socket extends EventEmitter {
     return this;
   }
 
+  void emit(String event, [dynamic data]) {
+    emitWithAck(event, data);
+  }
+
   /**
    * Emits to this client.
    *
    * @return {Socket} self
    * @api public
    */
-  void emit(String event, [dynamic data]) {
+  void emitWithAck(String event, dynamic data, {Function ack}) {
     if (EVENTS.contains(event)) {
       super.emit(event, data);
     } else {
       var packet = {};
-      List sendData = [event];
-      if (data is List) {
-        sendData.addAll(data);
-      } else {
-        sendData.add(data);
+      List sendData = data == null ? [event] : [event, data];
+
+      var flags = this.flags ?? {};
+
+      if (ack != null) {
+        if (this.roomList.isNotEmpty || flags['broadcast'] == true) {
+          throw new UnsupportedError('Callbacks are not supported when broadcasting');
+        }
+
+        this.acks['${this.nsp.ids}'] = ack;
+        packet['id'] = '${this.nsp.ids++}';
       }
 
       packet['type'] = /*hasBin(args) ? parser.BINARY_EVENT :*/ EVENT;
       packet['data'] = sendData;
-      var flags = this.flags ?? {};
 
-      // access last argument to see if it's an ACK callback
-      if (sendData is List && sendData.last is Function) {
-          if (this.roomList.isNotEmpty || flags['broadcast'] == true) {
-              throw new UnsupportedError('Callbacks are not supported when broadcasting');
-          }
-
-//          debug('emitting packet with ack id %d', this.nsp.ids);
-          this.acks['${this.nsp.ids}'] = sendData.removeLast();
-          packet['id'] = '${this.nsp.ids++}';
-          if (sendData.length == 1)
-            packet['data'] = sendData.first;
-      }
 
       if (this.roomList.isNotEmpty || flags['broadcast'] == true) {
         this.adapter.broadcast(

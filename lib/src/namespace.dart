@@ -194,12 +194,7 @@ class Namespace extends EventEmitter {
       // @todo check how to handle it with Dart
       // if (hasBin(args)) { parserType = ParserType.binaryEvent; } // binary
 
-      List data = [ev];
-      if (arg is List) {
-        data.addAll(arg);
-      } else {
-        data.add(arg);
-      }
+      List data = arg == null ? [ev] : [ev, arg];
 
       Map packet = {'type': EVENT, 'data': data};
 
