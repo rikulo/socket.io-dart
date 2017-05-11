@@ -15,7 +15,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:socket_io/src/engine/connect.dart';
-import 'package:socket_io/src/engine/parser/packet.dart';
 import 'package:socket_io/src/engine/parser/parser.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
 
@@ -26,7 +25,7 @@ class PollingTransport extends Transport {
   @override
   bool get supportsFraming => false;
 
-  static final Logger _logger = new Logger('socket_io:engine.transport.PollingTransport');
+  static final Logger _logger = new Logger('socket_io:transport.PollingTransport');
   int closeTimeout;
   Function shouldClose;
   SocketConnect dataReq;
@@ -190,18 +189,22 @@ class PollingTransport extends Transport {
    */
   onData(data) {
     _logger.fine('received "$data"');
-    var self = this;
-    var callback = (Map packet, [foo, bar]) {
-      if ('close' == packet['type']) {
-      _logger.fine('got xhr close packet');
-        self.onClose();
-        return false;
-      }
+    if (messageHandler != null) {
+      messageHandler.handle(data);
+    } else {
+      var self = this;
+      var callback = (Map packet, [foo, bar]) {
+        if ('close' == packet['type']) {
+          _logger.fine('got xhr close packet');
+          self.onClose();
+          return false;
+        }
 
-      self.onPacket(new Packet.fromJSON(packet));
-    };
+        self.onPacket(packet);
+      };
 
-    PacketParser.decodePayload(data, callback: callback);
+      PacketParser.decodePayload(data, callback: callback);
+    }
   }
 
   /**
@@ -236,9 +239,9 @@ class PollingTransport extends Transport {
     var self = this;
     PacketParser.encodePayload(
         packets, supportsBinary: this.supportsBinary, callback: (data) {
-      var compress = packets.any((packet) {
-        if (packet is Map) packet = new Packet.fromJSON(packet);
-        return packet.options != null && packet.options['compress'] == true;
+      var compress = packets.any((Map packet) {
+        var opt = packet['options'];
+        return opt != null && opt['compress'] == true;
       });
       self.write(data, {'compress': compress});
     });
@@ -279,7 +282,7 @@ class PollingTransport extends Transport {
     };
 
     var respond = (data) {
-      headers['Content-Length'] = data is String ? UTF8.encode(data).length : data.length;
+      headers[HttpHeaders.CONTENT_LENGTH] = data is String ? UTF8.encode(data).length : data.length;
       HttpResponse res = self.connect.response;
       res.statusCode = 200;
 
@@ -293,8 +296,11 @@ class PollingTransport extends Transport {
             .write(data);
           connect.close();
         } else {
-          res
-            .write(new String.fromCharCodes(data));
+          if (headers.containsKey(HttpHeaders.CONTENT_ENCODING)) {
+            res.add(data);
+          } else {
+            res.write(new String.fromCharCodes(data));
+          }
             connect.close();
         }
       } catch (e) {
@@ -332,8 +338,8 @@ class PollingTransport extends Transport {
 //        return;
 //      }
 
-      headers['Content-Encoding'] = encoding;
-      respond(gzip ? GZIP.encode(UTF8.encode(data)) : data);
+      headers[HttpHeaders.CONTENT_ENCODING] = encoding;
+      respond(gzip ? GZIP.encode(UTF8.encode(data is List ? new String.fromCharCodes(data as List<int>) : data)) : data);
 //    });
   }
 

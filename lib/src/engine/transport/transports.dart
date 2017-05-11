@@ -1,3 +1,4 @@
+import 'dart:collection';
 /**
  * transports.dart
  *
@@ -14,12 +15,12 @@ import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:socket_io/src/engine/connect.dart';
-import 'package:socket_io/src/engine/parser/packet.dart';
 import 'package:socket_io/src/engine/parser/parser.dart';
 import 'package:socket_io/src/engine/transport/jsonp_transport.dart';
 import 'package:socket_io/src/engine/transport/websocket_transport.dart';
 import 'package:socket_io/src/engine/transport/xhr_transport.dart';
 import 'package:socket_io/src/util/event_emitter.dart';
+import 'dart:async';
 
 class Transports {
   static List<String> upgradesTo(String from) {
@@ -56,10 +57,15 @@ abstract class Transport extends EventEmitter {
   String readyState;
   bool discarded;
   SocketConnect connect;
+  MessageHandler messageHandler;
 
   Transport(connect) {
     this.readyState = 'open';
     this.discarded = false;
+    var options = connect.dataset['options'];
+    if (options != null) {
+      messageHandler = options.containsKey('messageHandlerFactory') ? options['messageHandlerFactory'](this) : null;
+    }
   }
 
   void discard() {
@@ -87,12 +93,16 @@ abstract class Transport extends EventEmitter {
     }
   }
 
-  void onPacket(Packet packet) {
+  void onPacket(Map packet) {
     this.emit('packet', packet);
   }
 
-  void onData(data) {
-    this.onPacket(new Packet.fromJSON(PacketParser.decodePacket(data)));
+  onData(data) {
+    if (messageHandler != null) {
+      messageHandler.handle(data);
+    } else {
+      this.onPacket(PacketParser.decodePacket(data));
+    }
   }
 
   void onClose() {
@@ -100,9 +110,13 @@ abstract class Transport extends EventEmitter {
     this.emit('close');
   }
 
-  void send(List<Packet> data);
+  void send(List<Map> data);
 
   bool get supportsFraming;
   bool get handlesUpgrades;
 
+}
+
+abstract class MessageHandler {
+  void handle(String message);
 }

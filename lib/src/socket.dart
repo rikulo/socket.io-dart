@@ -63,6 +63,10 @@ class Socket extends EventEmitter {
   bool disconnected = false;
   Map handshake;
   Map<String, bool> flags;
+
+  // a data store for each socket.
+  Map data = {};
+
   Socket(this.nsp, this.client) {
     this.server = nsp.server;
     this.adapter = this.nsp.adapter;
@@ -108,7 +112,7 @@ class Socket extends EventEmitter {
     return this;
   }
 
-  void emit(String event, [dynamic data]) {
+  void emit(String event, [data]) {
     emitWithAck(event, data);
   }
 
@@ -335,7 +339,6 @@ class Socket extends EventEmitter {
    * @api private
    */
   Function ack(id) {
-    var self = this;
     var sent = false;
     return (_) {
       // prevent double callbacks
@@ -344,7 +347,7 @@ class Socket extends EventEmitter {
 //      debug('sending ack %j', args);
 
       var type = /*hasBin(args) ? parser.BINARY_ACK : parser.*/ACK;
-      self.packet({'id': id, 'type': type, 'data': [_]});
+      packet({'id': id, 'type': type, 'data': [_]});
       sent = true;
     };
   }
@@ -355,11 +358,10 @@ class Socket extends EventEmitter {
    * @api private
    */
   onack(packet) {
-    Function ack = this.acks[packet['id']];
+    Function ack = this.acks.remove(packet['id']);
     if (ack is Function) {
 //      debug('calling ack %s with %j', packet.id, packet.data);
       Function.apply(ack, packet['data']);
-      this.acks.remove(packet['id']);
     } else {
 //      debug('bad ack %s', packet.id);
     }

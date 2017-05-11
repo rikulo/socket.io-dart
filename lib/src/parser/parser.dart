@@ -205,7 +205,7 @@ class Decoder extends EventEmitter {
     }
 
     // look up namespace (if any)
-    if ('/' == str[i + 1]) {
+    if (str.length > i + 1 && '/' == str[i + 1]) {
       p['nsp'] = '';
       while (++i > 0) {
         var c = str[i];

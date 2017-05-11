@@ -10,10 +10,7 @@
  *
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
-import 'dart:io';
 import 'package:logging/logging.dart';
-import 'package:socket_io/src/engine/connect.dart';
-import 'package:socket_io/src/engine/parser/packet.dart';
 import 'package:socket_io/src/engine/parser/parser.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
 
@@ -28,8 +25,8 @@ class WebSocketTransport extends Transport {
     writable = true;
   }
 
-  void send(List<Packet> packets) {
-    var send = (String data, Packet packet) {
+  void send(List<Map> packets) {
+    var send = (String data, Map packet) {
       _logger.fine('writing "$data"');
 
       // always creates a new object since ws modifies it
@@ -56,9 +53,6 @@ class WebSocketTransport extends Transport {
 //    }
     for (var i = 0; i < packets.length; i++) {
       var packet = packets[i];
-      if (packet is Map) {
-        packet = new Packet.fromJSON(packet as Map);
-      }
       PacketParser.encodePacket(packet, supportsBinary: this.supportsBinary, callback: (_) => send(_, packet));
     }
   }

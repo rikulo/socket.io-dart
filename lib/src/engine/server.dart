@@ -19,6 +19,8 @@ import 'package:socket_io/src/engine/engine.dart';
 import 'package:socket_io/src/engine/socket.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
 import 'package:stream/stream.dart';
+import 'package:uuid/uuid.dart';
+
 /**
  * Server constructor.
  *
@@ -58,6 +60,7 @@ class Server extends Engine {
   Map perMessageDeflate;
   Map httpCompression;
   dynamic initialPacket;
+  Uuid _uuid = new Uuid();
 
   Server([Map opts]) {
     clients = {};
@@ -256,7 +259,7 @@ class Server extends Engine {
    * @api public
    */
   generateId(SocketConnect connect) {
-    return connect.request.session.id;
+    return _uuid.v1();
   }
 
   /**
@@ -357,7 +360,10 @@ class Server extends Engine {
 //    socket.close();
 //    return;
 //  }
-
+    if (connect.request.connectionInfo == null) {
+      _logger.fine('WebSocket connection closed: ${connect.request.uri.path}');
+      return;
+    }
     // get client id
     var id = connect.request.uri.queryParameters['sid'];
 
@@ -417,12 +423,15 @@ class Server extends Engine {
         _logger.fine('intercepting request for path "$path"');
         if (WebSocketTransformer.isUpgradeRequest(req) &&
             this.transports.contains('websocket')) {
+//          print('init websocket... ${req.uri}');
           var socket = await WebSocketTransformer.upgrade(req);
           var socketConnect = new SocketConnect.fromWebSocket(connect, socket);
+          socketConnect.dataset['options'] = options;
           this.handleUpgrade(socketConnect);
           return socketConnect.done;
         } else {
           var socketConnect = new SocketConnect(connect);
+          socketConnect.dataset['options'] = options;
           this.handleRequest(socketConnect);
           return socketConnect.done;
         }

@@ -38,7 +38,6 @@ class Namespace extends EventEmitter {
   List sockets = [];
   Map connected = {};
   List fns = [];
-  Map acks = {};
   int ids = 0;
   List rooms = [];
   Map flags = {};

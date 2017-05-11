@@ -16,7 +16,6 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:socket_io/src/engine/connect.dart';
 import 'package:socket_io/src/engine/server.dart';
-import 'package:socket_io/src/engine/parser/packet.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
 import 'package:socket_io/src/util/event_emitter.dart';
 
@@ -33,7 +32,7 @@ class Socket extends EventEmitter {
   bool upgrading;
   bool upgraded;
   String readyState;
-  List<Packet> writeBuffer;
+  List<Map> writeBuffer;
   List<Function> packetsFn;
   List<Function> sentCallbackFn;
   List cleanupFn;
@@ -47,7 +46,7 @@ class Socket extends EventEmitter {
     this.upgrading = false;
     this.upgraded = false;
     this.readyState = 'opening';
-    this.writeBuffer = <Packet>[];
+    this.writeBuffer = [];
     this.packetsFn = [];
     this.sentCallbackFn = [];
     this.cleanupFn = [];
@@ -96,7 +95,7 @@ class Socket extends EventEmitter {
    * @api private
    */
 
-  onPacket(Packet packet) {
+  onPacket(Map packet) {
     if ('open' == this.readyState) {
       // export packet event
       _logger.fine('packet');
@@ -105,7 +104,7 @@ class Socket extends EventEmitter {
       // Reset ping timeout on any packet, incoming data is a good sign of
       // other side's liveness
       this.setPingTimeout();
-      switch (packet.type) {
+      switch (packet['type']) {
         case 'ping':
           _logger.fine('got ping');
           this.sendPacket('pong');
@@ -117,8 +116,9 @@ class Socket extends EventEmitter {
           break;
 
         case 'message':
-          this.emit('data', packet.data);
-          this.emit('message', packet.data);
+          var data = packet['data'];
+          this.emit('data', data);
+          this.emit('message', data);
           break;
       }
     } else {
@@ -208,7 +208,7 @@ class Socket extends EventEmitter {
     var check = () {
       if ('polling' == this.transport.name && this.transport.writable == true) {
         _logger.fine('writing a noop packet to polling for fast upgrade');
-        this.transport.send([new Packet.fromJSON({ 'type': 'noop'})]);
+        this.transport.send([{ 'type': 'noop'}]);
       }
     };
 
@@ -397,7 +397,7 @@ class Socket extends EventEmitter {
       // exports packetCreate event
       this.emit('packetCreate', packet);
 
-      this.writeBuffer.add(new Packet.fromJSON(packet));
+      this.writeBuffer.add(packet);
 
       // add send callback to object, if defined
       if (callback != null) this.packetsFn.add(callback);

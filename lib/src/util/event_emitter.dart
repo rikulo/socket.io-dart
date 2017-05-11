@@ -15,7 +15,7 @@ import 'dart:collection' show HashMap;
 /**
  * Handler type for handling the event emitted by an [EventEmitter].
  */
-typedef dynamic EventHandler(data);
+typedef dynamic EventHandler<T>(T data);
 
 /**
  * Generic event emitting and handling.
@@ -35,7 +35,7 @@ class EventEmitter {
    * Constructor
    */
   EventEmitter() {
-    this._events = new HashMap<String, List<EventHandler>>();
+    this._events = new  HashMap<String, List<EventHandler>>();
     this._eventsOnce = new HashMap<String, List<EventHandler>>();
   }
 
@@ -78,13 +78,18 @@ class EventEmitter {
   /**
    * This function attempts to unbind the [handler] from the [event]
    */
-  void off(String event, EventHandler handler) {
-    this._events[event]?.remove(handler);
-    this._eventsOnce[event]?.remove(handler);
-    if (this._events[event]?.isEmpty == true) {
+  void off(String event, [EventHandler handler]) {
+    if (handler != null) {
+      this._events[event]?.remove(handler);
+      this._eventsOnce[event]?.remove(handler);
+      if (this._events[event]?.isEmpty == true) {
+        this._events.remove(event);
+      }
+      if (this._eventsOnce[event]?.isEmpty == true) {
+        this._eventsOnce.remove(event);
+      }
+    } else {
       this._events.remove(event);
-    }
-    if (this._eventsOnce[event]?.isEmpty == true) {
       this._eventsOnce.remove(event);
     }
   }

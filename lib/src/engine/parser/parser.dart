@@ -15,8 +15,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:socket_io/src/engine/parser/packet.dart';
 import 'package:socket_io/src/engine/parser/wtf8.dart';
+
+// Protocol version
+final protocol = 3;
 
 enum PacketType {
   OPEN,
@@ -44,7 +46,7 @@ const Map<String, int> PacketTypeMap = const
 
 class PacketParser {
   static const ERROR = const { 'type': 'error', 'data': 'parser error'};
-  static String encodePacket(Packet packet,
+  static String encodePacket(Map packet,
                              {supportsBinary, utf8encode = false, callback(
                                  _)}) {
     if (supportsBinary is Function) {
@@ -65,13 +67,13 @@ class PacketParser {
 //    }
 
     // Sending data as a utf-8 string
-    var encoded = '${PacketTypeMap[packet.type]}';
+    var encoded = '''${PacketTypeMap[packet['type']]}''';
 
     // data fragment is optional
-    if (packet.data != null) {
+    if (packet['data'] != null) {
       encoded +=
-      utf8encode == true ? WTF8.encode(packet.data.toString()).toString()
-      : packet.data.toString();
+      utf8encode == true ? WTF8.encode('''${packet['data']}''')
+      : '''${packet['data']}''';
     }
 
     return callback('$encoded');
@@ -179,7 +181,6 @@ class PacketParser {
     }
 
     var encodeOne = (packet, [doneCallback(err, _)]) {
-      if (packet is! Packet) packet = new Packet.fromJSON(packet);
       encodePacket(packet, supportsBinary: supportsBinary,
           utf8encode: false,
           callback: (message) {
@@ -201,7 +202,6 @@ class PacketParser {
    */
   static map(List ary, each(_, [callback(err, msg)]), done(err, results)) {
     var result = [];
-    var i = 0;
     Future.wait(ary.map((e) {
       return new Future.microtask(() =>
           each(e, (err, msg) {
@@ -352,7 +352,6 @@ class PacketParser {
 
       doneCallback(null, new List.from(sizeBuffer)..addAll(packet));
     };
-    if (p is Map) p = new Packet.fromJSON(p);
     encodePacket(p, supportsBinary: true,
         utf8encode: true,
         callback: onBinaryPacketEncode);

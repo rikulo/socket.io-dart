@@ -30,6 +30,8 @@ Map oldSettings = {
   "destroy buffer size": "maxHttpBufferSize"
 };
 
+final Logger _logger = new Logger('socket_io:Server');
+
 class Server {
   // Namespaces
   Map<String, Namespace> nsps;
@@ -41,8 +43,6 @@ class Server {
   StreamServer httpServer;
   Engine engine;
   Encoder encoder;
-
-  Logger _logger = new Logger('socket_io:Server');
 
   /**
    * Server constructor.

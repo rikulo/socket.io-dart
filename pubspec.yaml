@@ -10,6 +10,7 @@ environment:
 dependencies:
   logging: any
   stream: any
+  uuid: any
 dev_dependencies:
   unittest: any
   test: '>=0.12.0 <0.13.0'
