@@ -1,6 +1,6 @@
 # socket.io-dart
 
-Port of awesome JavaScript Node.js library - [Socket.io](https://github.com/socketio/socket.io) - in Dart
+Port of awesome JavaScript Node.js library - [Socket.io v2.0.1](https://github.com/socketio/socket.io) - in Dart
 
 ## Usage
 
@@ -34,6 +34,14 @@ Port of awesome JavaScript Node.js library - [Socket.io](https://github.com/sock
     socket.on('disconnect', function(){console.log('disconnect')});
     socket.on('fromServer', function(e){console.log(e)});
 
+    // Dart client
+    import 'package:socket_io_client/socket_io_client.dart' as IO;
+
+    Io.Socket socket = IO.io('http://localhost:3000');
+    socket.on('connect', (_) => print('connect'));
+    socket.on('event', (data) => print(data));
+    socket.on('disconnect', (_) print('disconnect'));
+    socket.on('fromServer', (_) print(_));
 
 ## Multiplexing support
 
@@ -64,3 +72,7 @@ If you are new to Git or GitHub, please read [this guide](https://help.github.co
 ## Who Uses
 
 * [Quire](https://quire.io) - a simple, collaborative, multi-level task management tool.
+
+## Socket.io Dart Client
+
+* [socket.io-client-dart](https://github.com/rikulo/socket.io-client-dart)
