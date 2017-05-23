@@ -95,7 +95,7 @@ class Client {
     var socket;
     // we don't use a for loop because the length of
     // `sockets` changes upon each iteration
-    this.sockets.forEach((socket) {
+    this.sockets.toList().forEach((socket) {
       socket.disconnect();
     });
     this.sockets.clear();

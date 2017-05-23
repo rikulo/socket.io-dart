@@ -35,8 +35,8 @@ List<String> flags = ['json', 'volatile'];
 class Namespace extends EventEmitter {
   String name;
   Server server;
-  List sockets = [];
-  Map connected = {};
+  List<Socket> sockets = [];
+  Map<String, Socket> connected = {};
   List fns = [];
   int ids = 0;
   List rooms = [];

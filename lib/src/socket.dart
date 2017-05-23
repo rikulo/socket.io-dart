@@ -429,9 +429,9 @@ class Socket extends EventEmitter {
    * @api public
    */
 
-  disconnect(close) {
+  disconnect([close]) {
     if (!this.connected) return this;
-    if (close) {
+    if (close == true) {
       this.client.disconnect();
     } else {
       this.packet({ 'type': DISCONNECT});
