@@ -399,7 +399,7 @@ class Socket extends EventEmitter {
    * @param {Error} optional error object
    * @api private
    */
-  onclose(reason) {
+  onclose([reason]) {
     if (!this.connected) return this;
 //    debug('closing socket - reason %s', reason);
     this.leaveAll();
