@@ -175,7 +175,7 @@ class Client {
     try {
       this.decoder.add(data);
     } catch (e) {
-      _logger.severe(e);
+      _logger.severe(e, (e as Error).stackTrace);
       this.onerror(e);
     }
   }
