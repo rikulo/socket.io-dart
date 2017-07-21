@@ -213,7 +213,7 @@ class Socket extends EventEmitter {
     };
 
     var onPacket = (packet) {
-      if ('ping' == packet.type && 'probe' == packet.data) {
+      if ('ping' == packet['type'] && 'probe' == packet['data']) {
         transport.send([{ 'type': 'pong', 'data': 'probe'}]);
         this.emit('upgrading', transport);
         if (this.checkIntervalTimer != null) {
@@ -221,7 +221,7 @@ class Socket extends EventEmitter {
         }
         this.checkIntervalTimer =
         new Timer.periodic(new Duration(milliseconds: 100), (_) => check());
-      } else if ('upgrade' == packet.type && this.readyState != 'closed') {
+      } else if ('upgrade' == packet['type'] && this.readyState != 'closed') {
         _logger.fine('got upgrade packet - upgrading');
         cleanupFn['cleanup']();
         this.transport.discard();

@@ -138,7 +138,7 @@ class PollingTransport extends Transport {
         if (chunks is String) {
           chunks += new String.fromCharCodes(data);
         } else {
-          chunks.addAll(data);
+          chunks.addAll(new String.fromCharCodes(data).split(',').map((s) => int.parse(s)).toList());
         }
         contentLength = chunks.length;
       }
