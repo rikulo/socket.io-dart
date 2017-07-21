@@ -37,11 +37,14 @@ Port of awesome JavaScript Node.js library - [Socket.io v2.0.1](https://github.c
     // Dart client
     import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-    Io.Socket socket = IO.io('http://localhost:3000');
-    socket.on('connect', (_) => print('connect'));
+    IO.Socket socket = IO.io('http://localhost:3000');
+    socket.on('connect', (_) {
+      print('connect');
+      socket.emit('msg', 'test');
+    });
     socket.on('event', (data) => print(data));
-    socket.on('disconnect', (_) print('disconnect'));
-    socket.on('fromServer', (_) print(_));
+    socket.on('disconnect', (_) => print('disconnect'));
+    socket.on('fromServer', (_) => print(_));
 
 ## Multiplexing support
 
