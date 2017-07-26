@@ -144,7 +144,7 @@ class Server extends Engine {
     var req = connect.request;
     var transport = req.uri.queryParameters['transport'];
     if (this.transports.indexOf(transport) == -1) {
-      _logger.fine('unknown transport "%s"', transport);
+      _logger.fine('unknown transport "$transport"');
       return fn(ServerErrors.UNKNOWN_TRANSPORT, false);
     }
 
