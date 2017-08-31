@@ -134,13 +134,13 @@ class Namespace extends EventEmitter {
    * @return {Socket}
    * @api private
    */
-  add(Client client, fn) {
+  add(Client client, query, fn) {
     _logger.fine('adding socket to nsp ${this.name}');
-    var socket = new Socket(this, client);
+    var socket = new Socket(this, client, query);
     var self = this;
-    this.run(socket, (err)
-    {
-      Timer.run(() {
+    this.run(socket, (err) {
+      // don't use Timer.run() here
+      scheduleMicrotask(() {
         if ('open' == client.conn.readyState) {
           if (err != null) return socket.error(err.data || err.message);
 

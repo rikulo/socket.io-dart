@@ -259,7 +259,7 @@ class Server extends Engine {
    * @api public
    */
   generateId(SocketConnect connect) {
-    return _uuid.v1();
+    return _uuid.v1().replaceAll('-', '');
   }
 
   /**

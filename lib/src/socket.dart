@@ -67,13 +67,13 @@ class Socket extends EventEmitter {
   // a data store for each socket.
   Map data = {};
 
-  Socket(this.nsp, this.client) {
+  Socket(this.nsp, this.client, query) {
     this.server = nsp.server;
     this.adapter = this.nsp.adapter;
     this.id = client.id;
     this.request = client.request;
     this.conn = client.conn;
-    this.handshake = this.buildHandshake();
+    this.handshake = this.buildHandshake(query);
   }
 
   /**
@@ -81,7 +81,13 @@ class Socket extends EventEmitter {
    *
    * @api private
    */
-  buildHandshake() {
+  buildHandshake(query) {
+
+    final buildQuery = () {
+      var requestQuery = this.request.uri.queryParameters;
+      //if socket-specific query exist, replace query strings in requestQuery
+      return query != null ? (new Map.from(query)..addAll(requestQuery)) : requestQuery;
+    };
     return {
       'headers': this.request.headers,
       'time': new DateTime.now().toString(),
@@ -90,7 +96,7 @@ class Socket extends EventEmitter {
     // TODO  'secure': ! !this.request.connectionInfo.encrypted,
       'issued': new DateTime.now().millisecondsSinceEpoch,
       'url': this.request.uri.path,
-      'query': this.request.uri.queryParameters
+      'query': buildQuery()
     };
   }
 

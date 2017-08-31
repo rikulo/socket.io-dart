@@ -320,7 +320,7 @@ class Socket extends EventEmitter {
 
       // clean writeBuffer in next tick, so developers can still
       // grab the writeBuffer on 'close' event
-      Timer.run(() {
+      scheduleMicrotask(() {
         this.writeBuffer = [];
       });
       this.packetsFn = [];

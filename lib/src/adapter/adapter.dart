@@ -61,7 +61,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     this.sids[id][room] = true;
     this.rooms[room] = this.rooms[room] ?? new  _Room();
     this.rooms[room].add(id);
-    if (fn != null) Timer.run(() => fn(null));
+    if (fn != null) scheduleMicrotask(() => fn(null));
   }
 
   /**
@@ -81,7 +81,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
         this.rooms.remove(room);
     }
 
-    if (fn != null) Timer.run(() => fn(null));
+    if (fn != null) scheduleMicrotask(() => fn(null));
   }
 
   /**
@@ -104,7 +104,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     }
     this.sids.remove(id);
 
-     if (fn != null) Timer.run(() => fn(null));
+     if (fn != null) scheduleMicrotask(() => fn(null));
   }
 
   /**
@@ -196,7 +196,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
       }
     }
 
-    if (fn != null) Timer.run(() => fn(sids));
+    if (fn != null) scheduleMicrotask(() => fn(sids));
   }
 
   /**
@@ -208,7 +208,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
    */
   clientRooms(String id, [fn(err, [_])]) {
     var rooms = this.sids[id];
-    if (fn != null) Timer.run(() => fn(null, rooms?.keys));
+    if (fn != null) scheduleMicrotask(() => fn(null, rooms?.keys));
   }
 }
   /**

@@ -61,7 +61,7 @@ class Client {
    * @param {String} namespace name
    * @api private
    */
-  connect(name) {
+  connect(name, [query]) {
     _logger.fine('connecting to namespace $name');
     if (!this.server.nsps.containsKey(name)) {
       this.packet(
@@ -75,7 +75,7 @@ class Client {
     }
 
     var self = this;
-    nsp.add(this, (socket) {
+    nsp.add(this, query, (socket) {
       self.sockets.add(socket);
       self.nsps[nsp.name] = socket;
 
@@ -187,7 +187,9 @@ class Client {
    */
   ondecoded(packet) {
     if (CONNECT == packet['type']) {
-      this.connect(packet['nsp']);
+      final nsp = packet['nsp'];
+      final uri = Uri.parse(nsp);
+      this.connect(uri.path, uri.queryParameters);
     } else {
       var socket = this.nsps[packet['nsp']];
       if (socket != null) {
