@@ -227,7 +227,7 @@ class Socket extends EventEmitter {
       return this;
     }
     this.adapter.add(this.id, room, ([err]) {
-      if (err != null) return fn && fn(err);
+      if (err != null) return fn?.call(err);
 //      _logger.info('joined room %s', room);
       this.roomMap[room] = room;
       if (fn != null)
@@ -247,10 +247,10 @@ class Socket extends EventEmitter {
   leave(room, fn) {
 //    debug('leave room %s', room);
     this.adapter.del(this.id, room, ([err]) {
-      if (err != null) return fn && fn(err);
+      if (err != null) return fn?.call(err);
 //      _logger.info('left room %s', room);
       this.roomMap.remove(room);
-      fn && fn(null);
+      fn?.call(null);
     });
     return this;
   }
