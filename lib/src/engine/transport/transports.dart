@@ -64,7 +64,7 @@ abstract class Transport extends EventEmitter {
     this.discarded = false;
     var options = connect.dataset['options'];
     if (options != null) {
-      messageHandler = options.containsKey('messageHandlerFactory') ? options['messageHandlerFactory'](this) : null;
+      messageHandler = options.containsKey('messageHandlerFactory') ? options['messageHandlerFactory'](this, connect) : null;
     }
   }
 
