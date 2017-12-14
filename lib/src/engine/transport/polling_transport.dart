@@ -190,7 +190,7 @@ class PollingTransport extends Transport {
   onData(data) {
     _logger.fine('received "$data"');
     if (messageHandler != null) {
-      messageHandler.handle(data);
+      messageHandler.handle(this, data);
     } else {
       var self = this;
       var callback = (Map packet, [foo, bar]) {

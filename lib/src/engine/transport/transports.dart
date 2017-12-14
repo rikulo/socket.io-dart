@@ -99,7 +99,7 @@ abstract class Transport extends EventEmitter {
 
   onData(data) {
     if (messageHandler != null) {
-      messageHandler.handle(data);
+      messageHandler.handle(this, data);
     } else {
       this.onPacket(PacketParser.decodePacket(data));
     }
@@ -118,5 +118,5 @@ abstract class Transport extends EventEmitter {
 }
 
 abstract class MessageHandler {
-  void handle(String message);
+  void handle(Transport transport, String message);
 }
