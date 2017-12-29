@@ -408,6 +408,7 @@ class Socket extends EventEmitter {
   onclose([reason]) {
     if (!this.connected) return this;
 //    debug('closing socket - reason %s', reason);
+    this.emit('disconnecting', reason);
     this.leaveAll();
     this.nsp.remove(this);
     this.client.remove(this);
