@@ -262,7 +262,7 @@ class Socket extends EventEmitter {
    */
 
   leaveAll() {
-//    this.adapter.delAll(this.id);
+    this.adapter.delAll(this.id);
     this.roomMap = {};
   }
 
