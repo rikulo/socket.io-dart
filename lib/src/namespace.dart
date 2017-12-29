@@ -140,8 +140,7 @@ class Namespace extends EventEmitter {
     var self = this;
     this.run(socket, (err) {
       // don't use Timer.run() here
-//     scheduleMicrotask(() {
-// don't use here to avoid the connection being blocked for large concurrent users.
+      scheduleMicrotask(() {
         if ('open' == client.conn.readyState) {
           if (err != null) return socket.error(err.data || err.message);
 
@@ -161,7 +160,7 @@ class Namespace extends EventEmitter {
         } else {
           _logger.fine('next called after client was closed - ignoring socket');
         }
-//      });
+      });
     });
     return socket;
   }
