@@ -170,9 +170,15 @@ class PacketParser {
     return { 'type': type, 'data': data};
   }
 
+  static hasBinary(List packets) {
+    return packets.any((map) {
+      final data = map['data'];
+      return data is ByteBuffer;
+    });
+  }
   static encodePayload(List packets,
                        {bool supportsBinary = false, callback(_)}) {
-    if (supportsBinary) {
+    if (supportsBinary && hasBinary(packets)) {
       return encodePayloadAsBinary(packets, callback);
     }
 
