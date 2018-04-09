@@ -12,7 +12,7 @@
  */
 import 'package:test/test.dart';
 
-import 'package:socket_io/socket.io.dart';
+import 'package:socket_io/socket_io.dart';
 
 main() {
   group('Socket IO', () {

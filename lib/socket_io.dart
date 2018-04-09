@@ -1,4 +1,4 @@
-library socket.io;
+library socket_io;
 
 export 'src/server.dart';
 export 'src/socket.dart';
