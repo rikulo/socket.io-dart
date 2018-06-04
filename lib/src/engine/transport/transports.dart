@@ -118,5 +118,5 @@ abstract class Transport extends EventEmitter {
 }
 
 abstract class MessageHandler {
-  void handle(Transport transport, String message);
+  void handle(Transport transport, /*String|List<int>*/ message);
 }

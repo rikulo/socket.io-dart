@@ -1,6 +1,6 @@
 name: socket_io
 description: Dartlang port of socket.io
-version: 0.8.0
+version: 0.8.1
 author: jumperchen <jumperchen@potix.com>
 homepage: https://www.zkoss.org
 

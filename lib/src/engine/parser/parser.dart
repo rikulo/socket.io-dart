@@ -48,7 +48,7 @@ class PacketParser {
   static const ERROR = const { 'type': 'error', 'data': 'parser error'};
   static String encodePacket(Map packet,
                              {supportsBinary, utf8encode = false, callback(
-                                 _)}) {
+                                 _), bool fromClient = false}) {
     if (supportsBinary is Function) {
       callback = supportsBinary;
       supportsBinary = null;
@@ -59,12 +59,15 @@ class PacketParser {
       utf8encode = null;
     }
 
-//    if (Buffer.isBuffer(packet.data)) {
-//      return encodeBuffer(packet, supportsBinary, callback);
-//    } else if (packet.data && (packet.data.buffer || packet.data) instanceof ArrayBuffer) {
-//      packet.data = arrayBufferToBuffer(packet.data);
-//      return encodeBuffer(packet, supportsBinary, callback);
-//    }
+    if (packet['data'] is Uint8List) {
+      return encodeBuffer(packet, supportsBinary, callback, fromClient: fromClient);
+    } else if (packet['data'] is Map && packet['data']['buffer'] is ByteBuffer) {
+      packet['data'] = (packet['data']['buffer'] as ByteBuffer).asUint8List();
+      return encodeBuffer(packet, supportsBinary, callback, fromClient: fromClient);
+    } else if (packet['data'] is ByteBuffer) {
+      packet['data'] = (packet['data'] as ByteBuffer).asUint8List();
+      return encodeBuffer(packet, supportsBinary, callback, fromClient: fromClient);
+    }
 
     // Sending data as a utf-8 string
     var encoded = '''${PacketTypeMap[packet['type']]}''';
@@ -83,15 +86,21 @@ class PacketParser {
    * Encode Buffer data
    */
 
-  static encodeBuffer(packet, supportsBinary, callback) {
+  static encodeBuffer(packet, supportsBinary, callback, {fromClient = false /*use this to check whether is in client or not*/}) {
     if (!supportsBinary) {
       return encodeBase64Packet(packet, callback);
     }
 
-    var data = packet.data;
-    var typeBuffer = [];
-    typeBuffer[0] = PacketTypeMap[packet.type];
-    return callback(typeBuffer..addAll(data));
+    var data = packet['data'];
+    // 'fromClient' is to check if the runtime is on server side or not,
+    // because Dart server's websocket cannot send data with byte buffer.
+    final newData = new Uint8List(data.length + 1);
+    newData..setAll(0, [PacketTypeMap[packet['type']]]..length = 1)..setAll(1, data);
+    if (fromClient) {
+      return callback(newData.buffer);
+    } else {
+      return callback(newData);
+    }
   }
 
   /**
@@ -102,7 +111,7 @@ class PacketParser {
    */
 
   static encodeBase64Packet(packet, callback) {
-    var message = 'b${PacketTypeMap[packet.type]}';
+    var message = '''b${PacketTypeMap[packet['type']]}''';
     message += BASE64.encode(packet.data
         .toString()
         .codeUnits);
@@ -159,14 +168,13 @@ class PacketParser {
     var data = BASE64.decode(UTF8.decode(msg
         .substring(1)
         .codeUnits));
-//    var data = new Buffer(msg.substr(1), 'base64');
-//    if (binaryType == 'arraybuffer') {
-//      var abv = new Uint8Array(data.length);
-//      for (var i = 0; i < abv.length; i++){
-//        abv[i] = data[i];
-//      }
-//      data = abv.buffer;
-//    }
+    if (binaryType == 'arraybuffer') {
+      var abv = new Uint8List(data.length);
+      for (var i = 0; i < abv.length; i++){
+        abv[i] = data[i];
+      }
+      return { 'type': type, 'data': abv.buffer};
+    }
     return { 'type': type, 'data': data};
   }
 

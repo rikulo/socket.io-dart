@@ -11,7 +11,9 @@
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:logging/logging.dart';
+import 'package:socket_io/src/parser/binary.dart';
 import 'package:socket_io/src/util/event_emitter.dart';
 
 const int CONNECT = 0;
@@ -56,7 +58,7 @@ class Encoder {
     _logger.fine('encoding packet $obj');
 
     if (BINARY_EVENT == obj['type'] || BINARY_ACK == obj['type']) {
-      // TODO: encodeAsBinary(obj, callback);
+      encodeAsBinary(obj, callback);
     } else {
       var encoding = encodeAsString(obj);
       callback([encoding]);
@@ -109,20 +111,21 @@ class Encoder {
  * @return {Buffer} encoded
  * @api private
  */
-//
-//static encodeAsBinary(obj, callback) {
-//
-//  function writeEncoding(bloblessData) {
-//    var deconstruction = binary.deconstructPacket(bloblessData);
-//    var pack = encodeAsString(deconstruction.packet);
-//    var buffers = deconstruction.buffers;
-//
-//    buffers.unshift(pack); // add packet info to beginning of data list
-//    callback(buffers); // write all the buffers
-//  }
+
+static encodeAsBinary(obj, callback) {
+
+  var writeEncoding = (bloblessData) {
+    var deconstruction = Binary.deconstructPacket(bloblessData);
+    var pack = encodeAsString(deconstruction['packet']);
+    var buffers = deconstruction['buffers'];
+
+    // add packet info to beginning of data list
+    callback([pack]..addAll(buffers)); // write all the buffers
+  };
 //
 //  binary.removeBlobs(obj, writeEncoding);
-//}
+  writeEncoding(obj);
+}
 }
 
 /**
@@ -147,30 +150,30 @@ class Decoder extends EventEmitter {
       packet = decodeString(obj);
       if (BINARY_EVENT == packet['type'] ||
           BINARY_ACK == packet['type']) { // binary packet's json
-// TODO:      this.reconstructor = new BinaryReconstructor(packet);
+        this.reconstructor = new BinaryReconstructor(packet);
 
         // no attachments, labeled binary but no binary data to follow
-//      if (this.reconstructor.reconPack.attachments === 0) {
-//        this.emit('decoded', packet);
-//      }
+        if (this.reconstructor.reconPack['attachments'] == 0) {
+          this.emit('decoded', packet);
+        }
       } else { // non-binary full packet
         this.emit('decoded', packet);
       }
-    } /* TODO: else if (isBuf(obj) || obj.base64) { // raw binary data
-    if (!this.reconstructor) {
-      throw new Error('got binary data when not reconstructing a packet');
-    } else {
-      packet = this.reconstructor.takeBinaryData(obj);
-      if (packet) { // received final buffer
-        this.reconstructor = null;
-        this.emit('decoded', packet);
+    } else if (obj is ByteBuffer || obj is Uint8List ||
+        obj is Map && obj['base64'] != null) { // raw binary data
+      if (this.reconstructor == null) {
+        throw new UnsupportedError(
+            'got binary data when not reconstructing a packet');
+      } else {
+        packet = this.reconstructor.takeBinaryData(obj);
+        if (packet != null) { // received final buffer
+          this.reconstructor = null;
+          this.emit('decoded', packet);
+        }
       }
+    } else {
+      throw new UnsupportedError('Unknown type: ' + obj);
     }
-  }
-  else {
-    throw new Error('Unknown type: ' + obj);
-  }*/
-
   }
 
   /**
@@ -198,7 +201,7 @@ class Decoder extends EventEmitter {
         buf += str[i];
         if (i == endLen) break;
       }
-      if (buf != num.parse(buf, (_) => -1) || str[i] != '-') {
+      if (buf != '${num.parse(buf, (_) => -1)}' || str[i] != '-') {
         throw new ArgumentError('Illegal attachments');
       }
       p['attachments'] = num.parse(buf);
@@ -265,52 +268,53 @@ class Decoder extends EventEmitter {
     }
   }
 }
-//
-///**
-// * A manager of a binary event's 'buffer sequence'. Should
-// * be constructed whenever a packet of type BINARY_EVENT is
-// * decoded.
-// *
-// * @param {Object} packet
-// * @return {BinaryReconstructor} initialized reconstructor
-// * @api private
-// */
-//
-//function BinaryReconstructor(packet) {
-//  this.reconPack = packet;
-//  this.buffers = [];
-//}
-//
-///**
-// * Method to be called when binary data received from connection
-// * after a BINARY_EVENT packet.
-// *
-// * @param {Buffer | ArrayBuffer} binData - the raw binary data received
-// * @return {null | Object} returns null if more binary data is expected or
-// *   a reconstructed packet object if all buffers have been received.
-// * @api private
-// */
-//
-//BinaryReconstructor.prototype.takeBinaryData = function(binData) {
-//  this.buffers.push(binData);
-//  if (this.buffers.length === this.reconPack.attachments) { // done with buffer list
-//    var packet = binary.reconstructPacket(this.reconPack, this.buffers);
-//    this.finishedReconstruction();
-//    return packet;
-//  }
-//  return null;
-//};
-//
-///**
-// * Cleans up binary packet reconstruction variables.
-// *
-// * @api private
-// */
-//
-//BinaryReconstructor.prototype.finishedReconstruction = function() {
-//  this.reconPack = null;
-//  this.buffers = [];
-//};
+
+/**
+ * A manager of a binary event's 'buffer sequence'. Should
+ * be constructed whenever a packet of type BINARY_EVENT is
+ * decoded.
+ *
+ * @param {Object} packet
+ * @return {BinaryReconstructor} initialized reconstructor
+ * @api private
+ */
+class BinaryReconstructor {
+  Map reconPack;
+  List buffers;
+  BinaryReconstructor(packet) {
+    this.reconPack = packet;
+    this.buffers = [];
+  }
+
+  /**
+   * Method to be called when binary data received from connection
+   * after a BINARY_EVENT packet.
+   *
+   * @param {Buffer | ArrayBuffer} binData - the raw binary data received
+   * @return {null | Object} returns null if more binary data is expected or
+   *   a reconstructed packet object if all buffers have been received.
+   * @api private
+   */
+  takeBinaryData(binData) {
+    this.buffers.add(binData);
+    if (this.buffers.length ==
+        this.reconPack['attachments']) { // done with buffer list
+      var packet = Binary.reconstructPacket(this.reconPack, this.buffers);
+      this.finishedReconstruction();
+      return packet;
+    }
+    return null;
+  }
+
+  /** Cleans up binary packet reconstruction variables.
+   *
+   * @api private
+   */
+  void finishedReconstruction() {
+    this.reconPack = null;
+    this.buffers = [];
+  }
+}
 
 Map error() {
   return {

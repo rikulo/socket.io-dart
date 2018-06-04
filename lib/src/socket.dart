@@ -122,13 +122,17 @@ class Socket extends EventEmitter {
     emitWithAck(event, data);
   }
 
+  void emitWithBinary(String event, [data]) {
+    emitWithAck(event, data, binary: true);
+  }
+
   /**
    * Emits to this client.
    *
    * @return {Socket} self
    * @api public
    */
-  void emitWithAck(String event, dynamic data, {Function ack}) {
+  void emitWithAck(String event, dynamic data, {Function ack, bool binary = false}) {
     if (EVENTS.contains(event)) {
       super.emit(event, data);
     } else {
@@ -146,7 +150,7 @@ class Socket extends EventEmitter {
         packet['id'] = '${this.nsp.ids++}';
       }
 
-      packet['type'] = /*hasBin(args) ? parser.BINARY_EVENT :*/ EVENT;
+      packet['type'] = binary ? BINARY_EVENT : EVENT;
       packet['data'] = sendData;
 
 

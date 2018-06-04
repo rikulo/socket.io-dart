@@ -26,7 +26,7 @@ class WebSocketTransport extends Transport {
   }
 
   void send(List<Map> packets) {
-    var send = (String data, Map packet) {
+    var send = (data, Map packet) {
       _logger.fine('writing "$data"');
 
       // always creates a new object since ws modifies it
