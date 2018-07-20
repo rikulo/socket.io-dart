@@ -1,3 +1,4 @@
+import 'dart:async';
 /**
  * websocket_transport.dart
  *
@@ -18,10 +19,11 @@ class WebSocketTransport extends Transport {
   static Logger _logger = new Logger('socket_io:transport.WebSocketTransport');
   bool get handlesUpgrades => true;
   bool get supportsFraming => true;
+  StreamSubscription subscription;
   WebSocketTransport(connect): super(connect) {
     this.name = 'websocket';
     this.connect = connect;
-    connect.websocket.listen(this.onData, onError: this.onError, onDone: this.onClose);
+    subscription = connect.websocket.listen(this.onData, onError: this.onError, onDone: this.onClose);
     writable = true;
   }
 
@@ -54,6 +56,15 @@ class WebSocketTransport extends Transport {
     for (var i = 0; i < packets.length; i++) {
       var packet = packets[i];
       PacketParser.encodePacket(packet, supportsBinary: this.supportsBinary, callback: (_) => send(_, packet));
+    }
+  }
+  void onClose() {
+    super.onClose();
+
+    // workaround for https://github.com/dart-lang/sdk/issues/27414
+    if (subscription != null) {
+      subscription.cancel();
+      subscription = null;
     }
   }
   void doClose([fn]) {
