@@ -15,7 +15,7 @@ import 'package:logging/logging.dart';
 import 'package:socket_io/src/client.dart';
 import 'package:socket_io/src/engine/engine.dart';
 import 'package:socket_io/src/namespace.dart';
-import 'package:socket_io/src/parser/parser.dart';
+import 'package:socket_io_common/src/parser/parser.dart';
 import 'package:stream/stream.dart';
 
 /**

@@ -12,7 +12,7 @@
  */
 import 'package:logging/logging.dart';
 import 'package:socket_io/src/engine/connect.dart';
-import 'package:socket_io/src/engine/parser/parser.dart';
+import 'package:socket_io_common/src/engine/parser/parser.dart';
 import 'package:socket_io/src/engine/transport/jsonp_transport.dart';
 import 'package:socket_io/src/engine/transport/websocket_transport.dart';
 import 'package:socket_io/src/engine/transport/xhr_transport.dart';

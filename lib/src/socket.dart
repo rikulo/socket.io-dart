@@ -13,7 +13,7 @@
 import 'dart:io';
 import 'package:socket_io/src/adapter/adapter.dart';
 import 'package:socket_io/src/client.dart';
-import 'package:socket_io/src/parser/parser.dart';
+import 'package:socket_io_common/src/parser/parser.dart';
 import 'package:socket_io/src/namespace.dart';
 import 'package:socket_io/src/server.dart';
 import 'package:socket_io/src/util/event_emitter.dart';

@@ -13,7 +13,7 @@
 import 'package:logging/logging.dart';
 
 import 'package:socket_io/src/engine/socket.dart';
-import 'package:socket_io/src/parser/parser.dart';
+import 'package:socket_io_common/src/parser/parser.dart';
 import 'package:socket_io/src/server.dart';
 
 class Client {

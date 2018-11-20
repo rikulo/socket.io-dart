@@ -12,7 +12,7 @@ import 'dart:async';
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
 import 'package:logging/logging.dart';
-import 'package:socket_io/src/engine/parser/parser.dart';
+import 'package:socket_io_common/src/engine/parser/parser.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
 
 class WebSocketTransport extends Transport {
