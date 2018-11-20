@@ -1,4 +1,3 @@
-import 'dart:collection';
 /**
  * transports.dart
  *
@@ -11,8 +10,6 @@ import 'dart:collection';
  *
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
-import 'dart:io';
-
 import 'package:logging/logging.dart';
 import 'package:socket_io/src/engine/connect.dart';
 import 'package:socket_io/src/engine/parser/parser.dart';
@@ -20,7 +17,6 @@ import 'package:socket_io/src/engine/transport/jsonp_transport.dart';
 import 'package:socket_io/src/engine/transport/websocket_transport.dart';
 import 'package:socket_io/src/engine/transport/xhr_transport.dart';
 import 'package:socket_io/src/util/event_emitter.dart';
-import 'dart:async';
 
 class Transports {
   static List<String> upgradesTo(String from) {
@@ -33,7 +29,7 @@ class Transports {
   static Transport newInstance(String name, SocketConnect connect) {
     if ('websocket' == name) {
       return new WebSocketTransport(connect);
-    } else if ('polling' == name ) {
+    } else if ('polling' == name) {
       if (connect.request.uri.queryParameters.containsKey('j')) {
         return new JSONPTransport(connect);
       } else {
@@ -64,7 +60,9 @@ abstract class Transport extends EventEmitter {
     this.discarded = false;
     var options = connect.dataset['options'];
     if (options != null) {
-      messageHandler = options.containsKey('messageHandlerFactory') ? options['messageHandlerFactory'](this, connect) : null;
+      messageHandler = options.containsKey('messageHandlerFactory')
+          ? options['messageHandlerFactory'](this, connect)
+          : null;
     }
   }
 
@@ -114,7 +112,6 @@ abstract class Transport extends EventEmitter {
 
   bool get supportsFraming;
   bool get handlesUpgrades;
-
 }
 
 abstract class MessageHandler {

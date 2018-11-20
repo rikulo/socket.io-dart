@@ -17,24 +17,23 @@ import 'package:socket_io/socket_io.dart';
 main() {
   group('Socket IO', () {
     test('Start standalone server', () async {
-
-        var io = new Server();
-        var nsp = io.of('/some');
-        nsp.on('connection', (Socket client) {
-          print('connection /some');
-          client.on('msg', (data) {
-            print('data from /some => $data');
-            client.emit('fromServer', "ok 2");
-          });
+      var io = new Server();
+      var nsp = io.of('/some');
+      nsp.on('connection', (client) {
+        print('connection /some');
+        client.on('msg', (data) {
+          print('data from /some => $data');
+          client.emit('fromServer', "ok 2");
         });
-        io.on('connection', (Socket client) {
-          print('connection default namespace');
-          client.on('msg', (data) {
-            print('data from default => $data');
-            client.emit('fromServer', "ok");
-          });
+      });
+      io.on('connection', (client) {
+        print('connection default namespace');
+        client.on('msg', (data) {
+          print('data from default => $data');
+          client.emit('fromServer', "ok");
         });
-        io.listen(3000);
+      });
+      io.listen(3000);
     });
   });
 }

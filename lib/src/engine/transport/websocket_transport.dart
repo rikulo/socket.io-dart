@@ -20,10 +20,11 @@ class WebSocketTransport extends Transport {
   bool get handlesUpgrades => true;
   bool get supportsFraming => true;
   StreamSubscription subscription;
-  WebSocketTransport(connect): super(connect) {
+  WebSocketTransport(connect) : super(connect) {
     this.name = 'websocket';
     this.connect = connect;
-    subscription = connect.websocket.listen(this.onData, onError: this.onError, onDone: this.onClose);
+    subscription = connect.websocket
+        .listen(this.onData, onError: this.onError, onDone: this.onClose);
     writable = true;
   }
 
@@ -55,9 +56,12 @@ class WebSocketTransport extends Transport {
 //    }
     for (var i = 0; i < packets.length; i++) {
       var packet = packets[i];
-      PacketParser.encodePacket(packet, supportsBinary: this.supportsBinary, callback: (_) => send(_, packet));
+      PacketParser.encodePacket(packet,
+          supportsBinary: this.supportsBinary,
+          callback: (_) => send(_, packet));
     }
   }
+
   void onClose() {
     super.onClose();
 
@@ -67,9 +71,9 @@ class WebSocketTransport extends Transport {
       subscription = null;
     }
   }
+
   void doClose([fn]) {
     this.connect.websocket.close();
-    if (fn != null)
-      fn();
+    if (fn != null) fn();
   }
 }

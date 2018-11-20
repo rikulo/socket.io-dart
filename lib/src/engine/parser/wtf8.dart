@@ -36,7 +36,8 @@ class WTF8 {
       if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
         // high surrogate, and there is a next character
         extra = string.codeUnitAt(counter++);
-        if ((extra & 0xFC00) == 0xDC00) { // low surrogate
+        if ((extra & 0xFC00) == 0xDC00) {
+          // low surrogate
           output.add(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
         } else {
           // unmatched surrogate; only append this code unit, in case the next
@@ -52,16 +53,20 @@ class WTF8 {
   }
 
   static _encodeCodePoint(int codePoint) {
-    if ((codePoint & 0xFFFFFF80) == 0) { // 1-byte sequence
+    if ((codePoint & 0xFFFFFF80) == 0) {
+      // 1-byte sequence
       return new String.fromCharCode(codePoint);
     }
     var symbol = '';
-    if ((codePoint & 0xFFFFF800) == 0) { // 2-byte sequence
+    if ((codePoint & 0xFFFFF800) == 0) {
+      // 2-byte sequence
       symbol = new String.fromCharCode(((codePoint >> 6) & 0x1F) | 0xC0);
-    } else if ((codePoint & 0xFFFF0000) == 0) { // 3-byte sequence
+    } else if ((codePoint & 0xFFFF0000) == 0) {
+      // 3-byte sequence
       symbol = new String.fromCharCode(((codePoint >> 12) & 0x0F) | 0xE0);
       symbol += _createByte(codePoint, 6);
-    } else if ((codePoint & 0xFFE00000) == 0) { // 4-byte sequence
+    } else if ((codePoint & 0xFFE00000) == 0) {
+      // 4-byte sequence
       symbol = new String.fromCharCode(((codePoint >> 18) & 0x07) | 0xF0);
       symbol += _createByte(codePoint, 12);
       symbol += _createByte(codePoint, 6);

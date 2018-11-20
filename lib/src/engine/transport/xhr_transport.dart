@@ -15,7 +15,7 @@ import 'package:socket_io/src/engine/connect.dart';
 import 'package:socket_io/src/engine/transport/polling_transport.dart';
 
 class XHRTransport extends PollingTransport {
-  XHRTransport(SocketConnect connect): super(connect);
+  XHRTransport(SocketConnect connect) : super(connect);
 
   /**
    * Overrides `onRequest` to handle `OPTIONS`..
@@ -49,13 +49,13 @@ class XHRTransport extends PollingTransport {
    */
   headers(SocketConnect connect, [Map headers]) {
     headers = headers ?? {};
-  var req = connect.request;
-  if (req.headers.value('origin') != null) {
-    headers['Access-Control-Allow-Credentials'] = 'true';
-    headers['Access-Control-Allow-Origin'] = req.headers.value('origin');
-  } else {
-    headers['Access-Control-Allow-Origin'] = '*';
-  }
+    var req = connect.request;
+    if (req.headers.value('origin') != null) {
+      headers['Access-Control-Allow-Credentials'] = 'true';
+      headers['Access-Control-Allow-Origin'] = req.headers.value('origin');
+    } else {
+      headers['Access-Control-Allow-Origin'] = '*';
+    }
     return super.headers(connect, headers);
   }
 }

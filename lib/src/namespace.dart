@@ -23,8 +23,9 @@ import 'package:socket_io/src/util/event_emitter.dart';
  * Blacklisted events.
  */
 
-List<String> events = ['connect', // for symmetry with client
-'connection', 'newListener'
+List<String> events = [
+  'connect', // for symmetry with client
+  'connection', 'newListener'
 ];
 
 /**
@@ -188,8 +189,6 @@ class Namespace extends EventEmitter {
     if (events.contains(ev)) {
       super.emit(ev, arg);
     } else {
-      // set up packet object
-      var parserType = EVENT; // default
       // @todo check how to handle it with Dart
       // if (hasBin(args)) { parserType = ParserType.binaryEvent; } // binary
 
@@ -197,10 +196,9 @@ class Namespace extends EventEmitter {
 
       Map packet = {'type': EVENT, 'data': data};
 
-      this.adapter.broadcast(packet, {
-          'rooms': this.rooms,
-          'flags': this.flags
-      });
+      this
+          .adapter
+          .broadcast(packet, {'rooms': this.rooms, 'flags': this.flags});
 
       this.rooms = null;
       this.flags = null;

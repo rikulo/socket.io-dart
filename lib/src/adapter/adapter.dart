@@ -28,12 +28,13 @@ abstract class Adapter {
   clientRooms(String id, [fn(err, [_])]);
 
   static Adapter newInstance(String key, Namespace nsp) {
-    if ('default' == key ) {
+    if ('default' == key) {
       return new _MemoryStoreAdapter(nsp);
     }
     throw new UnimplementedError('not supported other adapter yet.');
   }
 }
+
 class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   Map nsps = {};
   Map<String, _Room> rooms;
@@ -59,7 +60,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   add(String id, String room, [fn([_])]) {
     this.sids[id] = this.sids[id] ?? {};
     this.sids[id][room] = true;
-    this.rooms[room] = this.rooms[room] ?? new  _Room();
+    this.rooms[room] = this.rooms[room] ?? new _Room();
     this.rooms[room].add(id);
     if (fn != null) scheduleMicrotask(() => fn(null));
   }
@@ -77,8 +78,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     this.sids[id].remove(room);
     if (this.rooms.containsKey(room)) {
       this.rooms[room].del(id);
-      if (this.rooms[room].length == 0)
-        this.rooms.remove(room);
+      if (this.rooms[room].length == 0) this.rooms.remove(room);
     }
 
     if (fn != null) scheduleMicrotask(() => fn(null));
@@ -97,14 +97,13 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
       for (var room in rooms.keys) {
         if (this.rooms.containsKey(room)) {
           this.rooms[room].del(id);
-          if (this.rooms[room].length == 0)
-              this.rooms.remove(room);
+          if (this.rooms[room].length == 0) this.rooms.remove(room);
         }
       }
     }
     this.sids.remove(id);
 
-     if (fn != null) scheduleMicrotask(() => fn(null));
+    if (fn != null) scheduleMicrotask(() => fn(null));
   }
 
   /**
@@ -151,9 +150,9 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
         }
       } else {
         for (var id in this.sids.keys) {
-            if (except.indexOf(id) >= 0) continue;
-            socket = this.nsp.connected[id];
-            if (socket != null) socket.packet(encodedPackets, packetOpts);
+          if (except.indexOf(id) >= 0) continue;
+          socket = this.nsp.connected[id];
+          if (socket != null) socket.packet(encodedPackets, packetOpts);
         }
       }
     });
@@ -191,8 +190,8 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
       }
     } else {
       for (var id in this.sids.keys) {
-          socket = this.nsp.connected[id];
-          if (socket != null) sids.add(id);
+        socket = this.nsp.connected[id];
+        if (socket != null) sids.add(id);
       }
     }
 
@@ -211,7 +210,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     if (fn != null) scheduleMicrotask(() => fn(null, rooms?.keys));
   }
 }
-  /**
+/**
    * Room constructor.
    *
    * @api private

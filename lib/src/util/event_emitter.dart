@@ -35,7 +35,7 @@ class EventEmitter {
    * Constructor
    */
   EventEmitter() {
-    this._events = new  HashMap<String, List<EventHandler>>();
+    this._events = new HashMap<String, List<EventHandler>>();
     this._eventsOnce = new HashMap<String, List<EventHandler>>();
   }
 
@@ -48,7 +48,7 @@ class EventEmitter {
     // todo: try to optimize this. Maybe remember the off() handlers and remove later?
     // handler might be off() inside handler; make a copy first
     final list = list0 != null ? new List.from(list0) : null;
-    list?.forEach((EventHandler handler) {
+    list?.forEach((handler) {
       handler(data);
     });
 

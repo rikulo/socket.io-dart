@@ -64,8 +64,7 @@ class Client {
   connect(name, [query]) {
     _logger.fine('connecting to namespace $name');
     if (!this.server.nsps.containsKey(name)) {
-      this.packet(
-          {'type': ERROR, 'nsp': name, 'data': 'Invalid namespace'});
+      this.packet(<dynamic, dynamic>{'type': ERROR, 'nsp': name, 'data': 'Invalid namespace'});
       return;
     }
     var nsp = this.server.of(name);
@@ -92,7 +91,6 @@ class Client {
    * @api private
    */
   disconnect() {
-    var socket;
     // we don't use a for loop because the length of
     // `sockets` changes upon each iteration
     this.sockets.toList().forEach((socket) {
@@ -146,18 +144,20 @@ class Client {
     writeToEngine(encodedPackets) {
       if (opts['volatile'] != null && !self.conn.transport.writable) return;
       for (var i = 0; i < encodedPackets.length; i++) {
-        self.conn.write(encodedPackets[i], { 'compress': opts['compress']});
+        self.conn.write(encodedPackets[i], {'compress': opts['compress']});
       }
     }
 
     if ('open' == this.conn.readyState) {
       _logger.fine('writing packet $packet');
-      if (opts['preEncoded'] != true) { // not broadcasting, need to encode
-        this.encoder.encode(
-            packet, (encodedPackets) { // encode, then write results to engine
+      if (opts['preEncoded'] != true) {
+        // not broadcasting, need to encode
+        this.encoder.encode(packet, (encodedPackets) {
+          // encode, then write results to engine
           writeToEngine(encodedPackets);
         });
-      } else { // a broadcast pre-encodes a packet
+      } else {
+        // a broadcast pre-encodes a packet
         writeToEngine(packet);
       }
     } else {
@@ -174,8 +174,8 @@ class Client {
     // try/catch is needed for protocol violations (GH-1880)
     try {
       this.decoder.add(data);
-    } catch (e) {
-      _logger.severe(e, (e as Error).stackTrace);
+    } catch (e, st) {
+      _logger.severe(e, st);
       this.onerror(e);
     }
   }
