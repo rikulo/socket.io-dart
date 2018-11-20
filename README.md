@@ -80,3 +80,6 @@ If you are new to Git or GitHub, please read [this guide](https://help.github.co
 ## Socket.io Dart Client
 
 * [socket.io-client-dart](https://github.com/rikulo/socket.io-client-dart)
+
+## Contributors
+* Thanks [@felangel](https://github.com/felangel) for https://github.com/rikulo/socket.io-dart/issues/7
