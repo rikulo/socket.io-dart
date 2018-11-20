@@ -17,6 +17,7 @@ import 'package:socket_io/src/engine/engine.dart';
 import 'package:socket_io/src/namespace.dart';
 import 'package:socket_io/src/parser/parser.dart';
 import 'package:stream/stream.dart';
+
 /**
  * Socket.IO client source.
  */
@@ -56,7 +57,8 @@ class Server {
     this.nsps = {};
     this.path(options.containsKey('path') ? options['path'] : '/socket.io');
     this.serveClient(false != options['serveClient']);
-    this.adapter = options.containsKey('adapter') ? options['adapter'] : 'default';
+    this.adapter =
+        options.containsKey('adapter') ? options['adapter'] : 'default';
     this.origins(options.containsKey('origins') ? options['origins'] : '*:*');
     this.encoder = new Encoder();
     this.sockets = this.of('/');
@@ -72,8 +74,9 @@ class Server {
    * @param {Function} callback to be called with the result: `fn(err, success)`
    */
   checkRequest(HttpRequest req, [Function fn]) {
-    String origin = req.headers.value('origin') != null ? req.headers.value(
-        'origin') : req.headers.value('referer');
+    String origin = req.headers.value('origin') != null
+        ? req.headers.value('origin')
+        : req.headers.value('referer');
 
     // file:// URLs produce a null Origin which can't be authorized via echo-back
     if (origin == null || origin.isEmpty) {
@@ -93,9 +96,10 @@ class Server {
         Uri parts = Uri.parse(origin);
         int defaultPort = 'https:' == parts.scheme ? 443 : 80;
         int port = parts.port != null ? parts.port : defaultPort;
-        bool ok = this._origins.indexOf(parts.host + ':' + port.toString()) >=
-            0 || this._origins.indexOf(parts.host + ':*') >= 0 ||
-            this._origins.indexOf('*:' + port.toString()) >= 0;
+        bool ok =
+            this._origins.indexOf(parts.host + ':' + port.toString()) >= 0 ||
+                this._origins.indexOf(parts.host + ':*') >= 0 ||
+                this._origins.indexOf('*:' + port.toString()) >= 0;
 
         return fn(null, ok);
       } catch (ex) {}
@@ -131,7 +135,8 @@ class Server {
         val(socket.request, (err, authorized) {
           if (err) {
             return next(new Exception(err));
-          };
+          }
+          ;
           if (!authorized) {
             return next(new Exception('Not authorized'));
           }
@@ -253,28 +258,28 @@ class Server {
 ////                    response.close();
 ////                });
 
-        var connectPacket = { 'type': CONNECT, 'nsp': '/'};
-        this.encoder.encode(connectPacket, (encodedPacket) {
-          // the CONNECT packet will be merged with Engine.IO handshake,
-          // to reduce the number of round trips
-          opts['initialPacket'] = encodedPacket;
+      var connectPacket = {'type': CONNECT, 'nsp': '/'};
+      this.encoder.encode(connectPacket, (encodedPacket) {
+        // the CONNECT packet will be merged with Engine.IO handshake,
+        // to reduce the number of round trips
+        opts['initialPacket'] = encodedPacket;
 
-          _logger.fine('creating engine.io instance with opts $opts');
-          // initialize engine
-          this.engine = Engine.attach(server, opts);
+        _logger.fine('creating engine.io instance with opts $opts');
+        // initialize engine
+        this.engine = Engine.attach(server, opts);
 
-          // attach static file serving
+        // attach static file serving
 //        if (self._serveClient) self.attachServe(srv);
 
-          // Export http server
-          this.httpServer = server;
+        // Export http server
+        this.httpServer = server;
 
-          // bind to engine events
-          this.bind(this.engine);
-        });
+        // bind to engine events
+        this.bind(this.engine);
+      });
 //      });
     } else {
-      var connectPacket = { 'type': CONNECT, 'nsp': '/'};
+      var connectPacket = {'type': CONNECT, 'nsp': '/'};
       this.encoder.encode(connectPacket, (encodedPacket) {
         // the CONNECT packet will be merged with Engine.IO handshake,
         // to reduce the number of round trips
@@ -429,4 +434,3 @@ class Server {
   once(event, handler) => sockets.once(event, handler);
   off(event, handler) => sockets.off(event, handler);
 }
-

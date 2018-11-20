@@ -10,7 +10,6 @@
  *
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io' hide Socket;
 import 'package:logging/logging.dart';
@@ -75,17 +74,25 @@ class Server extends Engine {
     this.transports = ['polling', 'websocket'];
     this.allowUpgrades = false != opts['allowUpgrades'];
     this.allowRequest = opts['allowRequest'];
-    this.cookie = opts['cookie'] == false ?  false : opts['cookie'] ?? 'io'; //false != opts.cookie ? (opts.cookie || 'io') : false;
-    this.cookiePath = opts['cookiePath'] == false ?  false : opts['cookiePath'] ?? '/'; //false != opts.cookiePath ? (opts.cookiePath || '/') : false;
+    this.cookie = opts['cookie'] == false
+        ? false
+        : opts['cookie'] ??
+            'io'; //false != opts.cookie ? (opts.cookie || 'io') : false;
+    this.cookiePath = opts['cookiePath'] == false
+        ? false
+        : opts['cookiePath'] ??
+            '/'; //false != opts.cookiePath ? (opts.cookiePath || '/') : false;
     this.cookieHttpOnly = opts['cookieHttpOnly'] != false;
 
-    if (!opts.containsKey('perMessageDeflate') || opts['perMessageDeflate'] == true) {
-      this.perMessageDeflate = opts['perMessageDeflate'] is Map ? opts['perMessageDeflate'] : {};
+    if (!opts.containsKey('perMessageDeflate') ||
+        opts['perMessageDeflate'] == true) {
+      this.perMessageDeflate =
+          opts['perMessageDeflate'] is Map ? opts['perMessageDeflate'] : {};
       if (!this.perMessageDeflate.containsKey('threshold'))
         this.perMessageDeflate['threshold'] = 1024;
     }
     this.httpCompression = opts['httpCompression'] ?? {};
-    if (!this.httpCompression .containsKey('threshold'))
+    if (!this.httpCompression.containsKey('threshold'))
       this.httpCompression['threshold'] = 1024;
 
     this.initialPacket = opts['initialPacket'];
@@ -212,7 +219,8 @@ class Server extends Engine {
 //print('sid ${req.uri.queryParameters['sid']}');
       if (req.uri.queryParameters['sid'] != null) {
         _logger.fine('setting new request for existing client');
-        self.clients[req.uri.queryParameters['sid']].transport.onRequest(connect);
+        self.clients[req.uri.queryParameters['sid']].transport
+            .onRequest(connect);
       } else {
         self.handshake(req.uri.queryParameters['transport'], connect);
       }
@@ -231,9 +239,9 @@ class Server extends Engine {
     var res = req.response;
     var isForbidden = !ServerErrorMessages.containsKey(code);
     if (isForbidden) {
-      res.statusCode = HttpStatus.FORBIDDEN;
-      res.headers.contentType = ContentType.JSON;
-      res.write(JSON.encode({
+      res.statusCode = HttpStatus.forbidden;
+      res.headers.contentType = ContentType.json;
+      res.write(json.encode({
         'code': ServerErrors.FORBIDDEN,
         'message': code ?? ServerErrorMessages[ServerErrors.FORBIDDEN]
       }));
@@ -241,14 +249,14 @@ class Server extends Engine {
     }
     if (req.headers.value('origin') != null) {
       res.headers.add('Access-Control-Allow-Credentials', 'true');
-      res.headers.add(
-          'Access-Control-Allow-Origin', req.headers.value('origin'));
+      res.headers
+          .add('Access-Control-Allow-Origin', req.headers.value('origin'));
     } else {
       res.headers.add('Access-Control-Allow-Origin', '*');
     }
-    res.statusCode = HttpStatus.BAD_REQUEST;
+    res.statusCode = HttpStatus.badRequest;
     res.write(
-        JSON.encode({'code': code, 'message': ServerErrorMessages[code]}));
+        json.encode({'code': code, 'message': ServerErrorMessages[code]}));
   }
 
   /**
@@ -276,7 +284,7 @@ class Server extends Engine {
     var transport;
     var req = connect.request;
     try {
-       transport = Transports.newInstance(transportName, connect);
+      transport = Transports.newInstance(transportName, connect);
       if ('polling' == transportName) {
         transport.maxHttpBufferSize = this.maxHttpBufferSize;
         transport.httpCompression = this.httpCompression;
@@ -298,10 +306,12 @@ class Server extends Engine {
     if (false != this.cookie) {
       transport.on('headers', (headers) {
         headers['Set-Cookie'] = '${this.cookie}=${Uri.encodeComponent(id)}' +
-            (this.cookiePath?.isNotEmpty == true ? '; Path=${this.cookiePath}'
-             : '') +
-            (this.cookiePath?.isNotEmpty && this.cookieHttpOnly == true ? '; HttpOnly'
-             : '');
+            (this.cookiePath?.isNotEmpty == true
+                ? '; Path=${this.cookiePath}'
+                : '') +
+            (this.cookiePath?.isNotEmpty == true && this.cookieHttpOnly == true
+                ? '; HttpOnly'
+                : '');
       });
     }
 
@@ -326,7 +336,6 @@ class Server extends Engine {
   handleUpgrade(SocketConnect connect) {
 //  this.prepare(req);
 
-    var self = this;
     this.verify(connect, true, (err, success) {
       if (!success) {
         abortConnection(connect, err);
@@ -407,11 +416,9 @@ class Server extends Engine {
    * @api public
    */
   attachTo(StreamServer server, Map options) {
-    var self = this;
     options = options ?? {};
-    var path = (options['path'] ?? '/engine.io').replaceFirst(new RegExp(r"\/$"), '');
-
-    var destroyUpgradeTimeout = options['destroyUpgradeTimeout'] ?? 1000;
+    var path =
+        (options['path'] ?? '/engine.io').replaceFirst(new RegExp(r"\/$"), '');
 
     // normalize path
     path += '/';
@@ -420,21 +427,21 @@ class Server extends Engine {
     server.map('$path.*', (HttpConnect connect) async {
       var req = connect.request;
 
-        _logger.fine('intercepting request for path "$path"');
-        if (WebSocketTransformer.isUpgradeRequest(req) &&
-            this.transports.contains('websocket')) {
+      _logger.fine('intercepting request for path "$path"');
+      if (WebSocketTransformer.isUpgradeRequest(req) &&
+          this.transports.contains('websocket')) {
 //          print('init websocket... ${req.uri}');
-          var socket = await WebSocketTransformer.upgrade(req);
-          var socketConnect = new SocketConnect.fromWebSocket(connect, socket);
-          socketConnect.dataset['options'] = options;
-          this.handleUpgrade(socketConnect);
-          return socketConnect.done;
-        } else {
-          var socketConnect = new SocketConnect(connect);
-          socketConnect.dataset['options'] = options;
-          this.handleRequest(socketConnect);
-          return socketConnect.done;
-        }
+        var socket = await WebSocketTransformer.upgrade(req);
+        var socketConnect = new SocketConnect.fromWebSocket(connect, socket);
+        socketConnect.dataset['options'] = options;
+        this.handleUpgrade(socketConnect);
+        return socketConnect.done;
+      } else {
+        var socketConnect = new SocketConnect(connect);
+        socketConnect.dataset['options'] = options;
+        this.handleRequest(socketConnect);
+        return socketConnect.done;
+      }
     }, preceding: true);
   }
 
@@ -448,15 +455,17 @@ class Server extends Engine {
 
   static abortConnection(SocketConnect connect, code) {
     var socket = connect.websocket;
-    if (socket.readyState == HttpStatus.OK) {
+    if (socket.readyState == HttpStatus.ok) {
       var message = ServerErrorMessages.containsKey(code)
-                    ? ServerErrorMessages[code] : code;
-      var length = UTF8
-          .encode(message)
-          .length;
-      socket.add('HTTP/1.1 400 Bad Request\r\n' + 'Connection: close\r\n' +
-          'Content-type: text/html\r\n' + 'Content-Length: $length\r\n' +
-          '\r\n' + message);
+          ? ServerErrorMessages[code]
+          : code;
+      var length = utf8.encode(message).length;
+      socket.add('HTTP/1.1 400 Bad Request\r\n' +
+          'Connection: close\r\n' +
+          'Content-type: text/html\r\n' +
+          'Content-Length: $length\r\n' +
+          '\r\n' +
+          message);
     }
     socket.close();
   }

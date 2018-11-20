@@ -1,4 +1,3 @@
-
 /**
  * connect.dart
  *
@@ -21,7 +20,8 @@ class SocketConnect extends HttpConnectWrapper {
   bool _completed;
   SocketConnect(HttpConnect origin) : super(origin);
 
-  SocketConnect.fromWebSocket(HttpConnect origin, WebSocket socket) : super(origin) {
+  SocketConnect.fromWebSocket(HttpConnect origin, WebSocket socket)
+      : super(origin) {
     _socket = socket;
   }
 
@@ -45,13 +45,12 @@ class SocketConnect extends HttpConnectWrapper {
    * Closes the current connection.
    */
   void close() {
-   if (_done != null) {
-     _done.complete('done');
-   } else if (_socket != null) {
-     _socket.close();
-   } else {
-     _completed = true;
-   }
+    if (_done != null) {
+      _done.complete('done');
+    } else if (_socket != null) {
+      _socket.close();
+    } else {
+      _completed = true;
+    }
   }
-
 }

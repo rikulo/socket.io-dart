@@ -73,12 +73,13 @@ class Socket extends EventEmitter {
 
     // sends an `open` packet
     this.transport.sid = this.id;
-    this.sendPacket('open', data: JSON.encode({
-      'sid': this.id,
-      'upgrades': this.getAvailableUpgrades(),
-      'pingInterval': this.server.pingInterval,
-      'pingTimeout': this.server.pingTimeout
-    }));
+    this.sendPacket('open',
+        data: json.encode({
+          'sid': this.id,
+          'upgrades': this.getAvailableUpgrades(),
+          'pingInterval': this.server.pingInterval,
+          'pingTimeout': this.server.pingTimeout
+        }));
 
 //    if (this.server.initialPacket != null) {
 //      this.sendPacket('message', data: this.server.initialPacket);
@@ -146,8 +147,10 @@ class Socket extends EventEmitter {
     if (this.pingTimeoutTimer != null) {
       this.pingTimeoutTimer.cancel();
     }
-    this.pingTimeoutTimer = new Timer(new Duration(
-        milliseconds: this.server.pingInterval + this.server.pingTimeout), () {
+    this.pingTimeoutTimer = new Timer(
+        new Duration(
+            milliseconds: this.server.pingInterval + this.server.pingTimeout),
+        () {
       this.onClose('ping timeout');
     });
   }
@@ -189,14 +192,14 @@ class Socket extends EventEmitter {
    * @api private
    */
   maybeUpgrade(transport) {
-    _logger.fine('might upgrade socket transport from ${this.transport
-        .name} to ${transport.name}');
+    _logger.fine(
+        'might upgrade socket transport from ${this.transport.name} to ${transport.name}');
 
     this.upgrading = true;
     Map<String, Function> cleanupFn = {};
     // set transport upgrade timer
     this.upgradeTimeoutTimer =
-    new Timer(new Duration(milliseconds: this.server.upgradeTimeout), () {
+        new Timer(new Duration(milliseconds: this.server.upgradeTimeout), () {
       _logger.fine('client did not complete upgrade - closing transport');
       cleanupFn['cleanup']();
       if ('open' == transport.readyState) {
@@ -208,19 +211,23 @@ class Socket extends EventEmitter {
     var check = () {
       if ('polling' == this.transport.name && this.transport.writable == true) {
         _logger.fine('writing a noop packet to polling for fast upgrade');
-        this.transport.send([{ 'type': 'noop'}]);
+        this.transport.send([
+          {'type': 'noop'}
+        ]);
       }
     };
 
     var onPacket = (packet) {
       if ('ping' == packet['type'] && 'probe' == packet['data']) {
-        transport.send([{ 'type': 'pong', 'data': 'probe'}]);
+        transport.send([
+          {'type': 'pong', 'data': 'probe'}
+        ]);
         this.emit('upgrading', transport);
         if (this.checkIntervalTimer != null) {
           this.checkIntervalTimer.cancel();
         }
         this.checkIntervalTimer =
-        new Timer.periodic(new Duration(milliseconds: 100), (_) => check());
+            new Timer.periodic(new Duration(milliseconds: 100), (_) => check());
       } else if ('upgrade' == packet['type'] && this.readyState != 'closed') {
         _logger.fine('got upgrade packet - upgrading');
         cleanupFn['cleanup']();
@@ -256,7 +263,6 @@ class Socket extends EventEmitter {
     var onClose = (_) {
       onError('socket closed');
     };
-
 
     var cleanup = () {
       this.upgrading = false;
@@ -343,7 +349,8 @@ class Socket extends EventEmitter {
         if (seqFn is Function) {
           _logger.fine('executing send callback');
           seqFn(this.transport);
-        } /** else if (Array.isArray(seqFn)) {
+        }
+        /** else if (Array.isArray(seqFn)) {
             _logger.fine('executing batch send callback');
             for (var l = seqFn.length, i = 0; i < l; i++) {
             if ('function' === typeof seqFn[i]) {
@@ -372,7 +379,8 @@ class Socket extends EventEmitter {
    */
   send(data, options, [callback]) => write(data, options, callback);
   write(data, options, [callback]) {
-    this.sendPacket('message', data: data, options: options, callback: callback);
+    this.sendPacket('message',
+        data: data, options: options, callback: callback);
     return this;
   }
 
@@ -412,7 +420,8 @@ class Socket extends EventEmitter {
    * @api private
    */
   flush() {
-    if ('closed' != this.readyState && this.transport.writable == true &&
+    if ('closed' != this.readyState &&
+        this.transport.writable == true &&
         this.writeBuffer.length > 0) {
       _logger.fine('flushing buffer to transport');
       this.emit('flush', this.writeBuffer);

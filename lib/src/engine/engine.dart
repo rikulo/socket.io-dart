@@ -19,6 +19,7 @@ class Engine extends EventEmitter {
     engine.attachTo(server, options);
     return engine;
   }
+
   dynamic operator [](Object key) {}
 
   /**

@@ -1,15 +1,13 @@
-// Copyright (C) 2018 Potix Corporation. All Rights Reserved 
+// Copyright (C) 2018 Potix Corporation. All Rights Reserved
 // History: 2018/6/1 12:31 PM
 // Author: jumperchen<jumperchen@potix.com>
 
 import 'dart:typed_data';
 
 class Binary {
-
-  static final String  KEY_PLACEHOLDER = "_placeholder";
+  static final String KEY_PLACEHOLDER = "_placeholder";
 
   static final String KEY_NUM = "num";
-
 
   static Map deconstructPacket(Map packet) {
     List<int> buffers = [];
@@ -17,10 +15,7 @@ class Binary {
     packet['data'] = _deconstructPacket(packet['data'], buffers);
     packet['attachments'] = buffers.length;
 
-    final result = {
-      'packet': packet,
-      'buffers': buffers
-    };
+    final result = {'packet': packet, 'buffers': buffers};
     return result;
   }
 
@@ -35,7 +30,7 @@ class Binary {
       final newData = [];
       final _data = data;
       int len = _data.length;
-      for (int i = 0; i < len; i ++) {
+      for (int i = 0; i < len; i++) {
         newData.add(_deconstructPacket(_data[i], buffers));
       }
       return newData;
@@ -68,7 +63,7 @@ class Binary {
       final _data = data;
       if ('${_data[KEY_PLACEHOLDER]}'.toLowerCase() == 'true') {
         final knum = _data[KEY_NUM];
-        int num = knum is int ? knum : int.parse(_data[KEY_NUM], onError: (_) => -1).toInt();
+        int num = knum is int ? knum : int.parse(_data[KEY_NUM]).toInt();
         return num >= 0 && num < buffers.length ? buffers[num] : null;
       }
       data.forEach((key, value) {

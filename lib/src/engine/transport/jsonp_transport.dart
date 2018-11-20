@@ -11,16 +11,17 @@
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
 import 'dart:convert';
-import 'dart:io';
 import 'package:socket_io/src/engine/connect.dart';
 import 'package:socket_io/src/engine/transport/polling_transport.dart';
 
 class JSONPTransport extends PollingTransport {
   String head;
   String foot;
-  JSONPTransport(SocketConnect connect): super(connect) {
-
-    this.head = '___eio[' + (connect.request.uri.queryParameters['j'] ?? '').replaceAll(new RegExp('[^0-9]'), '') + '](';
+  JSONPTransport(SocketConnect connect) : super(connect) {
+    this.head = '___eio[' +
+        (connect.request.uri.queryParameters['j'] ?? '')
+            .replaceAll(new RegExp('[^0-9]'), '') +
+        '](';
     this.foot = ');';
   }
 
@@ -38,7 +39,6 @@ class JSONPTransport extends PollingTransport {
       // client will send already escaped newlines as \\\\n and newlines as \\n
       // \\n must be replaced with \n and \\\\n with \\n
       data = data.replaceAllMapped(new RegExp(r'(\\)?\\n'), (match) {
-        // TODO: need to verify the case.
         throw new UnimplementedError('Not implemented yet');
 //        print(match);
 //        match
@@ -56,7 +56,8 @@ class JSONPTransport extends PollingTransport {
   doWrite(data, options, [callback]) {
     // we must output valid javascript, not valid json
     // see: http://timelessrepo.com/json-isnt-a-javascript-subset
-    var js = JSON.encode(data)
+    var js = json
+        .encode(data)
         .replaceAll(new RegExp(r'\u2028'), '\\u2028')
         .replaceAll(new RegExp(r'\u2029'), '\\u2029');
 
