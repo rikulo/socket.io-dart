@@ -290,7 +290,7 @@ class Socket extends EventEmitter {
 //    debug('socket connected - writing packet');
     this.nsp.connected[this.id] = this;
     this.join(this.id);
-    this.packet({'type': CONNECT});
+    this.packet(<dynamic, dynamic>{'type': CONNECT});
   }
 
   /**
@@ -366,7 +366,7 @@ class Socket extends EventEmitter {
 //      debug('sending ack %j', args);
 
       var type = /*hasBin(args) ? parser.BINARY_ACK : parser.*/ ACK;
-      packet({
+      packet(<dynamic, dynamic>{
         'id': id,
         'type': type,
         'data': [_]
@@ -441,7 +441,7 @@ class Socket extends EventEmitter {
    * @api private
    */
   error(err) {
-    this.packet({'type': ERROR, 'data': err});
+    this.packet(<dynamic, dynamic>{'type': ERROR, 'data': err});
   }
 
   /**
@@ -457,7 +457,7 @@ class Socket extends EventEmitter {
     if (close == true) {
       this.client.disconnect();
     } else {
-      this.packet({'type': DISCONNECT});
+      this.packet(<dynamic, dynamic>{'type': DISCONNECT});
       this.onclose('server namespace disconnect');
     }
     return this;

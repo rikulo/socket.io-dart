@@ -201,7 +201,7 @@ class Decoder extends EventEmitter {
         buf += str[i];
         if (i == endLen) break;
       }
-      if (buf != '${num.parse(buf)}' || str[i] != '-') {
+      if (buf != '${num.tryParse(buf) ?? -1}' || str[i] != '-') {
         throw new ArgumentError('Illegal attachments');
       }
       p['attachments'] = num.parse(buf);
@@ -222,11 +222,11 @@ class Decoder extends EventEmitter {
 
     // look up id
     var next = i < endLen - 1 ? str[i + 1] : null;
-    if (next?.isNotEmpty == true && '${num.parse(next)}' == next) {
+    if (next?.isNotEmpty == true && '${num.tryParse(next)}' == next) {
       p['id'] = '';
       while (++i > 0) {
         var c = str[i];
-        if (null == c || '${num.parse(c)}' != c) {
+        if (null == c || '${num.tryParse(c)}' != c) {
           --i;
           break;
         }

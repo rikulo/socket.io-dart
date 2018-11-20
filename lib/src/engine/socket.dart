@@ -96,7 +96,7 @@ class Socket extends EventEmitter {
    * @api private
    */
 
-  onPacket(Map packet) {
+  onPacket(packet) {
     if ('open' == this.readyState) {
       // export packet event
       _logger.fine('packet');

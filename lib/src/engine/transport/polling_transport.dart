@@ -272,7 +272,7 @@ class PollingTransport extends Transport {
     var contentType =
         isString ? 'text/plain; charset=UTF-8' : 'application/octet-stream';
 
-    var headers = {'Content-Type': contentType};
+    final Map headers = {'Content-Type': contentType};
 
     var respond = (data) {
       headers[HttpHeaders.contentLengthHeader] =

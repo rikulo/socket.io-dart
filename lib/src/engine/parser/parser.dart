@@ -256,7 +256,7 @@ class PacketParser {
         continue;
       }
 
-      if (length.isEmpty || (length != '${(n = num.parse(length))}')) {
+      if (length.isEmpty || (length != '${(n = num.tryParse(length))}')) {
         // parser error - ignoring payload
         return callback(ERROR, 0, 1);
       }

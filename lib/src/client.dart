@@ -64,7 +64,7 @@ class Client {
   connect(name, [query]) {
     _logger.fine('connecting to namespace $name');
     if (!this.server.nsps.containsKey(name)) {
-      this.packet({'type': ERROR, 'nsp': name, 'data': 'Invalid namespace'});
+      this.packet(<dynamic, dynamic>{'type': ERROR, 'nsp': name, 'data': 'Invalid namespace'});
       return;
     }
     var nsp = this.server.of(name);
@@ -174,8 +174,8 @@ class Client {
     // try/catch is needed for protocol violations (GH-1880)
     try {
       this.decoder.add(data);
-    } catch (e) {
-      _logger.severe(e, (e as Error).stackTrace);
+    } catch (e, st) {
+      _logger.severe(e, st);
       this.onerror(e);
     }
   }
