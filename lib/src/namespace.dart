@@ -19,18 +19,14 @@ import 'package:socket_io/src/server.dart';
 import 'package:socket_io/src/socket.dart';
 import 'package:socket_io/src/util/event_emitter.dart';
 
-/**
- * Blacklisted events.
- */
+/// Blacklisted events.
 
 List<String> events = [
   'connect', // for symmetry with client
   'connection', 'newListener'
 ];
 
-/**
- * Flags.
- */
+/// Flags.
 List<String> flags = ['json', 'volatile'];
 
 class Namespace extends EventEmitter {
@@ -38,70 +34,63 @@ class Namespace extends EventEmitter {
   Server server;
   List<Socket> sockets = [];
   Map<String, Socket> connected = {};
-  List fns = [];
+  List<Function> fns = [];
   int ids = 0;
   List rooms = [];
   Map flags = {};
   Adapter adapter;
-  Logger _logger = new Logger('socket_io:Namespace');
+  final Logger _logger = Logger('socket_io:Namespace');
 
-  /**
-   * Namespace constructor.
-   *
-   * @param {Server} server instance
-   * @param {Socket} name
-   * @api private
-   */
-  Namespace(Server this.server, String this.name) {
-    this.initAdapter();
+  /// Namespace constructor.
+  ///
+  /// @param {Server} server instance
+  /// @param {Socket} name
+  /// @api private
+  Namespace(this.server, this.name) {
+    initAdapter();
   }
 
-  /**
-   * Initializes the `Adapter` for this nsp.
-   * Run upon changing adapter by `Server#adapter`
-   * in addition to the constructor.
-   *
-   * @api private
-   */
-  initAdapter() {
-    this.adapter = Adapter.newInstance(this.server.adapter, this);
+  /// Initializes the `Adapter` for this nsp.
+  /// Run upon changing adapter by `Server#adapter`
+  /// in addition to the constructor.
+  ///
+  /// @api private
+  void initAdapter() {
+    adapter = Adapter.newInstance(server.adapter, this);
   }
 
-  /**
-   * Sets up namespace middleware.
-   *
-   * @return {Namespace} self
-   * @api public
-   */
-  use(fn) {
-    this.fns.add(fn);
+  /// Sets up namespace middleware.
+  ///
+  /// @return {Namespace} self
+  /// @api public
+  Namespace use(fn) {
+    fns.add(fn);
     return this;
   }
 
-  /**
-   * Executes the middleware for an incoming client.
-   *
-   * @param {Socket} socket that will get added
-   * @param {Function} last fn call in the middleware
-   * @api private
-   */
-  run(socket, fn) {
+  /// Executes the middleware for an incoming client.
+  ///
+  /// @param {Socket} socket that will get added
+  /// @param {Function} last fn call in the middleware
+  /// @api private
+  void run(socket, Function fn) {
     var fns = this.fns.sublist(0);
     if (fns.isEmpty) return fn(null);
 
     run0(0, fns, socket, fn);
   }
 
-  static run0(idx, fns, socket, fn) {
-    return fns[idx](socket, (err) {
+  //TODO: Figure out return type for this method
+  static run0(int index, List<Function> fns, Socket socket, Function fn) {
+    return fns[index](socket, (err) {
       // upon error, short-circuit
       if (err) return fn(err);
 
       // if no middleware left, summon callback
-      if (!fns[idx + 1]) return fn(null);
+      if (fns.length < index + 1) return fn(null);
 
       // go on to next
-      run0(idx + 1, fns, socket, fn);
+      run0(index + 1, fns, socket, fn);
     });
   }
 
@@ -116,30 +105,26 @@ class Namespace extends EventEmitter {
 //        to(name);
 //    }
 
-  /**
-   * Targets a room when emitting.
-   *
-   * @param {String} name
-   * @return {Namespace} self
-   * @api public
-   */
-  to(String name) {
-    rooms = this.rooms?.isNotEmpty == true ? this.rooms : [];
-    if (!rooms.contains(name)) this.rooms.add(name);
+  /// Targets a room when emitting.
+  ///
+  /// @param {String} name
+  /// @return {Namespace} self
+  /// @api public
+  Namespace to(String name) {
+    rooms = rooms?.isNotEmpty == true ? rooms : [];
+    if (!rooms.contains(name)) rooms.add(name);
     return this;
   }
 
-  /**
-   * Adds a new client.
-   *
-   * @return {Socket}
-   * @api private
-   */
-  add(Client client, query, fn) {
-    _logger.fine('adding socket to nsp ${this.name}');
-    var socket = new Socket(this, client, query);
+  /// Adds a client.
+  ///
+  /// @return {Socket}
+  /// @api private
+  Socket add(Client client, query, Function fn) {
+    _logger.fine('adding socket to nsp ${name}');
+    var socket = Socket(this, client, query);
     var self = this;
-    this.run(socket, (err) {
+    run(socket, (err) {
       // don't use Timer.run() here
       scheduleMicrotask(() {
         if ('open' == client.conn.readyState) {
@@ -166,83 +151,72 @@ class Namespace extends EventEmitter {
     return socket;
   }
 
-  /**
-   * Removes a client. Called by each `Socket`.
-   *
-   * @api private
-   */
-  remove(socket) {
-    if (this.sockets.contains(socket)) {
-      this.sockets.remove(socket);
+  /// Removes a client. Called by each `Socket`.
+  ///
+  /// @api private
+  void remove(socket) {
+    if (sockets.contains(socket)) {
+      sockets.remove(socket);
     } else {
       _logger.fine('ignoring remove for ${socket.id}');
     }
   }
 
-  /**
-   * Emits to all clients.
-   *
-   * @return {Namespace} self
-   * @api public
-   */
-  emit(ev, [dynamic arg]) {
-    if (events.contains(ev)) {
-      super.emit(ev, arg);
+  /// Emits to all clients.
+  ///
+  /// @api public
+  @override
+  void emit(String event, [dynamic argument]) {
+    if (events.contains(event)) {
+      super.emit(event, argument);
     } else {
       // @todo check how to handle it with Dart
       // if (hasBin(args)) { parserType = ParserType.binaryEvent; } // binary
 
-      List data = arg == null ? [ev] : [ev, arg];
+      // ignore: omit_local_variable_types
+      List data = argument == null ? [event] : [event, argument];
 
-      Map packet = {'type': EVENT, 'data': data};
+      final packet = {'type': EVENT, 'data': data};
 
-      this
-          .adapter
-          .broadcast(packet, {'rooms': this.rooms, 'flags': this.flags});
+      adapter.broadcast(packet, {'rooms': rooms, 'flags': flags});
 
-      this.rooms = null;
-      this.flags = null;
+      rooms = null;
+      flags = null;
     }
   }
 
-  /**
-   * Sends a `message` event to all clients.
-   *
-   * @return {Namespace} self
-   * @api public
-   */
-  send([args]) {
+  /// Sends a `message` event to all clients.
+  ///
+  /// @return {Namespace} self
+  /// @api public
+  void send([args]) {
     write(args);
   }
 
-  write([args]) {
-    this.emit('message', args);
+  void write([args]) {
+    emit('message', args);
+  }
+
+  /// Gets a list of clients.
+  ///
+  /// @return {Namespace} self
+  /// @api public
+  ///
+  /// TODO: Fix this description or code. Add type parameters to [fn([_])]
+  ///
+  Namespace clients(fn([_])) {
+    adapter.clients(rooms, fn);
+    rooms = [];
     return this;
   }
 
-  /**
-   * Gets a list of clients.
-   *
-   * @return {Namespace} self
-   * @api public
-   */
-  clients(fn([_])) {
-    this.adapter.clients(this.rooms, fn);
-    this.rooms = [];
-    return this;
-  }
-
-  /**
-   * Sets the compress flag.
-   *
-   * @param {Boolean} if `true`, compresses the sending data
-   * @return {Socket} self
-   * @api public
-   */
-  compress(compress) {
-    this.flags = this.flags.isEmpty ? this.flags : {};
-    this.flags['compress'] = compress;
-    return this;
+  /// Sets the compress flag.
+  ///
+  /// @param {Boolean} if `true`, compresses the sending data
+  /// @api public
+  void compress(compress) {
+    flags = flags.isEmpty ? flags : {};
+    flags['compress'] = compress;
   }
 }
 

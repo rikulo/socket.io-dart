@@ -25,46 +25,44 @@ class Client {
   Decoder decoder;
   List sockets = [];
   Map nsps = {};
-  List connectBuffer = [];
-  Logger _logger = new Logger('socket_io:Client');
+  List<String> connectBuffer = [];
+  final Logger _logger = Logger('socket_io:Client');
 
-  /**
-   * Client constructor.
-   *
-   * @param {Server} server instance
-   * @param {Socket} connection
-   * @api private
-   */
-  Client(Server this.server, Socket this.conn) {
-    this.encoder = new Encoder();
-    this.decoder = new Decoder();
-    this.id = conn.id;
-    this.request = conn.connect.request;
-    this.setup();
+  /// Client constructor.
+  ///
+  /// @param {Server} server instance
+  /// @param {Socket} connection
+  /// @api private
+  Client(this.server, this.conn) {
+    encoder = Encoder();
+    decoder = Decoder();
+    id = conn.id;
+    request = conn.connect.request;
+    setup();
   }
 
-  /**
-   * Sets up event listeners.
-   *
-   * @api private
-   */
-  setup() {
-    this.decoder.on('decoded', this.ondecoded);
-    this.conn.on('data', this.ondata);
-    this.conn.on('error', this.onerror);
-    this.conn.on('close', this.onclose);
+  /// Sets up event listeners.
+  ///
+  /// @api private
+  void setup() {
+    decoder.on('decoded', ondecoded);
+    conn.on('data', ondata);
+    conn.on('error', onerror);
+    conn.on('close', onclose);
   }
 
-  /**
-   * Connects a client to a namespace.
-   *
-   * @param {String} namespace name
-   * @api private
-   */
-  connect(name, [query]) {
+  /// Connects a client to a namespace.
+  ///
+  /// @param {String} namespace name
+  /// @api private
+  void connect(String name, [query]) {
     _logger.fine('connecting to namespace $name');
     if (!this.server.nsps.containsKey(name)) {
-      this.packet(<dynamic, dynamic>{'type': ERROR, 'nsp': name, 'data': 'Invalid namespace'});
+      this.packet(<dynamic, dynamic>{
+        'type': ERROR,
+        'nsp': name,
+        'data': 'Invalid namespace'
+      });
       return;
     }
     var nsp = this.server.of(name);
@@ -227,7 +225,7 @@ class Client {
 
     // `nsps` and `sockets` are cleaned up seamlessly
     if (this.sockets.isNotEmpty) {
-      new List.from(this.sockets).forEach((socket) {
+      List.from(this.sockets).forEach((socket) {
         socket.onclose(reason);
       });
       this.sockets.clear();

@@ -2,8 +2,8 @@
 #
 # The commented part below is just for inspiration. Read the guide here:
 #   https://www.dartlang.org/guides/language/analysis-options
-
- analyzer:
+include: package:pedantic/analysis_options.yaml
+analyzer:
 #   exclude:
 #     - path/to/excluded/files/**
 # linter:
