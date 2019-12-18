@@ -1,8 +1,10 @@
 name: socket_io
 description: Dartlang port of socket.io
-version: 0.9.0+2
+version: 0.9.0+3
 author: jumperchen <jumperchen@potix.com>
 homepage: https://www.zkoss.org
+repository: https://github.com/rikulo/socket.io-dart
+issue_tracker: https://github.com/rikulo/socket.io-dart/issues
 
 environment:
   sdk: '>=2.0.0 <3.0.0'
