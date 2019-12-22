@@ -36,8 +36,11 @@ abstract class Adapter {
 }
 
 class _MemoryStoreAdapter extends EventEmitter implements Adapter {
+  @override
   Map nsps = {};
+  @override
   Map<String, _Room> rooms;
+  @override
   Map<String, Map> sids;
   Encoder encoder;
   Namespace nsp;
@@ -55,6 +58,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {Function} callback
   /// @api public
 
+  @override
   add(String id, String room, [fn([_])]) {
     sids[id] = sids[id] ?? {};
     sids[id][room] = true;
@@ -69,6 +73,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {String} room name
   /// @param {Function} callback
   /// @api public
+  @override
   del(String id, String room, [fn([_])]) {
     sids[id] = sids[id] ?? {};
     sids[id].remove(room);
@@ -85,6 +90,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {String} socket id
   /// @param {Function} callback
   /// @api public
+  @override
   delAll(String id, [fn([_])]) {
     var rooms = sids[id];
     if (rooms != null) {
@@ -109,6 +115,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   ///
   /// @param {Object} packet object
   /// @api public
+  @override
   broadcast(Map packet, [Map opts]) {
     opts = opts ?? {};
     List rooms = opts['rooms'] ?? [];
@@ -155,6 +162,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {Array} explicit set of rooms to check.
   /// @param {Function} callback
   /// @api public
+  @override
   clients(List rooms, [fn([_])]) {
     rooms = rooms ?? [];
 
@@ -193,6 +201,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {String} socket id
   /// @param {Function} callback
   /// @api public
+  @override
   clientRooms(String id, [fn(err, [_])]) {
     var rooms = sids[id];
     if (fn != null) scheduleMicrotask(() => fn(null, rooms?.keys));

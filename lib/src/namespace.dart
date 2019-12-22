@@ -165,6 +165,7 @@ class Namespace extends EventEmitter {
   ///
   /// @return {Namespace} self
   /// @api public
+  @override
   emit(ev, [dynamic arg]) {
     if (events.contains(ev)) {
       super.emit(ev, arg);

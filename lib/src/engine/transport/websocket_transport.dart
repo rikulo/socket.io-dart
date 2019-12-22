@@ -17,7 +17,9 @@ import 'package:socket_io/src/engine/transport/transports.dart';
 
 class WebSocketTransport extends Transport {
   static Logger _logger = Logger('socket_io:transport.WebSocketTransport');
+  @override
   bool get handlesUpgrades => true;
+  @override
   bool get supportsFraming => true;
   StreamSubscription subscription;
   WebSocketTransport(connect) : super(connect) {
@@ -28,6 +30,7 @@ class WebSocketTransport extends Transport {
     writable = true;
   }
 
+  @override
   void send(List<Map> packets) {
     var send = (data, Map packet) {
       _logger.fine('writing "$data"');
@@ -62,6 +65,7 @@ class WebSocketTransport extends Transport {
     }
   }
 
+  @override
   void onClose() {
     super.onClose();
 
@@ -72,6 +76,7 @@ class WebSocketTransport extends Transport {
     }
   }
 
+  @override
   void doClose([fn]) {
     connect.websocket.close();
     if (fn != null) fn();

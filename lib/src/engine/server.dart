@@ -172,6 +172,7 @@ class Server extends Engine {
   ///
   /// @api public
 
+  @override
   close() {
     _logger.fine('closing all open clients');
     for (var key in clients.keys) {

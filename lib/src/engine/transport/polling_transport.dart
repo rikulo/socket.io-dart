@@ -36,6 +36,7 @@ class PollingTransport extends Transport {
     name = 'polling';
   }
 
+  @override
   onRequest(SocketConnect connect) {
     var res = connect.response;
 
@@ -175,6 +176,7 @@ class PollingTransport extends Transport {
   ///
   /// @param {String} encoded payload
   /// @api private
+  @override
   onData(data) {
     _logger.fine('received "$data"');
     if (messageHandler != null) {
@@ -198,6 +200,7 @@ class PollingTransport extends Transport {
   /// Overrides onClose.
   ///
   /// @api private
+  @override
   onClose() {
     if (writable == true) {
       // close pending poll request
@@ -212,6 +215,7 @@ class PollingTransport extends Transport {
   ///
   /// @param {Object} packet
   /// @api private
+  @override
   send(List packets) {
     writable = false;
 
@@ -326,6 +330,7 @@ class PollingTransport extends Transport {
   /// Closes the transport.
   ///
   /// @api private
+  @override
   doClose([fn()]) {
     _logger.fine('closing');
 

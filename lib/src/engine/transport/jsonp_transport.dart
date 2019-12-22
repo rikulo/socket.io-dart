@@ -29,6 +29,7 @@ class JSONPTransport extends PollingTransport {
   /// Due to a bug in \n handling by browsers, we expect a escaped string.
   ///
   /// @api private
+  @override
   onData(data) {
     // we leverage the qs module so that we get built-in DoS protection
     // and the fast alternative to decodeURIComponent
@@ -49,6 +50,7 @@ class JSONPTransport extends PollingTransport {
   /// Performs the write.
   ///
   /// @api private
+  @override
   doWrite(data, options, [callback]) {
     // we must output valid javascript, not valid json
     // see: http://timelessrepo.com/json-isnt-a-javascript-subset

@@ -119,6 +119,7 @@ class Socket extends EventEmitter {
     return this;
   }
 
+  @override
   void emit(String event, [data]) {
     emitWithAck(event, data);
   }
