@@ -72,7 +72,7 @@ class Client {
       self.sockets.add(socket);
       self.nsps[nsp.name] = socket;
 
-      if ('/' == nsp.name && self.connectBuffer.length > 0) {
+      if ('/' == nsp.name && self.connectBuffer.isNotEmpty) {
         self.connectBuffer.forEach(self.connect);
         self.connectBuffer = [];
       }

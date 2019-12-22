@@ -396,7 +396,7 @@ class Socket extends EventEmitter {
   void flush() {
     if ('closed' != readyState &&
         transport.writable == true &&
-        writeBuffer.length > 0) {
+        writeBuffer.isNotEmpty) {
       _logger.fine('flushing buffer to transport');
       emit('flush', writeBuffer);
       server.emit('flush', [this, writeBuffer]);

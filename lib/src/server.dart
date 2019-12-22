@@ -79,7 +79,7 @@ class Server {
       origin = '*';
     }
 
-    if (!origin.isEmpty && _origins is Function) {
+    if (origin.isNotEmpty && _origins is Function) {
       return _origins(origin, fn);
     }
 
@@ -87,7 +87,7 @@ class Server {
       return fn(null, true);
     }
 
-    if (!origin.isEmpty) {
+    if (origin.isNotEmpty) {
       try {
         var parts = Uri.parse(origin);
         var defaultPort = 'https:' == parts.scheme ? 443 : 80;
