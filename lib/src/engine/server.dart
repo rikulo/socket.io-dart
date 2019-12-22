@@ -57,7 +57,7 @@ class Server extends Engine {
   Map perMessageDeflate;
   Map httpCompression;
   dynamic initialPacket;
-  Uuid _uuid =  Uuid();
+  final Uuid _uuid =  Uuid();
 
   Server([Map opts]) {
     clients = {};

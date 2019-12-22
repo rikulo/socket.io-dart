@@ -39,7 +39,7 @@ class Namespace extends EventEmitter {
   List rooms = [];
   Map flags = {};
   Adapter adapter;
-  Logger _logger = Logger('socket_io:Namespace');
+  final Logger _logger = Logger('socket_io:Namespace');
 
   /// Namespace constructor.
   ///

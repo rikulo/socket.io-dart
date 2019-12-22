@@ -26,7 +26,7 @@ class Client {
   List sockets = [];
   Map nsps = {};
   List connectBuffer = [];
-  Logger _logger = Logger('socket_io:Client');
+  final Logger _logger = Logger('socket_io:Client');
 
   /// Client constructor.
   ///

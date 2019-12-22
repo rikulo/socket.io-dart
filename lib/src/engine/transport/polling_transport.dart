@@ -50,8 +50,8 @@ class PollingTransport extends Transport {
     }
   }
 
-  Map<SocketConnect, Function> _reqCleanups = {};
-  Map<SocketConnect, Function> _reqCloses = {};
+  final Map<SocketConnect, Function> _reqCleanups = {};
+  final Map<SocketConnect, Function> _reqCloses = {};
 
   /// The client sends a request awaiting for us to send data.
   ///

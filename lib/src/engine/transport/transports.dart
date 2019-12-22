@@ -42,7 +42,7 @@ class Transports {
 }
 
 abstract class Transport extends EventEmitter {
-  static Logger _logger =  Logger('socket_io:transport.Transport');
+  static final Logger _logger =  Logger('socket_io:transport.Transport');
   double maxHttpBufferSize;
   Map httpCompression;
   Map perMessageDeflate;
