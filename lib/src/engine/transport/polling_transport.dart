@@ -150,7 +150,7 @@ class PollingTransport extends Transport {
 
       var headers = {'Content-Type': 'text/html', 'Content-Length': 2};
 
-      HttpResponse res = connect.response;
+      var res = connect.response;
 
       res.statusCode = 200;
 
@@ -245,7 +245,7 @@ class PollingTransport extends Transport {
   void write(data, [options]) {
     _logger.fine('writing "$data"');
     doWrite(data, options, () {
-      Function fn = _reqCleanups.remove(connect);
+      var fn = _reqCleanups.remove(connect);
       if (fn != null) fn();
     });
   }
@@ -261,12 +261,12 @@ class PollingTransport extends Transport {
     var contentType =
         isString ? 'text/plain; charset=UTF-8' : 'application/octet-stream';
 
-    final Map headers = {'Content-Type': contentType};
+    final headers = {'Content-Type': contentType};
 
     var respond = (data) {
       headers[HttpHeaders.contentLengthHeader] =
           data is String ? utf8.encode(data).length : data.length;
-      HttpResponse res = self.connect.response;
+      var res = self.connect.response;
       res.statusCode = 200;
 
       res.headers.clear(); // remove all default headers.
@@ -286,7 +286,7 @@ class PollingTransport extends Transport {
           connect.close();
         }
       } catch (e) {
-        Function fn = _reqCloses.remove(connect);
+        var fn = _reqCloses.remove(connect);
         if (fn != null) fn();
         rethrow;
       }

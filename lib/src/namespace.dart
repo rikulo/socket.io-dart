@@ -173,9 +173,9 @@ class Namespace extends EventEmitter {
       // @todo check how to handle it with Dart
       // if (hasBin(args)) { parserType = ParserType.binaryEvent; } // binary
 
-      List data = arg == null ? [ev] : [ev, arg];
+      var data = arg == null ? [ev] : [ev, arg];
 
-      Map packet = {'type': EVENT, 'data': data};
+      var packet = {'type': EVENT, 'data': data};
 
       adapter
           .broadcast(packet, {'rooms': rooms, 'flags': flags});

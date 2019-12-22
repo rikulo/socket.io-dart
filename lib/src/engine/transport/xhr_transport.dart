@@ -23,10 +23,10 @@ class XHRTransport extends PollingTransport {
   /// @api private
   @override
   void onRequest(SocketConnect connect) {
-    HttpRequest req = connect.request;
+    var req = connect.request;
     if ('OPTIONS' == req.method) {
       var res = req.response;
-      Map headers = this.headers(connect);
+      var headers = this.headers(connect);
       headers['Access-Control-Allow-Headers'] = 'Content-Type';
       headers.forEach((key, value) {
         res.headers.set(key, value);

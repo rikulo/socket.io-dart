@@ -70,7 +70,7 @@ class Server {
   /// @param {http.IncomingMessage} request
   /// @param {Function} callback to be called with the result: `fn(err, success)`
   void checkRequest(HttpRequest req, [Function fn]) {
-    String origin = req.headers.value('origin') != null
+    var origin = req.headers.value('origin') != null
         ? req.headers.value('origin')
         : req.headers.value('referer');
 
@@ -89,10 +89,10 @@ class Server {
 
     if (!origin.isEmpty) {
       try {
-        Uri parts = Uri.parse(origin);
-        int defaultPort = 'https:' == parts.scheme ? 443 : 80;
-        int port = parts.port != null ? parts.port : defaultPort;
-        bool ok =
+        var parts = Uri.parse(origin);
+        var defaultPort = 'https:' == parts.scheme ? 443 : 80;
+        var port = parts.port != null ? parts.port : defaultPort;
+        var ok =
             _origins.indexOf(parts.host + ':' + port.toString()) >= 0 ||
                 _origins.indexOf(parts.host + ':*') >= 0 ||
                 _origins.indexOf('*:' + port.toString()) >= 0;
@@ -207,7 +207,7 @@ class Server {
   /// @api public
   Server attach(srv, [Map opts]) {
     if (srv is Function) {
-      String msg = 'You are trying to attach socket.io to an express ' +
+      var msg = 'You are trying to attach socket.io to an express ' +
           'request handler function. Please pass a http.Server instance.';
       throw Exception(msg);
     }
@@ -229,7 +229,7 @@ class Server {
     if (srv is num) {
       _logger.fine('creating http server and binding to $srv');
       int port = srv;
-      StreamServer server = StreamServer();
+      var server = StreamServer();
       server.start(port: port);
 //      HttpServer.bind(InternetAddress.ANY_IP_V4, port).then((
 //          HttpServer server) {
@@ -354,7 +354,7 @@ class Server {
   /// @api public
   Server onconnection(conn) {
     _logger.fine('incoming connection with id ${conn.id}');
-    Client client = Client(this, conn);
+    var client = Client(this, conn);
     client.connect('/');
     return this;
   }
@@ -372,7 +372,7 @@ class Server {
 
     if (!nsps.containsKey(name)) {
       _logger.fine('initializing namespace $name');
-      Namespace nsp = Namespace(this, name);
+      var nsp = Namespace(this, name);
       nsps[name] = nsp;
     }
     if (fn != null) nsps[name].on('connect', fn);

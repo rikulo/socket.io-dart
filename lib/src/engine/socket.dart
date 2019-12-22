@@ -182,7 +182,7 @@ class Socket extends EventEmitter {
         'might upgrade socket transport from ${this.transport.name} to ${transport.name}');
 
     upgrading = true;
-    Map<String, Function> cleanupFn = {};
+    var cleanupFn = {};
     // set transport upgrade timer
     upgradeTimeoutTimer =
         Timer(Duration(milliseconds: server.upgradeTimeout), () {

@@ -138,7 +138,7 @@ class Socket extends EventEmitter {
       super.emit(event, data);
     } else {
       var packet = {};
-      List sendData = data == null ? [event] : [event, data];
+      var sendData = data == null ? [event] : [event, data];
 
       var flags = this.flags ?? {};
 
