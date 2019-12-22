@@ -67,7 +67,7 @@ class JSONPTransport extends PollingTransport {
 
   static Map parse(String query) {
     var search = RegExp('([^&=]+)=?([^&]*)');
-    var result = Map();
+    var result = {};
 
     // Get rid off the beginning ? in query strings.
     if (query.startsWith('?')) query = query.substring(1);

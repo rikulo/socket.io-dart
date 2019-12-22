@@ -47,7 +47,7 @@ class EventEmitter {
 
   /// This function binds the [handler] as a listener to the [event]
   void on(String event, EventHandler handler) {
-    _events.putIfAbsent(event, () => List<EventHandler>());
+    _events.putIfAbsent(event, () => <EventHandler>[]);
     _events[event].add(handler);
   }
 
@@ -55,7 +55,7 @@ class EventEmitter {
   /// occurrence of the [event]. When [handler] is called once,
   /// it is removed.
   void once(String event, EventHandler handler) {
-    _eventsOnce.putIfAbsent(event, () => List<EventHandler>());
+    _eventsOnce.putIfAbsent(event, () => <EventHandler>[]);
     _eventsOnce[event].add(handler);
   }
 
