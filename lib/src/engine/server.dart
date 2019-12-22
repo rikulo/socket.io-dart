@@ -20,12 +20,10 @@ import 'package:socket_io/src/engine/transport/transports.dart';
 import 'package:stream/stream.dart';
 import 'package:uuid/uuid.dart';
 
-/**
- * Server constructor.
- *
- * @param {Object} options
- * @api public
- */
+/// Server constructor.
+///
+/// @param {Object} options
+/// @api public
 class ServerErrors {
   static const int UNKNOWN_TRANSPORT = 0;
   static const int UNKNOWN_SID = 1;
@@ -99,11 +97,9 @@ class Server extends Engine {
     _init();
   }
 
-  /**
-   * Initialize websocket server
-   *
-   * @api private
-   */
+  /// Initialize websocket server
+  ///
+  /// @api private
 
   _init() {
 //  if (this.transports.indexOf('websocket') == -1) return;
@@ -126,25 +122,21 @@ class Server extends Engine {
 //  });
   }
 
-  /**
-   * Returns a list of available transports for upgrade given a certain transport.
-   *
-   * @return {Array}
-   * @api public
-   */
+  /// Returns a list of available transports for upgrade given a certain transport.
+  ///
+  /// @return {Array}
+  /// @api public
 
   List<String> upgrades(transport) {
     if (!allowUpgrades) return null;
     return Transports.upgradesTo(transport);
   }
 
-  /**
-   * Verifies a request.
-   *
-   * @param {http.IncomingMessage}
-   * @return {Boolean} whether the request is valid
-   * @api private
-   */
+  /// Verifies a request.
+  ///
+  /// @param {http.IncomingMessage}
+  /// @return {Boolean} whether the request is valid
+  /// @api private
 
   verify(SocketConnect connect, bool upgrade, fn) {
     // transport check
@@ -176,11 +168,9 @@ class Server extends Engine {
     fn(null, true);
   }
 
-  /**
-   * Closes all clients.
-   *
-   * @api public
-   */
+  /// Closes all clients.
+  ///
+  /// @api public
 
   close() {
     _logger.fine('closing all open clients');
@@ -196,13 +186,11 @@ class Server extends Engine {
 //  }
   }
 
-  /**
-   * Handles an Engine.IO HTTP request.
-   *
-   * @param {http.IncomingMessage} request
-   * @param {http.ServerResponse|http.OutgoingMessage} response
-   * @api public
-   */
+  /// Handles an Engine.IO HTTP request.
+  ///
+  /// @param {http.IncomingMessage} request
+  /// @param {http.ServerResponse|http.OutgoingMessage} response
+  /// @api public
 
   handleRequest(SocketConnect connect) {
     var req = connect.request;
@@ -227,13 +215,11 @@ class Server extends Engine {
     });
   }
 
-  /**
-   * Sends an Engine.IO Error Message
-   *
-   * @param {http.ServerResponse} response
-   * @param {code} error code
-   * @api private
-   */
+  /// Sends an Engine.IO Error Message
+  ///
+  /// @param {http.ServerResponse} response
+  /// @param {code} error code
+  /// @api private
 
   static sendErrorMessage(HttpRequest req, code) {
     var res = req.response;
@@ -259,24 +245,20 @@ class Server extends Engine {
         json.encode({'code': code, 'message': ServerErrorMessages[code]}));
   }
 
-  /**
-   * generate a socket id.
-   * Overwrite this method to generate your custom socket id
-   *
-   * @param {Object} request object
-   * @api public
-   */
+  /// generate a socket id.
+  /// Overwrite this method to generate your custom socket id
+  ///
+  /// @param {Object} request object
+  /// @api public
   generateId(SocketConnect connect) {
     return _uuid.v1().replaceAll('-', '');
   }
 
-  /**
-   * Handshakes a new client.
-   *
-   * @param {String} transport name
-   * @param {Object} request object
-   * @api private
-   */
+  /// Handshakes a new client.
+  ///
+  /// @param {String} transport name
+  /// @param {Object} request object
+  /// @api private
   handshake(String transportName, SocketConnect connect) {
     var id = generateId(connect);
 
@@ -328,11 +310,9 @@ class Server extends Engine {
     emit('connection', socket);
   }
 
-  /**
-   * Handles an Engine.IO HTTP Upgrade.
-   *
-   * @api public
-   */
+  /// Handles an Engine.IO HTTP Upgrade.
+  ///
+  /// @api public
   handleUpgrade(SocketConnect connect) {
 //  this.prepare(req);
 
@@ -353,12 +333,10 @@ class Server extends Engine {
     });
   }
 
-  /**
-   * Called upon a ws.io connection.
-   *
-   * @param {ws.Socket} websocket
-   * @api private
-   */
+  /// Called upon a ws.io connection.
+  ///
+  /// @param {ws.Socket} websocket
+  /// @api private
 
   onWebSocket(SocketConnect connect) {
 //    socket.listen((_) {},
@@ -408,13 +386,11 @@ class Server extends Engine {
     }
   }
 
-  /**
-   * Captures upgrade requests for a http.Server.
-   *
-   * @param {http.Server} server
-   * @param {Object} options
-   * @api public
-   */
+  /// Captures upgrade requests for a http.Server.
+  ///
+  /// @param {http.Server} server
+  /// @param {Object} options
+  /// @api public
   attachTo(StreamServer server, Map options) {
     options = options ?? {};
     var path =
@@ -445,13 +421,11 @@ class Server extends Engine {
     }, preceding: true);
   }
 
-  /**
-   * Closes the connection
-   *
-   * @param {net.Socket} socket
-   * @param {code} error code
-   * @api private
-   */
+  /// Closes the connection
+  ///
+  /// @param {net.Socket} socket
+  /// @param {code} error code
+  /// @api private
 
   static abortConnection(SocketConnect connect, code) {
     var socket = connect.websocket;

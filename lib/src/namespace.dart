@@ -19,18 +19,14 @@ import 'package:socket_io/src/server.dart';
 import 'package:socket_io/src/socket.dart';
 import 'package:socket_io/src/util/event_emitter.dart';
 
-/**
- * Blacklisted events.
- */
+/// Blacklisted events.
 
 List<String> events = [
   'connect', // for symmetry with client
   'connection', 'newListener'
 ];
 
-/**
- * Flags.
- */
+/// Flags.
 List<String> flags = ['json', 'volatile'];
 
 class Namespace extends EventEmitter {
@@ -45,46 +41,38 @@ class Namespace extends EventEmitter {
   Adapter adapter;
   Logger _logger = Logger('socket_io:Namespace');
 
-  /**
-   * Namespace constructor.
-   *
-   * @param {Server} server instance
-   * @param {Socket} name
-   * @api private
-   */
+  /// Namespace constructor.
+  ///
+  /// @param {Server} server instance
+  /// @param {Socket} name
+  /// @api private
   Namespace(Server this.server, String this.name) {
     initAdapter();
   }
 
-  /**
-   * Initializes the `Adapter` for this nsp.
-   * Run upon changing adapter by `Server#adapter`
-   * in addition to the constructor.
-   *
-   * @api private
-   */
+  /// Initializes the `Adapter` for this nsp.
+  /// Run upon changing adapter by `Server#adapter`
+  /// in addition to the constructor.
+  ///
+  /// @api private
   initAdapter() {
     adapter = Adapter.newInstance(server.adapter, this);
   }
 
-  /**
-   * Sets up namespace middleware.
-   *
-   * @return {Namespace} self
-   * @api public
-   */
+  /// Sets up namespace middleware.
+  ///
+  /// @return {Namespace} self
+  /// @api public
   use(fn) {
     fns.add(fn);
     return this;
   }
 
-  /**
-   * Executes the middleware for an incoming client.
-   *
-   * @param {Socket} socket that will get added
-   * @param {Function} last fn call in the middleware
-   * @api private
-   */
+  /// Executes the middleware for an incoming client.
+  ///
+  /// @param {Socket} socket that will get added
+  /// @param {Function} last fn call in the middleware
+  /// @api private
   run(socket, fn) {
     var fns = this.fns.sublist(0);
     if (fns.isEmpty) return fn(null);
@@ -116,25 +104,21 @@ class Namespace extends EventEmitter {
 //        to(name);
 //    }
 
-  /**
-   * Targets a room when emitting.
-   *
-   * @param {String} name
-   * @return {Namespace} self
-   * @api public
-   */
+  /// Targets a room when emitting.
+  ///
+  /// @param {String} name
+  /// @return {Namespace} self
+  /// @api public
   to(String name) {
     rooms = rooms?.isNotEmpty == true ? rooms : [];
     if (!rooms.contains(name)) rooms.add(name);
     return this;
   }
 
-  /**
-   * Adds a new client.
-   *
-   * @return {Socket}
-   * @api private
-   */
+  /// Adds a new client.
+  ///
+  /// @return {Socket}
+  /// @api private
   add(Client client, query, fn) {
     _logger.fine('adding socket to nsp ${name}');
     var socket = Socket(this, client, query);
@@ -166,11 +150,9 @@ class Namespace extends EventEmitter {
     return socket;
   }
 
-  /**
-   * Removes a client. Called by each `Socket`.
-   *
-   * @api private
-   */
+  /// Removes a client. Called by each `Socket`.
+  ///
+  /// @api private
   remove(socket) {
     if (sockets.contains(socket)) {
       sockets.remove(socket);
@@ -179,12 +161,10 @@ class Namespace extends EventEmitter {
     }
   }
 
-  /**
-   * Emits to all clients.
-   *
-   * @return {Namespace} self
-   * @api public
-   */
+  /// Emits to all clients.
+  ///
+  /// @return {Namespace} self
+  /// @api public
   emit(ev, [dynamic arg]) {
     if (events.contains(ev)) {
       super.emit(ev, arg);
@@ -204,12 +184,10 @@ class Namespace extends EventEmitter {
     }
   }
 
-  /**
-   * Sends a `message` event to all clients.
-   *
-   * @return {Namespace} self
-   * @api public
-   */
+  /// Sends a `message` event to all clients.
+  ///
+  /// @return {Namespace} self
+  /// @api public
   send([args]) {
     write(args);
   }
@@ -219,25 +197,21 @@ class Namespace extends EventEmitter {
     return this;
   }
 
-  /**
-   * Gets a list of clients.
-   *
-   * @return {Namespace} self
-   * @api public
-   */
+  /// Gets a list of clients.
+  ///
+  /// @return {Namespace} self
+  /// @api public
   clients(fn([_])) {
     adapter.clients(rooms, fn);
     rooms = [];
     return this;
   }
 
-  /**
-   * Sets the compress flag.
-   *
-   * @param {Boolean} if `true`, compresses the sending data
-   * @return {Socket} self
-   * @api public
-   */
+  /// Sets the compress flag.
+  ///
+  /// @param {Boolean} if `true`, compresses the sending data
+  /// @return {Socket} self
+  /// @api public
   compress(compress) {
     flags = flags.isEmpty ? flags : {};
     flags['compress'] = compress;

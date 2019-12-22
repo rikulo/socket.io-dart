@@ -23,11 +23,9 @@ import 'package:socket_io/src/util/event_emitter.dart';
 //
 //module.exports = exports = Socket;
 
-/**
- * Blacklisted events.
- *
- * @api public
- */
+/// Blacklisted events.
+///
+/// @api public
 
 List events = [
   'error',
@@ -37,11 +35,9 @@ List events = [
   'removeListener'
 ];
 
-/**
- * Flags.
- *
- * @api private
- */
+/// Flags.
+///
+/// @api private
 List flags = ['json', 'volatile', 'broadcast'];
 
 const List EVENTS = const [
@@ -82,11 +78,9 @@ class Socket extends EventEmitter {
     handshake = buildHandshake(query);
   }
 
-  /**
-   * Builds the `handshake` BC object
-   *
-   * @api private
-   */
+  /// Builds the `handshake` BC object
+  ///
+  /// @api private
   buildHandshake(query) {
     final buildQuery = () {
       var requestQuery = request.uri.queryParameters;
@@ -133,12 +127,10 @@ class Socket extends EventEmitter {
     emitWithAck(event, data, binary: true);
   }
 
-  /**
-   * Emits to this client.
-   *
-   * @return {Socket} self
-   * @api public
-   */
+  /// Emits to this client.
+  ///
+  /// @return {Socket} self
+  /// @api public
   void emitWithAck(String event, dynamic data,
       {Function ack, bool binary = false}) {
     if (EVENTS.contains(event)) {
@@ -182,24 +174,20 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Targets a room when broadcasting.
-   *
-   * @param {String} name
-   * @return {Socket} self
-   * @api public
-   */
+  /// Targets a room when broadcasting.
+  ///
+  /// @param {String} name
+  /// @return {Socket} self
+  /// @api public
   to(String name) {
     if (!roomList.contains(name)) roomList.add(name);
     return this;
   }
 
-  /**
-   * Sends a `message` event.
-   *
-   * @return {Socket} self
-   * @api public
-   */
+  /// Sends a `message` event.
+  ///
+  /// @return {Socket} self
+  /// @api public
   send(_) {
     write(_);
   }
@@ -209,13 +197,11 @@ class Socket extends EventEmitter {
     return this;
   }
 
-  /**
-   * Writes a packet.
-   *
-   * @param {Object} packet object
-   * @param {Object} options
-   * @api private
-   */
+  /// Writes a packet.
+  ///
+  /// @param {Object} packet object
+  /// @param {Object} options
+  /// @api private
   packet(packet, [opts]) {
     // ignore preEncoded = true.
     if (packet is Map) {
@@ -226,14 +212,12 @@ class Socket extends EventEmitter {
     client.packet(packet, opts);
   }
 
-  /**
-   * Joins a room.
-   *
-   * @param {String} room
-   * @param {Function} optional, callback
-   * @return {Socket} self
-   * @api private
-   */
+  /// Joins a room.
+  ///
+  /// @param {String} room
+  /// @param {Function} optional, callback
+  /// @return {Socket} self
+  /// @api private
   join(room, [fn]) {
 //    debug('joining room %s', room);
     if (roomMap.containsKey(room)) {
@@ -249,14 +233,12 @@ class Socket extends EventEmitter {
     return this;
   }
 
-  /**
-   * Leaves a room.
-   *
-   * @param {String} room
-   * @param {Function} optional, callback
-   * @return {Socket} self
-   * @api private
-   */
+  /// Leaves a room.
+  ///
+  /// @param {String} room
+  /// @param {Function} optional, callback
+  /// @return {Socket} self
+  /// @api private
   leave(room, fn) {
 //    debug('leave room %s', room);
     adapter.del(id, room, ([err]) {
@@ -268,23 +250,19 @@ class Socket extends EventEmitter {
     return this;
   }
 
-  /**
-   * Leave all rooms.
-   *
-   * @api private
-   */
+  /// Leave all rooms.
+  ///
+  /// @api private
 
   leaveAll() {
     adapter.delAll(id);
     roomMap = {};
   }
 
-  /**
-   * Called by `Namespace` upon succesful
-   * middleware execution (ie: authorization).
-   *
-   * @api private
-   */
+  /// Called by `Namespace` upon succesful
+  /// middleware execution (ie: authorization).
+  ///
+  /// @api private
 
   onconnect() {
 //    debug('socket connected - writing packet');
@@ -293,12 +271,10 @@ class Socket extends EventEmitter {
     packet(<dynamic, dynamic>{'type': CONNECT});
   }
 
-  /**
-   * Called with each packet. Called by `Client`.
-   *
-   * @param {Object} packet
-   * @api private
-   */
+  /// Called with each packet. Called by `Client`.
+  ///
+  /// @param {Object} packet
+  /// @api private
 
   onpacket(packet) {
 //    debug('got packet %j', packet);
@@ -328,12 +304,10 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Called upon event packet.
-   *
-   * @param {Object} packet object
-   * @api private
-   */
+  /// Called upon event packet.
+  ///
+  /// @param {Object} packet object
+  /// @api private
   onevent(packet) {
     List args = packet['data'] ?? [];
 //    debug('emitting event %j', args);
@@ -351,12 +325,10 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Produces an ack callback to emit with an event.
-   *
-   * @param {Number} packet id
-   * @api private
-   */
+  /// Produces an ack callback to emit with an event.
+  ///
+  /// @param {Number} packet id
+  /// @api private
   Function ack(id) {
     var sent = false;
     return (_) {
@@ -375,11 +347,9 @@ class Socket extends EventEmitter {
     };
   }
 
-  /**
-   * Called upon ack packet.
-   *
-   * @api private
-   */
+  /// Called upon ack packet.
+  ///
+  /// @api private
   onack(packet) {
     Function ack = acks.remove(packet['id']);
     if (ack is Function) {
@@ -390,21 +360,17 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Called upon client disconnect packet.
-   *
-   * @api private
-   */
+  /// Called upon client disconnect packet.
+  ///
+  /// @api private
   ondisconnect() {
 //    debug('got disconnect packet');
     onclose('client namespace disconnect');
   }
 
-  /**
-   * Handles a client error.
-   *
-   * @api private
-   */
+  /// Handles a client error.
+  ///
+  /// @api private
   onerror(err) {
     if (hasListeners('error')) {
       emit('error', err);
@@ -414,13 +380,11 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Called upon closing. Called by `Client`.
-   *
-   * @param {String} reason
-   * @param {Error} optional error object
-   * @api private
-   */
+  /// Called upon closing. Called by `Client`.
+  ///
+  /// @param {String} reason
+  /// @param {Error} optional error object
+  /// @api private
   onclose([reason]) {
     if (!connected) return this;
 //    debug('closing socket - reason %s', reason);
@@ -434,23 +398,19 @@ class Socket extends EventEmitter {
     emit('disconnect', reason);
   }
 
-  /**
-   * Produces an `error` packet.
-   *
-   * @param {Object} error object
-   * @api private
-   */
+  /// Produces an `error` packet.
+  ///
+  /// @param {Object} error object
+  /// @api private
   error(err) {
     packet(<dynamic, dynamic>{'type': ERROR, 'data': err});
   }
 
-  /**
-   * Disconnects this client.
-   *
-   * @param {Boolean} if `true`, closes the underlying connection
-   * @return {Socket} self
-   * @api public
-   */
+  /// Disconnects this client.
+  ///
+  /// @param {Boolean} if `true`, closes the underlying connection
+  /// @return {Socket} self
+  /// @api public
 
   disconnect([close]) {
     if (!connected) return this;
@@ -463,13 +423,11 @@ class Socket extends EventEmitter {
     return this;
   }
 
-  /**
-   * Sets the compress flag.
-   *
-   * @param {Boolean} if `true`, compresses the sending data
-   * @return {Socket} self
-   * @api public
-   */
+  /// Sets the compress flag.
+  ///
+  /// @param {Boolean} if `true`, compresses the sending data
+  /// @return {Socket} self
+  /// @api public
   compress(compress) {
     flags = flags ?? {};
     flags['compress'] = compress;

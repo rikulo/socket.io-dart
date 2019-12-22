@@ -28,13 +28,11 @@ class Client {
   List connectBuffer = [];
   Logger _logger = Logger('socket_io:Client');
 
-  /**
-   * Client constructor.
-   *
-   * @param {Server} server instance
-   * @param {Socket} connection
-   * @api private
-   */
+  /// Client constructor.
+  ///
+  /// @param {Server} server instance
+  /// @param {Socket} connection
+  /// @api private
   Client(Server this.server, Socket this.conn) {
     encoder = Encoder();
     decoder = Decoder();
@@ -43,11 +41,9 @@ class Client {
     setup();
   }
 
-  /**
-   * Sets up event listeners.
-   *
-   * @api private
-   */
+  /// Sets up event listeners.
+  ///
+  /// @api private
   setup() {
     decoder.on('decoded', ondecoded);
     conn.on('data', ondata);
@@ -55,12 +51,10 @@ class Client {
     conn.on('close', onclose);
   }
 
-  /**
-   * Connects a client to a namespace.
-   *
-   * @param {String} namespace name
-   * @api private
-   */
+  /// Connects a client to a namespace.
+  ///
+  /// @param {String} namespace name
+  /// @api private
   connect(name, [query]) {
     _logger.fine('connecting to namespace $name');
     if (!server.nsps.containsKey(name)) {
@@ -85,11 +79,9 @@ class Client {
     });
   }
 
-  /**
-   * Disconnects from all namespaces and closes transport.
-   *
-   * @api private
-   */
+  /// Disconnects from all namespaces and closes transport.
+  ///
+  /// @api private
   disconnect() {
     // we don't use a for loop because the length of
     // `sockets` changes upon each iteration
@@ -101,11 +93,9 @@ class Client {
     close();
   }
 
-  /**
-   * Removes a socket. Called by each `Socket`.
-   *
-   * @api private
-   */
+  /// Removes a socket. Called by each `Socket`.
+  ///
+  /// @api private
   remove(socket) {
     var i = sockets.indexOf(socket);
     if (i >= 0) {
@@ -117,11 +107,9 @@ class Client {
     }
   }
 
-  /**
-   * Closes the underlying connection.
-   *
-   * @api private
-   */
+  /// Closes the underlying connection.
+  ///
+  /// @api private
   close() {
     if ('open' == conn.readyState) {
       _logger.fine('forcing transport close');
@@ -130,13 +118,11 @@ class Client {
     }
   }
 
-  /**
-   * Writes a packet to the transport.
-   *
-   * @param {Object} packet object
-   * @param {Object} options
-   * @api private
-   */
+  /// Writes a packet to the transport.
+  ///
+  /// @param {Object} packet object
+  /// @param {Object} options
+  /// @api private
   packet(packet, [Map opts]) {
     var self = this;
     opts = opts ?? {};
@@ -165,11 +151,9 @@ class Client {
     }
   }
 
-  /**
-   * Called with incoming transport data.
-   *
-   * @api private
-   */
+  /// Called with incoming transport data.
+  ///
+  /// @api private
   ondata(data) {
     // try/catch is needed for protocol violations (GH-1880)
     try {
@@ -180,11 +164,9 @@ class Client {
     }
   }
 
-  /**
-   * Called when parser fully decodes a packet.
-   *
-   * @api private
-   */
+  /// Called when parser fully decodes a packet.
+  ///
+  /// @api private
   ondecoded(packet) {
     if (CONNECT == packet['type']) {
       final nsp = packet['nsp'];
@@ -200,12 +182,10 @@ class Client {
     }
   }
 
-  /**
-   * Handles an error.
-   *
-   * @param {Objcet} error object
-   * @api private
-   */
+  /// Handles an error.
+  ///
+  /// @param {Objcet} error object
+  /// @api private
   onerror(err) {
     sockets.forEach((socket) {
       socket.onerror(err);
@@ -213,12 +193,10 @@ class Client {
     onclose('client error');
   }
 
-  /**
-   * Called upon transport close.
-   *
-   * @param {String} reason
-   * @api private
-   */
+  /// Called upon transport close.
+  ///
+  /// @param {String} reason
+  /// @api private
   onclose(reason) {
     _logger.fine('client close with reason $reason');
 
@@ -235,11 +213,9 @@ class Client {
     decoder.destroy(); // clean up decoder
   }
 
-  /**
-   * Cleans up event listeners.
-   *
-   * @api private
-   */
+  /// Cleans up event listeners.
+  ///
+  /// @api private
   destroy() {
     conn.off('data', ondata);
     conn.off('error', onerror);

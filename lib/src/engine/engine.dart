@@ -22,12 +22,10 @@ class Engine extends EventEmitter {
 
   dynamic operator [](Object key) {}
 
-  /**
-   * Associates the [key] with the given [value].
-   *
-   * If the key was already in the map, its associated value is changed.
-   * Otherwise the key-value pair is added to the map.
-   */
+  /// Associates the [key] with the given [value].
+  ///
+  /// If the key was already in the map, its associated value is changed.
+  /// Otherwise the key-value pair is added to the map.
   void operator []=(String key, dynamic value) {}
 //  init() {}
 //  upgrades() {}

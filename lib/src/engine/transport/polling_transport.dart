@@ -52,11 +52,9 @@ class PollingTransport extends Transport {
   Map<SocketConnect, Function> _reqCleanups = {};
   Map<SocketConnect, Function> _reqCloses = {};
 
-  /**
-   * The client sends a request awaiting for us to send data.
-   *
-   * @api private
-   */
+  /// The client sends a request awaiting for us to send data.
+  ///
+  /// @api private
   onPollRequest(SocketConnect connect) {
     if (this.connect != null) {
       _logger.fine('request overlap');
@@ -95,11 +93,9 @@ class PollingTransport extends Transport {
     }
   }
 
-  /**
-   * The client sends a request with data.
-   *
-   * @api private
-   */
+  /// The client sends a request with data.
+  ///
+  /// @api private
   onDataRequest(SocketConnect connect) {
     if (dataReq != null) {
       // assert: this.dataRes, '.dataReq and .dataRes should be (un)set together'
@@ -175,12 +171,10 @@ class PollingTransport extends Transport {
     }
   }
 
-  /**
-   * Processes the incoming data payload.
-   *
-   * @param {String} encoded payload
-   * @api private
-   */
+  /// Processes the incoming data payload.
+  ///
+  /// @param {String} encoded payload
+  /// @api private
   onData(data) {
     _logger.fine('received "$data"');
     if (messageHandler != null) {
@@ -201,11 +195,9 @@ class PollingTransport extends Transport {
     }
   }
 
-  /**
-   * Overrides onClose.
-   *
-   * @api private
-   */
+  /// Overrides onClose.
+  ///
+  /// @api private
   onClose() {
     if (writable == true) {
       // close pending poll request
@@ -216,12 +208,10 @@ class PollingTransport extends Transport {
     super.onClose();
   }
 
-  /**
-   * Writes a packet payload.
-   *
-   * @param {Object} packet
-   * @api private
-   */
+  /// Writes a packet payload.
+  ///
+  /// @param {Object} packet
+  /// @api private
   send(List packets) {
     writable = false;
 
@@ -243,13 +233,11 @@ class PollingTransport extends Transport {
     });
   }
 
-  /**
-   * Writes data as response to poll request.
-   *
-   * @param {String} data
-   * @param {Object} options
-   * @api private
-   */
+  /// Writes data as response to poll request.
+  ///
+  /// @param {String} data
+  /// @param {Object} options
+  /// @api private
   write(data, [options]) {
     _logger.fine('writing "$data"');
     doWrite(data, options, () {
@@ -258,11 +246,9 @@ class PollingTransport extends Transport {
     });
   }
 
-  /**
-   * Performs the write.
-   *
-   * @api private
-   */
+  /// Performs the write.
+  ///
+  /// @api private
   doWrite(data, options, [callback]) {
     var self = this;
 
@@ -337,11 +323,9 @@ class PollingTransport extends Transport {
 //    });
   }
 
-  /**
-   * Closes the transport.
-   *
-   * @api private
-   */
+  /// Closes the transport.
+  ///
+  /// @api private
   doClose([fn()]) {
     _logger.fine('closing');
 
@@ -375,13 +359,11 @@ class PollingTransport extends Transport {
     }
   }
 
-  /**
-   * Returns headers for a response.
-   *
-   * @param {http.IncomingMessage} request
-   * @param {Object} extra headers
-   * @api private
-   */
+  /// Returns headers for a response.
+  ///
+  /// @param {http.IncomingMessage} request
+  /// @param {Object} extra headers
+  /// @api private
   headers(SocketConnect connect, [Map headers]) {
     headers = headers ?? {};
 

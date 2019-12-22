@@ -21,9 +21,7 @@ import 'package:stream/stream.dart';
 /**
  * Socket.IO client source.
  */
-/**
- * Old settings for backwards compatibility
- */
+/// Old settings for backwards compatibility
 Map oldSettings = {
   "transports": "transports",
   "heartbeat timeout": "pingTimeout",
@@ -45,13 +43,11 @@ class Server {
   Engine engine;
   Encoder encoder;
 
-  /**
-   * Server constructor.
-   *
-   * @param {http.Server|Number|Object} http server, port or options
-   * @param {Object} options
-   * @api public
-   */
+  /// Server constructor.
+  ///
+  /// @param {http.Server|Number|Object} http server, port or options
+  /// @param {Object} options
+  /// @api public
   Server({server: null, Map options}) {
     options = options ?? {};
     nsps = {};
@@ -67,12 +63,10 @@ class Server {
     }
   }
 
-  /**
-   * Server request verification function, that checks for allowed origins
-   *
-   * @param {http.IncomingMessage} request
-   * @param {Function} callback to be called with the result: `fn(err, success)`
-   */
+  /// Server request verification function, that checks for allowed origins
+  ///
+  /// @param {http.IncomingMessage} request
+  /// @param {Function} callback to be called with the result: `fn(err, success)`
   checkRequest(HttpRequest req, [Function fn]) {
     String origin = req.headers.value('origin') != null
         ? req.headers.value('origin')
@@ -108,13 +102,11 @@ class Server {
     fn(null, false);
   }
 
-  /**
-   * Sets/gets whether client code is being served.
-   *
-   * @param {Boolean} whether to serve client code
-   * @return {Server|Boolean} self when setting or value when getting
-   * @api public
-   */
+  /// Sets/gets whether client code is being served.
+  ///
+  /// @param {Boolean} whether to serve client code
+  /// @return {Server|Boolean} self when setting or value when getting
+  /// @api public
   serveClient([bool v]) {
     if (v == null) {
       return _serveClient;
@@ -124,11 +116,9 @@ class Server {
     return this;
   }
 
-  /**
-   * Backwards compatiblity.
-   *
-   * @api public
-   */
+  /// Backwards compatiblity.
+  ///
+  /// @api public
   set(String key, [val]) {
     if ('authorization' == key && val != null) {
       use((socket, next) {
@@ -157,26 +147,22 @@ class Server {
     return this;
   }
 
-  /**
-   * Sets the client serving path.
-   *
-   * @param {String} pathname
-   * @return {Server|String} self when setting or value when getting
-   * @api public
-   */
+  /// Sets the client serving path.
+  ///
+  /// @param {String} pathname
+  /// @return {Server|String} self when setting or value when getting
+  /// @api public
   path([String v]) {
     if (v == null || v.isEmpty) return _path;
     _path = v.replaceFirst(RegExp(r'/\/$/'), '');
     return this;
   }
 
-  /**
-   * Sets the adapter for rooms.
-   *
-   * @param {Adapter} pathname
-   * @return {Server|Adapter} self when setting or value when getting
-   * @api public
-   */
+  /// Sets the adapter for rooms.
+  ///
+  /// @param {Adapter} pathname
+  /// @return {Server|Adapter} self when setting or value when getting
+  /// @api public
   String get adapter => _adapter;
 
   void set adapter(String v) {
@@ -188,13 +174,11 @@ class Server {
     }
   }
 
-  /**
-   * Sets the allowed origins for requests.
-   *
-   * @param {String} origins
-   * @return {Server|Adapter} self when setting or value when getting
-   * @api public
-   */
+  /// Sets the allowed origins for requests.
+  ///
+  /// @param {String} origins
+  /// @return {Server|Adapter} self when setting or value when getting
+  /// @api public
 
   origins([String v]) {
     if (v == null || v.isEmpty) return _origins;
@@ -203,26 +187,22 @@ class Server {
     return this;
   }
 
-  /**
-   * Attaches socket.io to a server or port.
-   *
-   * @param {http.Server|Number} server or port
-   * @param {Object} options passed to engine.io
-   * @return {Server} self
-   * @api public
-   */
+  /// Attaches socket.io to a server or port.
+  ///
+  /// @param {http.Server|Number} server or port
+  /// @param {Object} options passed to engine.io
+  /// @return {Server} self
+  /// @api public
   listen(srv, [Map opts]) {
     attach(srv, opts);
   }
 
-  /**
-   * Attaches socket.io to a server or port.
-   *
-   * @param {http.Server|Number} server or port
-   * @param {Object} options passed to engine.io
-   * @return {Server} self
-   * @api public
-   */
+  /// Attaches socket.io to a server or port.
+  ///
+  /// @param {http.Server|Number} server or port
+  /// @param {Object} options passed to engine.io
+  /// @return {Server} self
+  /// @api public
   attach(srv, [Map opts]) {
     if (srv is Function) {
       String msg = 'You are trying to attach socket.io to an express ' +
@@ -354,26 +334,22 @@ class Server {
 //        res.end(clientSource);
 //    }
 
-  /**
-   * Binds socket.io to an engine.io instance.
-   *
-   * @param {engine.Server} engine.io (or compatible) server
-   * @return {Server} self
-   * @api public
-   */
+  /// Binds socket.io to an engine.io instance.
+  ///
+  /// @param {engine.Server} engine.io (or compatible) server
+  /// @return {Server} self
+  /// @api public
   bind(engine) {
     this.engine = engine;
     this.engine.on('connection', onconnection);
     return this;
   }
 
-  /**
-   * Called with each incoming transport connection.
-   *
-   * @param {engine.Socket} socket
-   * @return {Server} self
-   * @api public
-   */
+  /// Called with each incoming transport connection.
+  ///
+  /// @param {engine.Socket} socket
+  /// @return {Server} self
+  /// @api public
   onconnection(conn) {
     _logger.fine('incoming connection with id ${conn.id}');
     Client client = Client(this, conn);
@@ -381,13 +357,11 @@ class Server {
     return this;
   }
 
-  /**
-   * Looks up a namespace.
-   *
-   * @param {String} nsp name
-   * @param {Function} optional, nsp `connection` ev handler
-   * @api public
-   */
+  /// Looks up a namespace.
+  ///
+  /// @param {String} nsp name
+  /// @param {Function} optional, nsp `connection` ev handler
+  /// @api public
 
   of(name, [fn]) {
     if (name.toString()[0] != '/') {
@@ -403,11 +377,9 @@ class Server {
     return nsps[name];
   }
 
-  /**
-   * Closes server connection
-   *
-   * @api public
-   */
+  /// Closes server connection
+  ///
+  /// @api public
   close() {
     nsps['/'].sockets.forEach((socket) {
       socket.onclose();

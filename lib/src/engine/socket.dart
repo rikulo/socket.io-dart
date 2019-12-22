@@ -19,11 +19,9 @@ import 'package:socket_io/src/engine/server.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
 import 'package:socket_io/src/util/event_emitter.dart';
 
-/**
- * Client class (abstract).
- *
- * @api private
- */
+/// Client class (abstract).
+///
+/// @api private
 class Socket extends EventEmitter {
   static final Logger _logger = Logger("socket_io:engine.Socket");
   String id;
@@ -62,11 +60,9 @@ class Socket extends EventEmitter {
     onOpen();
   }
 
-  /**
-   * Called upon transport considered open.
-   *
-   * @api private
-   */
+  /// Called upon transport considered open.
+  ///
+  /// @api private
 
   onOpen() {
     readyState = 'open';
@@ -89,12 +85,10 @@ class Socket extends EventEmitter {
     setPingTimeout();
   }
 
-  /**
-   * Called upon transport packet.
-   *
-   * @param {Object} packet
-   * @api private
-   */
+  /// Called upon transport packet.
+  ///
+  /// @param {Object} packet
+  /// @api private
 
   onPacket(packet) {
     if ('open' == readyState) {
@@ -127,22 +121,18 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Called upon transport error.
-   *
-   * @param {Error} error object
-   * @api private
-   */
+  /// Called upon transport error.
+  ///
+  /// @param {Error} error object
+  /// @api private
   onError(err) {
     _logger.fine('transport error');
     onClose('transport error', err);
   }
 
-  /**
-   * Sets and resets ping timeout timer based on client pings.
-   *
-   * @api private
-   */
+  /// Sets and resets ping timeout timer based on client pings.
+  ///
+  /// @api private
   setPingTimeout() {
     if (pingTimeoutTimer != null) {
       pingTimeoutTimer.cancel();
@@ -155,12 +145,10 @@ class Socket extends EventEmitter {
     });
   }
 
-  /**
-   * Attaches handlers for the given transport.
-   *
-   * @param {Transport} transport
-   * @api private
-   */
+  /// Attaches handlers for the given transport.
+  ///
+  /// @param {Transport} transport
+  /// @api private
   setTransport(Transport transport) {
     var onError = this.onError;
     var onPacket = this.onPacket;
@@ -185,12 +173,10 @@ class Socket extends EventEmitter {
     });
   }
 
-  /**
-   * Upgrades socket to the given transport
-   *
-   * @param {Transport} transport
-   * @api private
-   */
+  /// Upgrades socket to the given transport
+  ///
+  /// @param {Transport} transport
+  /// @api private
   maybeUpgrade(transport) {
     _logger.fine(
         'might upgrade socket transport from ${this.transport.name} to ${transport.name}');
@@ -285,11 +271,9 @@ class Socket extends EventEmitter {
     once('close', onClose);
   }
 
-  /**
-   * Clears listeners and timers associated with current transport.
-   *
-   * @api private
-   */
+  /// Clears listeners and timers associated with current transport.
+  ///
+  /// @api private
   clearTransport() {
     var cleanup;
 
@@ -311,11 +295,9 @@ class Socket extends EventEmitter {
     pingTimeoutTimer?.cancel();
   }
 
-  /**
-   * Called upon transport considered closed.
-   * Possible reasons: `ping timeout`, `client error`, `parse error`,
-   * `transport error`, `server close`, `transport close`
-   */
+  /// Called upon transport considered closed.
+  /// Possible reasons: `ping timeout`, `client error`, `parse error`,
+  /// `transport error`, `server close`, `transport close`
   onClose(reason, [description]) {
     if ('closed' != readyState) {
       readyState = 'closed';
@@ -336,11 +318,9 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Setup and manage send callback
-   *
-   * @api private
-   */
+  /// Setup and manage send callback
+  ///
+  /// @api private
   setupSendCallback() {
     // the message was sent successfully, execute the callback
     var onDrain = (_) {
@@ -368,15 +348,13 @@ class Socket extends EventEmitter {
     });
   }
 
-  /**
-   * Sends a message packet.
-   *
-   * @param {String} message
-   * @param {Object} options
-   * @param {Function} callback
-   * @return {Socket} for chaining
-   * @api public
-   */
+  /// Sends a message packet.
+  ///
+  /// @param {String} message
+  /// @param {Object} options
+  /// @param {Function} callback
+  /// @return {Socket} for chaining
+  /// @api public
   send(data, options, [callback]) => write(data, options, callback);
   write(data, options, [callback]) {
     sendPacket('message',
@@ -384,14 +362,12 @@ class Socket extends EventEmitter {
     return this;
   }
 
-  /**
-   * Sends a packet.
-   *
-   * @param {String} packet type
-   * @param {String} optional, data
-   * @param {Object} options
-   * @api private
-   */
+  /// Sends a packet.
+  ///
+  /// @param {String} packet type
+  /// @param {String} optional, data
+  /// @param {Object} options
+  /// @api private
   sendPacket(type, {data, options, callback}) {
     options = options ?? {};
     options['compress'] = false != options['compress'];
@@ -414,11 +390,9 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Attempts to flush the packets buffer.
-   *
-   * @api private
-   */
+  /// Attempts to flush the packets buffer.
+  ///
+  /// @api private
   flush() {
     if ('closed' != readyState &&
         transport.writable == true &&
@@ -440,11 +414,9 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Get available upgrades for this socket.
-   *
-   * @api private
-   */
+  /// Get available upgrades for this socket.
+  ///
+  /// @api private
   getAvailableUpgrades() {
     var availableUpgrades = [];
     var allUpgrades = server.upgrades(transport.name);
@@ -457,13 +429,11 @@ class Socket extends EventEmitter {
     return availableUpgrades;
   }
 
-  /**
-   * Closes the socket and underlying transport.
-   *
-   * @param {Boolean} optional, discard
-   * @return {Socket} for chaining
-   * @api public
-   */
+  /// Closes the socket and underlying transport.
+  ///
+  /// @param {Boolean} optional, discard
+  /// @return {Socket} for chaining
+  /// @api public
 
   close([discard = false]) {
     if ('open' != readyState) return;
@@ -477,12 +447,10 @@ class Socket extends EventEmitter {
     closeTransport(discard);
   }
 
-  /**
-   * Closes the underlying transport.
-   *
-   * @param {Boolean} discard
-   * @api private
-   */
+  /// Closes the underlying transport.
+  ///
+  /// @param {Boolean} discard
+  /// @api private
   closeTransport(discard) {
     if (discard == true) transport.discard();
     transport.close(() => onClose('forced close'));

@@ -41,9 +41,7 @@ class SocketConnect extends HttpConnectWrapper {
     }
   }
 
-  /**
-   * Closes the current connection.
-   */
+  /// Closes the current connection.
   void close() {
     if (_done != null) {
       _done.complete('done');

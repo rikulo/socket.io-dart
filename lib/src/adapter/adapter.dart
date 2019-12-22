@@ -48,14 +48,12 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     encoder = nsp.server.encoder;
   }
 
-  /**
-   * Adds a socket to a room.
-   *
-   * @param {String} socket id
-   * @param {String} room name
-   * @param {Function} callback
-   * @api public
-   */
+  /// Adds a socket to a room.
+  ///
+  /// @param {String} socket id
+  /// @param {String} room name
+  /// @param {Function} callback
+  /// @api public
 
   add(String id, String room, [fn([_])]) {
     sids[id] = sids[id] ?? {};
@@ -65,14 +63,12 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     if (fn != null) scheduleMicrotask(() => fn(null));
   }
 
-  /**
-   * Removes a socket from a room.
-   *
-   * @param {String} socket id
-   * @param {String} room name
-   * @param {Function} callback
-   * @api public
-   */
+  /// Removes a socket from a room.
+  ///
+  /// @param {String} socket id
+  /// @param {String} room name
+  /// @param {Function} callback
+  /// @api public
   del(String id, String room, [fn([_])]) {
     sids[id] = sids[id] ?? {};
     sids[id].remove(room);
@@ -84,13 +80,11 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     if (fn != null) scheduleMicrotask(() => fn(null));
   }
 
-  /**
-   * Removes a socket from all rooms it's joined.
-   *
-   * @param {String} socket id
-   * @param {Function} callback
-   * @api public
-   */
+  /// Removes a socket from all rooms it's joined.
+  ///
+  /// @param {String} socket id
+  /// @param {Function} callback
+  /// @api public
   delAll(String id, [fn([_])]) {
     var rooms = sids[id];
     if (rooms != null) {
@@ -106,17 +100,15 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     if (fn != null) scheduleMicrotask(() => fn(null));
   }
 
-  /**
-   * Broadcasts a packet.
-   *
-   * Options:
-   *  - `flags` {Object} flags for this packet
-   *  - `except` {Array} sids that should be excluded
-   *  - `rooms` {Array} list of rooms to broadcast to
-   *
-   * @param {Object} packet object
-   * @api public
-   */
+  /// Broadcasts a packet.
+  ///
+  /// Options:
+  ///  - `flags` {Object} flags for this packet
+  ///  - `except` {Array} sids that should be excluded
+  ///  - `rooms` {Array} list of rooms to broadcast to
+  ///
+  /// @param {Object} packet object
+  /// @api public
   broadcast(Map packet, [Map opts]) {
     opts = opts ?? {};
     List rooms = opts['rooms'] ?? [];
@@ -158,13 +150,11 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     });
   }
 
-  /**
-   * Gets a list of clients by sid.
-   *
-   * @param {Array} explicit set of rooms to check.
-   * @param {Function} callback
-   * @api public
-   */
+  /// Gets a list of clients by sid.
+  ///
+  /// @param {Array} explicit set of rooms to check.
+  /// @param {Function} callback
+  /// @api public
   clients(List rooms, [fn([_])]) {
     rooms = rooms ?? [];
 
@@ -198,24 +188,21 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     if (fn != null) scheduleMicrotask(() => fn(sids));
   }
 
-  /**
-   * Gets the list of rooms a given client has joined.
-   *
-   * @param {String} socket id
-   * @param {Function} callback
-   * @api public
-   */
+  /// Gets the list of rooms a given client has joined.
+  ///
+  /// @param {String} socket id
+  /// @param {Function} callback
+  /// @api public
   clientRooms(String id, [fn(err, [_])]) {
     var rooms = sids[id];
     if (fn != null) scheduleMicrotask(() => fn(null, rooms?.keys));
   }
 }
-/**
-   * Room constructor.
-   *
-   * @api private
-   */
 
+
+/// Room constructor.
+///
+/// @api private
 class _Room {
   Map<String, bool> sockets;
   int length;
@@ -224,12 +211,10 @@ class _Room {
     length = 0;
   }
 
-  /**
-   * Adds a socket to a room.
-   *
-   * @param {String} socket id
-   * @api private
-   */
+  /// Adds a socket to a room.
+  ///
+  /// @param {String} socket id
+  /// @api private
   add(String id) {
     if (!sockets.containsKey(id)) {
       sockets[id] = true;
@@ -237,12 +222,10 @@ class _Room {
     }
   }
 
-  /**
-   * Removes a socket from a room.
-   *
-   * @param {String} socket id
-   * @api private
-   */
+  /// Removes a socket from a room.
+  ///
+  /// @param {String} socket id
+  /// @api private
   del(String id) {
     if (sockets.containsKey(id)) {
       sockets.remove(id);
