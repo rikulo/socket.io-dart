@@ -138,7 +138,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
           var sockets = room.sockets;
           for (var id in sockets.keys) {
             if (sockets.containsKey(id)) {
-              if (ids[id] != null || except.indexOf(id) >= 0) continue;
+              if (ids[id] != null || except.contains(id)) continue;
               socket = nsp.connected[id];
               if (socket != null) {
                 socket.packet(encodedPackets, packetOpts);
@@ -149,7 +149,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
         }
       } else {
         for (var id in sids.keys) {
-          if (except.indexOf(id) >= 0) continue;
+          if (except.contains(id)) continue;
           socket = nsp.connected[id];
           if (socket != null) socket.packet(encodedPackets, packetOpts);
         }

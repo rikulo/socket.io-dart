@@ -376,7 +376,7 @@ class PollingTransport extends Transport {
     // https://github.com/LearnBoost/socket.io/pull/1333
     var ua = connect.request.headers.value('user-agent');
     if (ua != null &&
-        (ua.indexOf(';MSIE') >= 0 || ua.indexOf('Trident/') >= 0)) {
+        (ua.contains(';MSIE') || ua.contains('Trident/'))) {
       headers['X-XSS-Protection'] = '0';
     }
 
