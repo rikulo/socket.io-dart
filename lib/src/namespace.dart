@@ -202,7 +202,7 @@ class Namespace extends EventEmitter {
   ///
   /// @return {Namespace} self
   /// @api public
-  Namespace clients(fn([_])) {
+  Namespace clients(dynamic Function([dynamic]) fn) {
     adapter.clients(rooms, fn);
     rooms = [];
     return this;

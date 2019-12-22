@@ -331,7 +331,7 @@ class PollingTransport extends Transport {
   ///
   /// @api private
   @override
-  void doClose([fn()]) {
+  void doClose([dynamic Function() fn]) {
     _logger.fine('closing');
 
     var self = this;

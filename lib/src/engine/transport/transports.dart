@@ -74,13 +74,13 @@ abstract class Transport extends EventEmitter {
     this.connect = connect;
   }
 
-  void close([closeFn()]) {
+  void close([dynamic Function() closeFn]) {
     if ('closed' == readyState || 'closing' == readyState) return;
     readyState = 'closing';
     doClose(closeFn);
   }
 
-  void doClose([callback()]);
+  void doClose([dynamic Function() callback]);
 
   void onError(msg, [desc]) {
     writable = false;
