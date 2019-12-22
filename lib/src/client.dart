@@ -1,15 +1,13 @@
-/**
- * client.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    22/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// client.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    22/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:logging/logging.dart';
 
 import 'package:socket_io/src/engine/socket.dart';
@@ -58,7 +56,11 @@ class Client {
   void connect(name, [query]) {
     _logger.fine('connecting to namespace $name');
     if (!server.nsps.containsKey(name)) {
-      packet(<dynamic, dynamic>{'type': ERROR, 'nsp': name, 'data': 'Invalid namespace'});
+      packet(<dynamic, dynamic>{
+        'type': ERROR,
+        'nsp': name,
+        'data': 'Invalid namespace'
+      });
       return;
     }
     var nsp = server.of(name);
@@ -205,7 +207,7 @@ class Client {
 
     // `nsps` and `sockets` are cleaned up seamlessly
     if (sockets.isNotEmpty) {
-       List.from(sockets).forEach((socket) {
+      List.from(sockets).forEach((socket) {
         socket.onclose(reason);
       });
       sockets.clear();

@@ -1,22 +1,21 @@
 import 'dart:async';
-/**
- * websocket_transport.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    22/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// websocket_transport.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    22/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:logging/logging.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
 
 class WebSocketTransport extends Transport {
-  static final Logger _logger = Logger('socket_io:transport.WebSocketTransport');
+  static final Logger _logger =
+      Logger('socket_io:transport.WebSocketTransport');
   @override
   bool get handlesUpgrades => true;
   @override
@@ -25,8 +24,8 @@ class WebSocketTransport extends Transport {
   WebSocketTransport(connect) : super(connect) {
     name = 'websocket';
     this.connect = connect;
-    subscription = connect.websocket
-        .listen(onData, onError: onError, onDone: onClose);
+    subscription =
+        connect.websocket.listen(onData, onError: onError, onDone: onClose);
     writable = true;
   }
 
@@ -60,8 +59,7 @@ class WebSocketTransport extends Transport {
     for (var i = 0; i < packets.length; i++) {
       var packet = packets[i];
       PacketParser.encodePacket(packet,
-          supportsBinary: supportsBinary,
-          callback: (_) => send(_, packet));
+          supportsBinary: supportsBinary, callback: (_) => send(_, packet));
     }
   }
 

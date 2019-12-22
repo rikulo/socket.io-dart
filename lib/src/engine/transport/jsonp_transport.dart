@@ -1,15 +1,13 @@
-/**
- * jsonp_transport.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    22/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// jsonp_transport.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    22/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'dart:convert';
 import 'package:socket_io/src/engine/connect.dart';
 import 'package:socket_io/src/engine/transport/polling_transport.dart';

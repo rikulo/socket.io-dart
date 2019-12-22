@@ -1,15 +1,13 @@
-/**
- * socket.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    17/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// socket.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    17/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -138,9 +136,7 @@ class Socket extends EventEmitter {
       pingTimeoutTimer.cancel();
     }
     pingTimeoutTimer = Timer(
-        Duration(
-            milliseconds: server.pingInterval + server.pingTimeout),
-        () {
+        Duration(milliseconds: server.pingInterval + server.pingTimeout), () {
       onClose('ping timeout');
     });
   }
@@ -330,14 +326,14 @@ class Socket extends EventEmitter {
           _logger.fine('executing send callback');
           seqFn(transport);
         }
-        /** else if (Array.isArray(seqFn)) {
-            _logger.fine('executing batch send callback');
-            for (var l = seqFn.length, i = 0; i < l; i++) {
-            if ('function' === typeof seqFn[i]) {
-            seqFn[i](self.transport);
-            }
-            }
-            }*/
+        /// else if (Array.isArray(seqFn)) {
+        /// _logger.fine('executing batch send callback');
+        /// for (var l = seqFn.length, i = 0; i < l; i++) {
+        /// if ('function' === typeof seqFn[i]) {
+        /// seqFn[i](self.transport);
+        /// }
+        /// }
+        ///            }
       }
     };
 
@@ -357,8 +353,7 @@ class Socket extends EventEmitter {
   /// @api public
   void send(data, options, [callback]) => write(data, options, callback);
   Socket write(data, options, [callback]) {
-    sendPacket('message',
-        data: data, options: options, callback: callback);
+    sendPacket('message', data: data, options: options, callback: callback);
     return this;
   }
 

@@ -1,15 +1,13 @@
-/**
- * adapter.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    16/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// adapter.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    16/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'dart:async';
 import 'package:socket_io/src/namespace.dart';
 import 'package:socket_io_common/src/parser/parser.dart';
@@ -207,7 +205,6 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     if (fn != null) scheduleMicrotask(() => fn(null, rooms?.keys));
   }
 }
-
 
 /// Room constructor.
 ///

@@ -1,15 +1,13 @@
-/**
- * transports.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    17/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// transports.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    17/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:logging/logging.dart';
 import 'package:socket_io/src/engine/connect.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
@@ -28,21 +26,21 @@ class Transports {
 
   static Transport newInstance(String name, SocketConnect connect) {
     if ('websocket' == name) {
-      return  WebSocketTransport(connect);
+      return WebSocketTransport(connect);
     } else if ('polling' == name) {
       if (connect.request.uri.queryParameters.containsKey('j')) {
-        return  JSONPTransport(connect);
+        return JSONPTransport(connect);
       } else {
-        return  XHRTransport(connect);
+        return XHRTransport(connect);
       }
     } else {
-      throw  UnsupportedError('Unknown transport $name');
+      throw UnsupportedError('Unknown transport $name');
     }
   }
 }
 
 abstract class Transport extends EventEmitter {
-  static final Logger _logger =  Logger('socket_io:transport.Transport');
+  static final Logger _logger = Logger('socket_io:transport.Transport');
   double maxHttpBufferSize;
   Map httpCompression;
   Map perMessageDeflate;

@@ -1,15 +1,13 @@
-/**
- * namespace.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    17/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// namespace.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    17/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:socket_io/src/adapter/adapter.dart';
@@ -93,13 +91,11 @@ class Namespace extends EventEmitter {
     });
   }
 
-  /**
-   * Targets a room when emitting.
-   *
-   * @param {String} name
-   * @return {Namespace} self
-   * @api public
-   */
+  /// Targets a room when emitting.
+  ///
+  /// @param {String} name
+  /// @return {Namespace} self
+  /// @api public
 //    in(String name) {
 //        to(name);
 //    }
@@ -177,8 +173,7 @@ class Namespace extends EventEmitter {
 
       var packet = {'type': EVENT, 'data': data};
 
-      adapter
-          .broadcast(packet, {'rooms': rooms, 'flags': flags});
+      adapter.broadcast(packet, {'rooms': rooms, 'flags': flags});
 
       rooms = null;
       flags = null;
@@ -220,9 +215,7 @@ class Namespace extends EventEmitter {
   }
 }
 
-/**
- * Apply flags from `Socket`.
- */
+/// Apply flags from `Socket`.
 // @todo
 //exports.flags.forEach(function(flag){
 //    Namespace.prototype.__defineGetter__(flag, function(){

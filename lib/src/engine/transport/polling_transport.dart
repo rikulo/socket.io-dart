@@ -1,15 +1,13 @@
-/**
- * polling_transport.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    22/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// polling_transport.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    22/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -359,8 +357,7 @@ class PollingTransport extends Transport {
     } else {
       _logger.fine('transport not writable - buffering orderly close');
       shouldClose = onClose;
-      closeTimeoutTimer =
-          Timer(Duration(milliseconds: closeTimeout), onClose);
+      closeTimeoutTimer = Timer(Duration(milliseconds: closeTimeout), onClose);
     }
   }
 
@@ -375,8 +372,7 @@ class PollingTransport extends Transport {
     // prevent XSS warnings on IE
     // https://github.com/LearnBoost/socket.io/pull/1333
     var ua = connect.request.headers.value('user-agent');
-    if (ua != null &&
-        (ua.contains(';MSIE') || ua.contains('Trident/'))) {
+    if (ua != null && (ua.contains(';MSIE') || ua.contains('Trident/'))) {
       headers['X-XSS-Protection'] = '0';
     }
 

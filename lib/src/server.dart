@@ -1,15 +1,13 @@
-/**
- * server.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    22/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// server.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    22/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:socket_io/src/client.dart';
@@ -20,9 +18,7 @@ import 'package:stream/stream.dart';
 
 import 'namespace.dart';
 
-/**
- * Socket.IO client source.
- */
+/// Socket.IO client source.
 /// Old settings for backwards compatibility
 Map oldSettings = {
   'transports': 'transports',
@@ -55,8 +51,7 @@ class Server {
     nsps = {};
     path(options.containsKey('path') ? options['path'] : '/socket.io');
     serveClient(false != options['serveClient']);
-    adapter =
-        options.containsKey('adapter') ? options['adapter'] : 'default';
+    adapter = options.containsKey('adapter') ? options['adapter'] : 'default';
     origins(options.containsKey('origins') ? options['origins'] : '*:*');
     encoder = Encoder();
     sockets = of('/');
@@ -90,13 +85,12 @@ class Server {
         var parts = Uri.parse(origin);
         var defaultPort = 'https:' == parts.scheme ? 443 : 80;
         var port = parts.port ?? defaultPort;
-        var ok =
-            _origins.indexOf(parts.host + ':' + port.toString()) >= 0 ||
-                _origins.indexOf(parts.host + ':*') >= 0 ||
-                _origins.indexOf('*:' + port.toString()) >= 0;
+        var ok = _origins.indexOf(parts.host + ':' + port.toString()) >= 0 ||
+            _origins.indexOf(parts.host + ':*') >= 0 ||
+            _origins.indexOf('*:' + port.toString()) >= 0;
 
         return fn(null, ok);
-      } catch (ex) { 
+      } catch (ex) {
         print(ex);
       }
     }
@@ -283,13 +277,11 @@ class Server {
     return this;
   }
 
-  /**
-   * Attaches the static file serving.
-   *
-   * @param {Function|http.Server} http server
-   * @api private
-   * @todo Include better way to serve files
-   */
+  /// Attaches the static file serving.
+  ///
+  /// @param {Function|http.Server} http server
+  /// @api private
+  /// @todo Include better way to serve files
 //    attachServe(srv){
 //        _logger.fine()('attaching client serving req handler');
 //        var url = this._path + '/socket.io.js';
@@ -307,14 +299,12 @@ class Server {
 //        })
 //    }
 
-  /**
-   * Handles a request serving `/socket.io.js`
-   *
-   * @param {http.Request} req
-   * @param {http.Response} res
-   * @api private
-   * @todo Include better way to serve files
-   */
+  /// Handles a request serving `/socket.io.js`
+  ///
+  /// @param {http.Request} req
+  /// @param {http.Response} res
+  /// @api private
+  /// @todo Include better way to serve files
 
 //    serve(req, res){
 //        var etag = req.headers['if-none-match'];
@@ -394,7 +384,7 @@ class Server {
 
   // redirect to sockets method
   Namespace to(_) => sockets.to(_);
-  Namespace  use(_) => sockets.use(_);
+  Namespace use(_) => sockets.use(_);
   void send(_) => sockets.send(_);
   Namespace write(_) => sockets.write(_);
   Namespace clients(_) => sockets.clients(_);

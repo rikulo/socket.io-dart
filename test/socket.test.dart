@@ -1,15 +1,13 @@
-/**
- * socket.test.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    16/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// socket.test.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    16/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:test/test.dart';
 
 import 'package:socket_io/socket_io.dart';

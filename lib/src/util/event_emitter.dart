@@ -1,19 +1,17 @@
-/**
- * event_emitter.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *     11/23/2016, Created by Henri Chen<henrichen@potix.com>
- *
- * Copyright (C) 2016 Potix Corporation. All Rights Reserved.
- */
+/// event_emitter.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///     11/23/2016, Created by Henri Chen<henrichen@potix.com>
+///
+/// Copyright (C) 2016 Potix Corporation. All Rights Reserved.
 import 'dart:collection' show HashMap;
 
 /// Handler type for handling the event emitted by an [EventEmitter].
-typedef dynamic EventHandler<T>(T data);
+typedef EventHandler<T> = dynamic Function(T data);
 
 /// Generic event emitting and handling.
 class EventEmitter {

@@ -1,15 +1,13 @@
-/**
- * server
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    17/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// server
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    17/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'dart:convert';
 import 'dart:io' hide Socket;
 import 'package:logging/logging.dart';
@@ -57,7 +55,7 @@ class Server extends Engine {
   Map perMessageDeflate;
   Map httpCompression;
   dynamic initialPacket;
-  final Uuid _uuid =  Uuid();
+  final Uuid _uuid = Uuid();
 
   Server([Map opts]) {
     clients = {};
@@ -225,7 +223,7 @@ class Server extends Engine {
   /// @param {code} error code
   /// @api private
 
-  static void  sendErrorMessage(HttpRequest req, code) {
+  static void sendErrorMessage(HttpRequest req, code) {
     var res = req.response;
     var isForbidden = !ServerErrorMessages.containsKey(code);
     if (isForbidden) {
@@ -292,9 +290,7 @@ class Server extends Engine {
     if (false != cookie) {
       transport.on('headers', (headers) {
         headers['Set-Cookie'] = '${cookie}=${Uri.encodeComponent(id)}' +
-            (cookiePath?.isNotEmpty == true
-                ? '; Path=${cookiePath}'
-                : '') +
+            (cookiePath?.isNotEmpty == true ? '; Path=${cookiePath}' : '') +
             (cookiePath?.isNotEmpty == true && cookieHttpOnly == true
                 ? '; HttpOnly'
                 : '');
@@ -439,10 +435,10 @@ class Server extends Engine {
           : code;
       var length = utf8.encode(message).length;
       socket.add('HTTP/1.1 400 Bad Request\r\n'
-          'Connection: close\r\n'
-          'Content-type: text/html\r\n'
-          'Content-Length: $length\r\n'
-          '\r\n' +
+              'Connection: close\r\n'
+              'Content-type: text/html\r\n'
+              'Content-Length: $length\r\n'
+              '\r\n' +
           message);
     }
     socket.close();

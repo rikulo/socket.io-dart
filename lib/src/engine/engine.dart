@@ -1,15 +1,13 @@
-/**
- * engine.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    16/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// engine.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    16/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:socket_io/src/engine/server.dart';
 import 'package:socket_io/src/util/event_emitter.dart';
 
