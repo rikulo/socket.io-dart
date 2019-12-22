@@ -20,8 +20,8 @@ import 'package:socket_io/src/util/event_emitter.dart';
 
 class Transports {
   static List<String> upgradesTo(String from) {
-    if ("polling" == from) {
-      return ["websocket"];
+    if ('polling' == from) {
+      return ['websocket'];
     }
     return [];
   }

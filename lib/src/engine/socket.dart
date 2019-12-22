@@ -23,7 +23,7 @@ import 'package:socket_io/src/util/event_emitter.dart';
 ///
 /// @api private
 class Socket extends EventEmitter {
-  static final Logger _logger = Logger("socket_io:engine.Socket");
+  static final Logger _logger = Logger('socket_io:engine.Socket');
   String id;
   Server server;
   Transport transport;

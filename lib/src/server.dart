@@ -23,10 +23,10 @@ import 'package:stream/stream.dart';
  */
 /// Old settings for backwards compatibility
 Map oldSettings = {
-  "transports": "transports",
-  "heartbeat timeout": "pingTimeout",
-  "heartbeat interval": "pingInterval",
-  "destroy buffer size": "maxHttpBufferSize"
+  'transports': 'transports',
+  'heartbeat timeout': 'pingTimeout',
+  'heartbeat interval': 'pingInterval',
+  'destroy buffer size': 'maxHttpBufferSize'
 };
 
 final Logger _logger = Logger('socket_io:Server');

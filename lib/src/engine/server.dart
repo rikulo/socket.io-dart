@@ -41,7 +41,7 @@ const Map<int, String> ServerErrorMessages = const {
 };
 
 class Server extends Engine {
-  static final Logger _logger = Logger("socket_io:engine.Server");
+  static final Logger _logger = Logger('socket_io:engine.Server');
   Map clients;
   int clientsCount;
   int pingTimeout;
@@ -395,7 +395,7 @@ class Server extends Engine {
   attachTo(StreamServer server, Map options) {
     options = options ?? {};
     var path =
-        (options['path'] ?? '/engine.io').replaceFirst(RegExp(r"\/$"), '');
+        (options['path'] ?? '/engine.io').replaceFirst(RegExp(r'\/$'), '');
 
     // normalize path
     path += '/';
