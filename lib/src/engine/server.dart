@@ -86,12 +86,14 @@ class Server extends Engine {
         opts['perMessageDeflate'] == true) {
       perMessageDeflate =
           opts['perMessageDeflate'] is Map ? opts['perMessageDeflate'] : {};
-      if (!perMessageDeflate.containsKey('threshold'))
+      if (!perMessageDeflate.containsKey('threshold')) {
         perMessageDeflate['threshold'] = 1024;
+      }
     }
     httpCompression = opts['httpCompression'] ?? {};
-    if (!httpCompression.containsKey('threshold'))
+    if (!httpCompression.containsKey('threshold')) {
       httpCompression['threshold'] = 1024;
+    }
 
     initialPacket = opts['initialPacket'];
     _init();
@@ -159,8 +161,9 @@ class Server extends Engine {
       }
     } else {
       // handshake is GET only
-      if ('GET' != req.method)
+      if ('GET' != req.method) {
         return fn(ServerErrors.BAD_HANDSHAKE_METHOD, false);
+      }
       if (allowRequest == null) return fn(null, true);
       return allowRequest(req, fn);
     }

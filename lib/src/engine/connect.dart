@@ -33,9 +33,9 @@ class SocketConnect extends HttpConnectWrapper {
     if (_completed == true) {
       return Future.value('done');
     }
-    if (_socket != null)
+    if (_socket != null) {
       return _socket.done;
-    else {
+    } else {
       _done = Completer();
       return _done.future;
     }
