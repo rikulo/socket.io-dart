@@ -33,7 +33,7 @@ class Client {
   /// @param {Server} server instance
   /// @param {Socket} connection
   /// @api private
-  Client(Server this.server, Socket this.conn) {
+  Client(this.server, this.conn) {
     encoder = Encoder();
     decoder = Decoder();
     id = conn.id;

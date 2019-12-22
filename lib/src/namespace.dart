@@ -46,7 +46,7 @@ class Namespace extends EventEmitter {
   /// @param {Server} server instance
   /// @param {Socket} name
   /// @api private
-  Namespace(Server this.server, String this.name) {
+  Namespace(this.server, this.name) {
     initAdapter();
   }
 
