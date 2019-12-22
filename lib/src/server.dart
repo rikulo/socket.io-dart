@@ -50,7 +50,7 @@ class Server {
   /// @param {http.Server|Number|Object} http server, port or options
   /// @param {Object} options
   /// @api public
-  Server({server: null, Map options}) {
+  Server({server, Map options}) {
     options = options ?? {};
     nsps = {};
     path(options.containsKey('path') ? options['path'] : '/socket.io');
@@ -70,9 +70,7 @@ class Server {
   /// @param {http.IncomingMessage} request
   /// @param {Function} callback to be called with the result: `fn(err, success)`
   void checkRequest(HttpRequest req, [Function fn]) {
-    var origin = req.headers.value('origin') != null
-        ? req.headers.value('origin')
-        : req.headers.value('referer');
+    var origin = req.headers.value('origin') ?? req.headers.value('referer');
 
     // file:// URLs produce a null Origin which can't be authorized via echo-back
     if (origin == null || origin.isEmpty) {
@@ -91,14 +89,16 @@ class Server {
       try {
         var parts = Uri.parse(origin);
         var defaultPort = 'https:' == parts.scheme ? 443 : 80;
-        var port = parts.port != null ? parts.port : defaultPort;
+        var port = parts.port ?? defaultPort;
         var ok =
             _origins.indexOf(parts.host + ':' + port.toString()) >= 0 ||
                 _origins.indexOf(parts.host + ':*') >= 0 ||
                 _origins.indexOf('*:' + port.toString()) >= 0;
 
         return fn(null, ok);
-      } catch (ex) {}
+      } catch (ex) { 
+        print(ex);
+      }
     }
 
     fn(null, false);
@@ -207,7 +207,7 @@ class Server {
   /// @api public
   Server attach(srv, [Map opts]) {
     if (srv is Function) {
-      var msg = 'You are trying to attach socket.io to an express ' +
+      var msg = 'You are trying to attach socket.io to an express '
           'request handler function. Please pass a http.Server instance.';
       throw Exception(msg);
     }
@@ -216,9 +216,7 @@ class Server {
     if (srv is String && int.parse(srv.toString()).toString() == srv) {
       srv = int.parse(srv.toString());
     }
-    if (opts == null) {
-      opts = {};
-    }
+    opts ??= {};
     // set engine.io path to `/socket.io`
     if (!opts.containsKey('path')) {
       opts['path'] = path();

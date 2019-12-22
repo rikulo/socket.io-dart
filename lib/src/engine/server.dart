@@ -32,7 +32,7 @@ class ServerErrors {
   static const int FORBIDDEN = 4;
 }
 
-const Map<int, String> ServerErrorMessages = const {
+const Map<int, String> ServerErrorMessages = {
   0: 'Transport unknown',
   1: 'Session ID unknown',
   2: 'Bad handshake method',
@@ -438,10 +438,10 @@ class Server extends Engine {
           ? ServerErrorMessages[code]
           : code;
       var length = utf8.encode(message).length;
-      socket.add('HTTP/1.1 400 Bad Request\r\n' +
-          'Connection: close\r\n' +
-          'Content-type: text/html\r\n' +
-          'Content-Length: $length\r\n' +
+      socket.add('HTTP/1.1 400 Bad Request\r\n'
+          'Connection: close\r\n'
+          'Content-type: text/html\r\n'
+          'Content-Length: $length\r\n'
           '\r\n' +
           message);
     }

@@ -40,7 +40,7 @@ List events = [
 /// @api private
 List flags = ['json', 'volatile', 'broadcast'];
 
-const List EVENTS = const [
+const List EVENTS = [
   'error',
   'connect',
   'disconnect',
