@@ -22,7 +22,7 @@ class XHRTransport extends PollingTransport {
   /// @param {http.IncomingMessage}
   /// @api private
   @override
-  onRequest(SocketConnect connect) {
+  void onRequest(SocketConnect connect) {
     HttpRequest req = connect.request;
     if ('OPTIONS' == req.method) {
       var res = req.response;
@@ -45,7 +45,7 @@ class XHRTransport extends PollingTransport {
   /// @param {Object} extra headers
   /// @api private
   @override
-  headers(SocketConnect connect, [Map headers]) {
+  Map headers(SocketConnect connect, [Map headers]) {
     headers = headers ?? {};
     var req = connect.request;
     if (req.headers.value('origin') != null) {

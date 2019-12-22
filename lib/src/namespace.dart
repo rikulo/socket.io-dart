@@ -55,7 +55,7 @@ class Namespace extends EventEmitter {
   /// in addition to the constructor.
   ///
   /// @api private
-  initAdapter() {
+  void initAdapter() {
     adapter = Adapter.newInstance(server.adapter, this);
   }
 
@@ -63,7 +63,7 @@ class Namespace extends EventEmitter {
   ///
   /// @return {Namespace} self
   /// @api public
-  use(fn) {
+  Namespace use(fn) {
     fns.add(fn);
     return this;
   }
@@ -73,14 +73,14 @@ class Namespace extends EventEmitter {
   /// @param {Socket} socket that will get added
   /// @param {Function} last fn call in the middleware
   /// @api private
-  run(socket, fn) {
+  void run(socket, fn) {
     var fns = this.fns.sublist(0);
     if (fns.isEmpty) return fn(null);
 
     run0(0, fns, socket, fn);
   }
 
-  static run0(idx, fns, socket, fn) {
+  static void run0(idx, fns, socket, fn) {
     return fns[idx](socket, (err) {
       // upon error, short-circuit
       if (err) return fn(err);
@@ -109,7 +109,7 @@ class Namespace extends EventEmitter {
   /// @param {String} name
   /// @return {Namespace} self
   /// @api public
-  to(String name) {
+  Namespace to(String name) {
     rooms = rooms?.isNotEmpty == true ? rooms : [];
     if (!rooms.contains(name)) rooms.add(name);
     return this;
@@ -119,7 +119,7 @@ class Namespace extends EventEmitter {
   ///
   /// @return {Socket}
   /// @api private
-  add(Client client, query, fn) {
+  Socket add(Client client, query, fn) {
     _logger.fine('adding socket to nsp ${name}');
     var socket = Socket(this, client, query);
     var self = this;
@@ -153,7 +153,7 @@ class Namespace extends EventEmitter {
   /// Removes a client. Called by each `Socket`.
   ///
   /// @api private
-  remove(socket) {
+  void remove(socket) {
     if (sockets.contains(socket)) {
       sockets.remove(socket);
     } else {
@@ -166,7 +166,7 @@ class Namespace extends EventEmitter {
   /// @return {Namespace} self
   /// @api public
   @override
-  emit(ev, [dynamic arg]) {
+  void emit(ev, [dynamic arg]) {
     if (events.contains(ev)) {
       super.emit(ev, arg);
     } else {
@@ -189,11 +189,11 @@ class Namespace extends EventEmitter {
   ///
   /// @return {Namespace} self
   /// @api public
-  send([args]) {
+  void send([args]) {
     write(args);
   }
 
-  write([args]) {
+  Namespace write([args]) {
     emit('message', args);
     return this;
   }
@@ -202,7 +202,7 @@ class Namespace extends EventEmitter {
   ///
   /// @return {Namespace} self
   /// @api public
-  clients(fn([_])) {
+  Namespace clients(fn([_])) {
     adapter.clients(rooms, fn);
     rooms = [];
     return this;
@@ -213,7 +213,7 @@ class Namespace extends EventEmitter {
   /// @param {Boolean} if `true`, compresses the sending data
   /// @return {Socket} self
   /// @api public
-  compress(compress) {
+  Namespace compress(compress) {
     flags = flags.isEmpty ? flags : {};
     flags['compress'] = compress;
     return this;

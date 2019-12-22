@@ -95,7 +95,7 @@ abstract class Transport extends EventEmitter {
     emit('packet', packet);
   }
 
-  onData(data) {
+  void onData(data) {
     if (messageHandler != null) {
       messageHandler.handle(this, data);
     } else {

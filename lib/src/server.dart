@@ -18,6 +18,8 @@ import 'package:socket_io/src/namespace.dart';
 import 'package:socket_io_common/src/parser/parser.dart';
 import 'package:stream/stream.dart';
 
+import 'namespace.dart';
+
 /**
  * Socket.IO client source.
  */
@@ -67,7 +69,7 @@ class Server {
   ///
   /// @param {http.IncomingMessage} request
   /// @param {Function} callback to be called with the result: `fn(err, success)`
-  checkRequest(HttpRequest req, [Function fn]) {
+  void checkRequest(HttpRequest req, [Function fn]) {
     String origin = req.headers.value('origin') != null
         ? req.headers.value('origin')
         : req.headers.value('referer');
@@ -107,7 +109,7 @@ class Server {
   /// @param {Boolean} whether to serve client code
   /// @return {Server|Boolean} self when setting or value when getting
   /// @api public
-  serveClient([bool v]) {
+  dynamic serveClient([bool v]) {
     if (v == null) {
       return _serveClient;
     }
@@ -119,7 +121,7 @@ class Server {
   /// Backwards compatiblity.
   ///
   /// @api public
-  set(String key, [val]) {
+  Server set(String key, [val]) {
     if ('authorization' == key && val != null) {
       use((socket, next) {
         val(socket.request, (err, authorized) {
@@ -152,7 +154,7 @@ class Server {
   /// @param {String} pathname
   /// @return {Server|String} self when setting or value when getting
   /// @api public
-  path([String v]) {
+  dynamic path([String v]) {
     if (v == null || v.isEmpty) return _path;
     _path = v.replaceFirst(RegExp(r'/\/$/'), '');
     return this;
@@ -165,7 +167,7 @@ class Server {
   /// @api public
   String get adapter => _adapter;
 
-  void set adapter(String v) {
+  set adapter(String v) {
     _adapter = v;
     if (nsps.isNotEmpty) {
       nsps.forEach((dynamic i, Namespace nsp) {
@@ -180,7 +182,7 @@ class Server {
   /// @return {Server|Adapter} self when setting or value when getting
   /// @api public
 
-  origins([String v]) {
+  dynamic origins([String v]) {
     if (v == null || v.isEmpty) return _origins;
 
     _origins = v;
@@ -193,7 +195,7 @@ class Server {
   /// @param {Object} options passed to engine.io
   /// @return {Server} self
   /// @api public
-  listen(srv, [Map opts]) {
+  void listen(srv, [Map opts]) {
     attach(srv, opts);
   }
 
@@ -203,7 +205,7 @@ class Server {
   /// @param {Object} options passed to engine.io
   /// @return {Server} self
   /// @api public
-  attach(srv, [Map opts]) {
+  Server attach(srv, [Map opts]) {
     if (srv is Function) {
       String msg = 'You are trying to attach socket.io to an express ' +
           'request handler function. Please pass a http.Server instance.';
@@ -339,7 +341,7 @@ class Server {
   /// @param {engine.Server} engine.io (or compatible) server
   /// @return {Server} self
   /// @api public
-  bind(engine) {
+  Server bind(engine) {
     this.engine = engine;
     this.engine.on('connection', onconnection);
     return this;
@@ -350,7 +352,7 @@ class Server {
   /// @param {engine.Socket} socket
   /// @return {Server} self
   /// @api public
-  onconnection(conn) {
+  Server onconnection(conn) {
     _logger.fine('incoming connection with id ${conn.id}');
     Client client = Client(this, conn);
     client.connect('/');
@@ -363,7 +365,7 @@ class Server {
   /// @param {Function} optional, nsp `connection` ev handler
   /// @api public
 
-  of(name, [fn]) {
+  Namespace of(name, [fn]) {
     if (name.toString()[0] != '/') {
       name = '/' + name;
     }
@@ -380,7 +382,7 @@ class Server {
   /// Closes server connection
   ///
   /// @api public
-  close() {
+  void close() {
     nsps['/'].sockets.forEach((socket) {
       socket.onclose();
     });
@@ -393,16 +395,16 @@ class Server {
   }
 
   // redirect to sockets method
-  to(_) => sockets.to(_);
-  use(_) => sockets.use(_);
-  send(_) => sockets.send(_);
-  write(_) => sockets.write(_);
-  clients(_) => sockets.clients(_);
-  compress(_) => sockets.compress(_);
+  Namespace to(_) => sockets.to(_);
+  Namespace  use(_) => sockets.use(_);
+  void send(_) => sockets.send(_);
+  Namespace write(_) => sockets.write(_);
+  Namespace clients(_) => sockets.clients(_);
+  Namespace compress(_) => sockets.compress(_);
 
   // emitter
-  emit(event, data) => sockets.emit(event, data);
-  on(event, handler) => sockets.on(event, handler);
-  once(event, handler) => sockets.once(event, handler);
-  off(event, handler) => sockets.off(event, handler);
+  void emit(event, data) => sockets.emit(event, data);
+  void on(event, handler) => sockets.on(event, handler);
+  void once(event, handler) => sockets.once(event, handler);
+  void off(event, handler) => sockets.off(event, handler);
 }

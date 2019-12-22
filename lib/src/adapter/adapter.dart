@@ -20,12 +20,12 @@ abstract class Adapter {
   Map<String, _Room> rooms;
   Map<String, Map> sids;
 
-  add(String id, String room, [fn([_])]);
-  del(String id, String room, [fn([_])]);
-  delAll(String id, [fn([_])]);
-  broadcast(Map packet, [Map opts]);
-  clients(List rooms, [fn([_])]);
-  clientRooms(String id, [fn(err, [_])]);
+  void add(String id, String room, [fn([_])]);
+  void del(String id, String room, [fn([_])]);
+  void delAll(String id, [fn([_])]);
+  void broadcast(Map packet, [Map opts]);
+  void clients(List rooms, [fn([_])]);
+  void clientRooms(String id, [fn(err, [_])]);
 
   static Adapter newInstance(String key, Namespace nsp) {
     if ('default' == key) {
@@ -59,7 +59,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @api public
 
   @override
-  add(String id, String room, [fn([_])]) {
+  void add(String id, String room, [fn([_])]) {
     sids[id] = sids[id] ?? {};
     sids[id][room] = true;
     rooms[room] = rooms[room] ?? _Room();
@@ -74,7 +74,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {Function} callback
   /// @api public
   @override
-  del(String id, String room, [fn([_])]) {
+  void del(String id, String room, [fn([_])]) {
     sids[id] = sids[id] ?? {};
     sids[id].remove(room);
     if (rooms.containsKey(room)) {
@@ -91,7 +91,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {Function} callback
   /// @api public
   @override
-  delAll(String id, [fn([_])]) {
+  void delAll(String id, [fn([_])]) {
     var rooms = sids[id];
     if (rooms != null) {
       for (var room in rooms.keys) {
@@ -116,7 +116,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {Object} packet object
   /// @api public
   @override
-  broadcast(Map packet, [Map opts]) {
+  void broadcast(Map packet, [Map opts]) {
     opts = opts ?? {};
     List rooms = opts['rooms'] ?? [];
     List except = opts['except'] ?? [];
@@ -163,7 +163,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {Function} callback
   /// @api public
   @override
-  clients(List rooms, [fn([_])]) {
+  void clients(List rooms, [fn([_])]) {
     rooms = rooms ?? [];
 
     var ids = {};
@@ -202,7 +202,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {Function} callback
   /// @api public
   @override
-  clientRooms(String id, [fn(err, [_])]) {
+  void clientRooms(String id, [fn(err, [_])]) {
     var rooms = sids[id];
     if (fn != null) scheduleMicrotask(() => fn(null, rooms?.keys));
   }
@@ -224,7 +224,7 @@ class _Room {
   ///
   /// @param {String} socket id
   /// @api private
-  add(String id) {
+  void add(String id) {
     if (!sockets.containsKey(id)) {
       sockets[id] = true;
       length++;
@@ -235,7 +235,7 @@ class _Room {
   ///
   /// @param {String} socket id
   /// @api private
-  del(String id) {
+  void del(String id) {
     if (sockets.containsKey(id)) {
       sockets.remove(id);
       length--;

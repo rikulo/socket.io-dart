@@ -44,7 +44,7 @@ class Client {
   /// Sets up event listeners.
   ///
   /// @api private
-  setup() {
+  void setup() {
     decoder.on('decoded', ondecoded);
     conn.on('data', ondata);
     conn.on('error', onerror);
@@ -55,7 +55,7 @@ class Client {
   ///
   /// @param {String} namespace name
   /// @api private
-  connect(name, [query]) {
+  void connect(name, [query]) {
     _logger.fine('connecting to namespace $name');
     if (!server.nsps.containsKey(name)) {
       packet(<dynamic, dynamic>{'type': ERROR, 'nsp': name, 'data': 'Invalid namespace'});
@@ -82,7 +82,7 @@ class Client {
   /// Disconnects from all namespaces and closes transport.
   ///
   /// @api private
-  disconnect() {
+  void disconnect() {
     // we don't use a for loop because the length of
     // `sockets` changes upon each iteration
     sockets.toList().forEach((socket) {
@@ -96,7 +96,7 @@ class Client {
   /// Removes a socket. Called by each `Socket`.
   ///
   /// @api private
-  remove(socket) {
+  void remove(socket) {
     var i = sockets.indexOf(socket);
     if (i >= 0) {
       var nsp = sockets[i].nsp.name;
@@ -110,7 +110,7 @@ class Client {
   /// Closes the underlying connection.
   ///
   /// @api private
-  close() {
+  void close() {
     if ('open' == conn.readyState) {
       _logger.fine('forcing transport close');
       conn.close();
@@ -123,11 +123,11 @@ class Client {
   /// @param {Object} packet object
   /// @param {Object} options
   /// @api private
-  packet(packet, [Map opts]) {
+  void packet(packet, [Map opts]) {
     var self = this;
     opts = opts ?? {};
     // this writes to the actual connection
-    writeToEngine(encodedPackets) {
+    void writeToEngine(encodedPackets) {
       if (opts['volatile'] != null && !self.conn.transport.writable) return;
       for (var i = 0; i < encodedPackets.length; i++) {
         self.conn.write(encodedPackets[i], {'compress': opts['compress']});
@@ -154,7 +154,7 @@ class Client {
   /// Called with incoming transport data.
   ///
   /// @api private
-  ondata(data) {
+  void ondata(data) {
     // try/catch is needed for protocol violations (GH-1880)
     try {
       decoder.add(data);
@@ -167,7 +167,7 @@ class Client {
   /// Called when parser fully decodes a packet.
   ///
   /// @api private
-  ondecoded(packet) {
+  void ondecoded(packet) {
     if (CONNECT == packet['type']) {
       final nsp = packet['nsp'];
       final uri = Uri.parse(nsp);
@@ -186,7 +186,7 @@ class Client {
   ///
   /// @param {Objcet} error object
   /// @api private
-  onerror(err) {
+  void onerror(err) {
     sockets.forEach((socket) {
       socket.onerror(err);
     });
@@ -197,7 +197,7 @@ class Client {
   ///
   /// @param {String} reason
   /// @api private
-  onclose(reason) {
+  void onclose(reason) {
     _logger.fine('client close with reason $reason');
 
     // ignore a potential subsequent `close` event
@@ -216,7 +216,7 @@ class Client {
   /// Cleans up event listeners.
   ///
   /// @api private
-  destroy() {
+  void destroy() {
     conn.off('data', ondata);
     conn.off('error', onerror);
     conn.off('close', onclose);

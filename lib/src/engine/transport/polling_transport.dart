@@ -37,7 +37,7 @@ class PollingTransport extends Transport {
   }
 
   @override
-  onRequest(SocketConnect connect) {
+  void onRequest(SocketConnect connect) {
     var res = connect.response;
 
     if ('GET' == connect.request.method) {
@@ -56,7 +56,7 @@ class PollingTransport extends Transport {
   /// The client sends a request awaiting for us to send data.
   ///
   /// @api private
-  onPollRequest(SocketConnect connect) {
+  void onPollRequest(SocketConnect connect) {
     if (this.connect != null) {
       _logger.fine('request overlap');
       // assert: this.res, '.req and .res should be (un)set together'
@@ -97,7 +97,7 @@ class PollingTransport extends Transport {
   /// The client sends a request with data.
   ///
   /// @api private
-  onDataRequest(SocketConnect connect) {
+  void onDataRequest(SocketConnect connect) {
     if (dataReq != null) {
       // assert: this.dataRes, '.dataReq and .dataRes should be (un)set together'
       onError('data request overlap from client');
@@ -177,7 +177,7 @@ class PollingTransport extends Transport {
   /// @param {String} encoded payload
   /// @api private
   @override
-  onData(data) {
+  void onData(data) {
     _logger.fine('received "$data"');
     if (messageHandler != null) {
       messageHandler.handle(this, data);
@@ -201,7 +201,7 @@ class PollingTransport extends Transport {
   ///
   /// @api private
   @override
-  onClose() {
+  void onClose() {
     if (writable == true) {
       // close pending poll request
       send([
@@ -216,7 +216,7 @@ class PollingTransport extends Transport {
   /// @param {Object} packet
   /// @api private
   @override
-  send(List packets) {
+  void send(List packets) {
     writable = false;
 
     if (shouldClose != null) {
@@ -242,7 +242,7 @@ class PollingTransport extends Transport {
   /// @param {String} data
   /// @param {Object} options
   /// @api private
-  write(data, [options]) {
+  void write(data, [options]) {
     _logger.fine('writing "$data"');
     doWrite(data, options, () {
       Function fn = _reqCleanups.remove(connect);
@@ -253,7 +253,7 @@ class PollingTransport extends Transport {
   /// Performs the write.
   ///
   /// @api private
-  doWrite(data, options, [callback]) {
+  void doWrite(data, options, [callback]) {
     var self = this;
 
     // explicit UTF-8 is required for pages not served under utf
@@ -331,7 +331,7 @@ class PollingTransport extends Transport {
   ///
   /// @api private
   @override
-  doClose([fn()]) {
+  void doClose([fn()]) {
     _logger.fine('closing');
 
     var self = this;
@@ -369,7 +369,7 @@ class PollingTransport extends Transport {
   /// @param {http.IncomingMessage} request
   /// @param {Object} extra headers
   /// @api private
-  headers(SocketConnect connect, [Map headers]) {
+  Map headers(SocketConnect connect, [Map headers]) {
     headers = headers ?? {};
 
     // prevent XSS warnings on IE

@@ -64,7 +64,7 @@ class Socket extends EventEmitter {
   ///
   /// @api private
 
-  onOpen() {
+  void onOpen() {
     readyState = 'open';
 
     // sends an `open` packet
@@ -90,7 +90,7 @@ class Socket extends EventEmitter {
   /// @param {Object} packet
   /// @api private
 
-  onPacket(packet) {
+  void onPacket(packet) {
     if ('open' == readyState) {
       // export packet event
       _logger.fine('packet');
@@ -125,7 +125,7 @@ class Socket extends EventEmitter {
   ///
   /// @param {Error} error object
   /// @api private
-  onError(err) {
+  void onError(err) {
     _logger.fine('transport error');
     onClose('transport error', err);
   }
@@ -133,7 +133,7 @@ class Socket extends EventEmitter {
   /// Sets and resets ping timeout timer based on client pings.
   ///
   /// @api private
-  setPingTimeout() {
+  void setPingTimeout() {
     if (pingTimeoutTimer != null) {
       pingTimeoutTimer.cancel();
     }
@@ -149,7 +149,7 @@ class Socket extends EventEmitter {
   ///
   /// @param {Transport} transport
   /// @api private
-  setTransport(Transport transport) {
+  void setTransport(Transport transport) {
     var onError = this.onError;
     var onPacket = this.onPacket;
     var flush = (_) => this.flush();
@@ -177,7 +177,7 @@ class Socket extends EventEmitter {
   ///
   /// @param {Transport} transport
   /// @api private
-  maybeUpgrade(transport) {
+  void maybeUpgrade(transport) {
     _logger.fine(
         'might upgrade socket transport from ${this.transport.name} to ${transport.name}');
 
@@ -274,7 +274,7 @@ class Socket extends EventEmitter {
   /// Clears listeners and timers associated with current transport.
   ///
   /// @api private
-  clearTransport() {
+  void clearTransport() {
     var cleanup;
 
     var toCleanUp = cleanupFn.length;
@@ -298,7 +298,7 @@ class Socket extends EventEmitter {
   /// Called upon transport considered closed.
   /// Possible reasons: `ping timeout`, `client error`, `parse error`,
   /// `transport error`, `server close`, `transport close`
-  onClose(reason, [description]) {
+  void onClose(reason, [description]) {
     if ('closed' != readyState) {
       readyState = 'closed';
       pingTimeoutTimer?.cancel();
@@ -321,7 +321,7 @@ class Socket extends EventEmitter {
   /// Setup and manage send callback
   ///
   /// @api private
-  setupSendCallback() {
+  void setupSendCallback() {
     // the message was sent successfully, execute the callback
     var onDrain = (_) {
       if (sentCallbackFn.isNotEmpty) {
@@ -355,8 +355,8 @@ class Socket extends EventEmitter {
   /// @param {Function} callback
   /// @return {Socket} for chaining
   /// @api public
-  send(data, options, [callback]) => write(data, options, callback);
-  write(data, options, [callback]) {
+  void send(data, options, [callback]) => write(data, options, callback);
+  Socket write(data, options, [callback]) {
     sendPacket('message',
         data: data, options: options, callback: callback);
     return this;
@@ -368,7 +368,7 @@ class Socket extends EventEmitter {
   /// @param {String} optional, data
   /// @param {Object} options
   /// @api private
-  sendPacket(type, {data, options, callback}) {
+  void sendPacket(type, {data, options, callback}) {
     options = options ?? {};
     options['compress'] = false != options['compress'];
 
@@ -393,7 +393,7 @@ class Socket extends EventEmitter {
   /// Attempts to flush the packets buffer.
   ///
   /// @api private
-  flush() {
+  void flush() {
     if ('closed' != readyState &&
         transport.writable == true &&
         writeBuffer.length > 0) {
@@ -417,7 +417,7 @@ class Socket extends EventEmitter {
   /// Get available upgrades for this socket.
   ///
   /// @api private
-  getAvailableUpgrades() {
+  List<dynamic> getAvailableUpgrades() {
     var availableUpgrades = [];
     var allUpgrades = server.upgrades(transport.name);
     for (var i = 0, l = allUpgrades.length; i < l; ++i) {
@@ -435,7 +435,7 @@ class Socket extends EventEmitter {
   /// @return {Socket} for chaining
   /// @api public
 
-  close([discard = false]) {
+  void close([discard = false]) {
     if ('open' != readyState) return;
     readyState = 'closing';
 
@@ -451,7 +451,7 @@ class Socket extends EventEmitter {
   ///
   /// @param {Boolean} discard
   /// @api private
-  closeTransport(discard) {
+  void closeTransport(discard) {
     if (discard == true) transport.discard();
     transport.close(() => onClose('forced close'));
   }

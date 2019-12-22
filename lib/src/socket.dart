@@ -81,7 +81,7 @@ class Socket extends EventEmitter {
   /// Builds the `handshake` BC object
   ///
   /// @api private
-  buildHandshake(query) {
+  Map buildHandshake(query) {
     final buildQuery = () {
       var requestQuery = request.uri.queryParameters;
       //if socket-specific query exist, replace query strings in requestQuery
@@ -180,7 +180,7 @@ class Socket extends EventEmitter {
   /// @param {String} name
   /// @return {Socket} self
   /// @api public
-  to(String name) {
+  Socket to(String name) {
     if (!roomList.contains(name)) roomList.add(name);
     return this;
   }
@@ -189,11 +189,11 @@ class Socket extends EventEmitter {
   ///
   /// @return {Socket} self
   /// @api public
-  send(_) {
+  void send(_) {
     write(_);
   }
 
-  write(List data) {
+  Socket write(List data) {
     emit('message', data);
     return this;
   }
@@ -203,7 +203,7 @@ class Socket extends EventEmitter {
   /// @param {Object} packet object
   /// @param {Object} options
   /// @api private
-  packet(packet, [opts]) {
+  void packet(packet, [opts]) {
     // ignore preEncoded = true.
     if (packet is Map) {
       packet['nsp'] = nsp.name;
@@ -219,7 +219,7 @@ class Socket extends EventEmitter {
   /// @param {Function} optional, callback
   /// @return {Socket} self
   /// @api private
-  join(room, [fn]) {
+  Socket join(room, [fn]) {
 //    debug('joining room %s', room);
     if (roomMap.containsKey(room)) {
       if (fn != null) fn(null);
@@ -240,7 +240,7 @@ class Socket extends EventEmitter {
   /// @param {Function} optional, callback
   /// @return {Socket} self
   /// @api private
-  leave(room, fn) {
+  Socket leave(room, fn) {
 //    debug('leave room %s', room);
     adapter.del(id, room, ([err]) {
       if (err != null) return fn?.call(err);
@@ -255,7 +255,7 @@ class Socket extends EventEmitter {
   ///
   /// @api private
 
-  leaveAll() {
+  void leaveAll() {
     adapter.delAll(id);
     roomMap = {};
   }
@@ -265,7 +265,7 @@ class Socket extends EventEmitter {
   ///
   /// @api private
 
-  onconnect() {
+  void onconnect() {
 //    debug('socket connected - writing packet');
     nsp.connected[id] = this;
     join(id);
@@ -277,7 +277,7 @@ class Socket extends EventEmitter {
   /// @param {Object} packet
   /// @api private
 
-  onpacket(packet) {
+  void onpacket(packet) {
 //    debug('got packet %j', packet);
     switch (packet['type']) {
       case EVENT:
@@ -309,7 +309,7 @@ class Socket extends EventEmitter {
   ///
   /// @param {Object} packet object
   /// @api private
-  onevent(packet) {
+  void onevent(packet) {
     List args = packet['data'] ?? [];
 //    debug('emitting event %j', args);
 
@@ -351,7 +351,7 @@ class Socket extends EventEmitter {
   /// Called upon ack packet.
   ///
   /// @api private
-  onack(packet) {
+  void onack(packet) {
     Function ack = acks.remove(packet['id']);
     if (ack is Function) {
 //      debug('calling ack %s with %j', packet.id, packet.data);
@@ -364,7 +364,7 @@ class Socket extends EventEmitter {
   /// Called upon client disconnect packet.
   ///
   /// @api private
-  ondisconnect() {
+  void ondisconnect() {
 //    debug('got disconnect packet');
     onclose('client namespace disconnect');
   }
@@ -372,7 +372,7 @@ class Socket extends EventEmitter {
   /// Handles a client error.
   ///
   /// @api private
-  onerror(err) {
+  void onerror(err) {
     if (hasListeners('error')) {
       emit('error', err);
     } else {
@@ -386,7 +386,7 @@ class Socket extends EventEmitter {
   /// @param {String} reason
   /// @param {Error} optional error object
   /// @api private
-  onclose([reason]) {
+  dynamic onclose([reason]) {
     if (!connected) return this;
 //    debug('closing socket - reason %s', reason);
     emit('disconnecting', reason);
@@ -403,7 +403,7 @@ class Socket extends EventEmitter {
   ///
   /// @param {Object} error object
   /// @api private
-  error(err) {
+  void error(err) {
     packet(<dynamic, dynamic>{'type': ERROR, 'data': err});
   }
 
@@ -413,7 +413,7 @@ class Socket extends EventEmitter {
   /// @return {Socket} self
   /// @api public
 
-  disconnect([close]) {
+  Socket disconnect([close]) {
     if (!connected) return this;
     if (close == true) {
       client.disconnect();
@@ -429,7 +429,7 @@ class Socket extends EventEmitter {
   /// @param {Boolean} if `true`, compresses the sending data
   /// @return {Socket} self
   /// @api public
-  compress(compress) {
+  Socket compress(compress) {
     flags = flags ?? {};
     flags['compress'] = compress;
     return this;

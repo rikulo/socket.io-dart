@@ -101,7 +101,7 @@ class Server extends Engine {
   ///
   /// @api private
 
-  _init() {
+  void _init() {
 //  if (this.transports.indexOf('websocket') == -1) return;
 
 //  if (this.ws) this.ws.close();
@@ -138,7 +138,7 @@ class Server extends Engine {
   /// @return {Boolean} whether the request is valid
   /// @api private
 
-  verify(SocketConnect connect, bool upgrade, fn) {
+  void verify(SocketConnect connect, bool upgrade, fn) {
     // transport check
     var req = connect.request;
     var transport = req.uri.queryParameters['transport'];
@@ -173,7 +173,7 @@ class Server extends Engine {
   /// @api public
 
   @override
-  close() {
+  void close() {
     _logger.fine('closing all open clients');
     for (var key in clients.keys) {
       if (clients[key] != null) {
@@ -193,7 +193,7 @@ class Server extends Engine {
   /// @param {http.ServerResponse|http.OutgoingMessage} response
   /// @api public
 
-  handleRequest(SocketConnect connect) {
+  void handleRequest(SocketConnect connect) {
     var req = connect.request;
     _logger.fine('handling ${req.method} http request ${req.uri.path}');
 //  this.prepare(req);
@@ -222,7 +222,7 @@ class Server extends Engine {
   /// @param {code} error code
   /// @api private
 
-  static sendErrorMessage(HttpRequest req, code) {
+  static void  sendErrorMessage(HttpRequest req, code) {
     var res = req.response;
     var isForbidden = !ServerErrorMessages.containsKey(code);
     if (isForbidden) {
@@ -251,7 +251,7 @@ class Server extends Engine {
   ///
   /// @param {Object} request object
   /// @api public
-  generateId(SocketConnect connect) {
+  String generateId(SocketConnect connect) {
     return _uuid.v1().replaceAll('-', '');
   }
 
@@ -260,7 +260,7 @@ class Server extends Engine {
   /// @param {String} transport name
   /// @param {Object} request object
   /// @api private
-  handshake(String transportName, SocketConnect connect) {
+  void handshake(String transportName, SocketConnect connect) {
     var id = generateId(connect);
 
     _logger.fine('handshaking client $id');
@@ -314,7 +314,7 @@ class Server extends Engine {
   /// Handles an Engine.IO HTTP Upgrade.
   ///
   /// @api public
-  handleUpgrade(SocketConnect connect) {
+  void handleUpgrade(SocketConnect connect) {
 //  this.prepare(req);
 
     verify(connect, true, (err, success) {
@@ -339,7 +339,7 @@ class Server extends Engine {
   /// @param {ws.Socket} websocket
   /// @api private
 
-  onWebSocket(SocketConnect connect) {
+  void onWebSocket(SocketConnect connect) {
 //    socket.listen((_) {},
 //        onError: () => _logger.fine('websocket error before upgrade'));
 
@@ -392,7 +392,7 @@ class Server extends Engine {
   /// @param {http.Server} server
   /// @param {Object} options
   /// @api public
-  attachTo(StreamServer server, Map options) {
+  void attachTo(StreamServer server, Map options) {
     options = options ?? {};
     var path =
         (options['path'] ?? '/engine.io').replaceFirst(RegExp(r'\/$'), '');
@@ -428,7 +428,7 @@ class Server extends Engine {
   /// @param {code} error code
   /// @api private
 
-  static abortConnection(SocketConnect connect, code) {
+  static void abortConnection(SocketConnect connect, code) {
     var socket = connect.websocket;
     if (socket.readyState == HttpStatus.ok) {
       var message = ServerErrorMessages.containsKey(code)

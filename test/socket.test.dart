@@ -14,7 +14,7 @@ import 'package:test/test.dart';
 
 import 'package:socket_io/socket_io.dart';
 
-main() {
+void main() {
   group('Socket IO', () {
     test('Start standalone server', () async {
       var io = Server();

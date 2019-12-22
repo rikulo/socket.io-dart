@@ -30,7 +30,7 @@ class JSONPTransport extends PollingTransport {
   ///
   /// @api private
   @override
-  onData(data) {
+  void onData(data) {
     // we leverage the qs module so that we get built-in DoS protection
     // and the fast alternative to decodeURIComponent
     data = parse(data)['d'];
@@ -51,7 +51,7 @@ class JSONPTransport extends PollingTransport {
   ///
   /// @api private
   @override
-  doWrite(data, options, [callback]) {
+  void doWrite(data, options, [callback]) {
     // we must output valid javascript, not valid json
     // see: http://timelessrepo.com/json-isnt-a-javascript-subset
     var js = json
@@ -73,7 +73,7 @@ class JSONPTransport extends PollingTransport {
     if (query.startsWith('?')) query = query.substring(1);
 
     // A custom decoder.
-    decode(String s) => Uri.decodeComponent(s.replaceAll('+', ' '));
+    String decode(String s) => Uri.decodeComponent(s.replaceAll('+', ' '));
 
     // Go through all the matches and build the result map.
     for (Match match in search.allMatches(query)) {

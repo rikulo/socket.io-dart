@@ -31,7 +31,7 @@ class Engine extends EventEmitter {
 //  upgrades() {}
 //  verify() {}
 //  prepare() {}
-  close() {}
+  void close() {}
 //  handleRequest() {}
 //  handshake() {}
 }
