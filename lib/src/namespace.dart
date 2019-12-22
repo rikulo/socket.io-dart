@@ -53,7 +53,7 @@ class Namespace extends EventEmitter {
    * @api private
    */
   Namespace(Server this.server, String this.name) {
-    this.initAdapter();
+    initAdapter();
   }
 
   /**
@@ -64,7 +64,7 @@ class Namespace extends EventEmitter {
    * @api private
    */
   initAdapter() {
-    this.adapter = Adapter.newInstance(this.server.adapter, this);
+    adapter = Adapter.newInstance(server.adapter, this);
   }
 
   /**
@@ -74,7 +74,7 @@ class Namespace extends EventEmitter {
    * @api public
    */
   use(fn) {
-    this.fns.add(fn);
+    fns.add(fn);
     return this;
   }
 
@@ -124,8 +124,8 @@ class Namespace extends EventEmitter {
    * @api public
    */
   to(String name) {
-    rooms = this.rooms?.isNotEmpty == true ? this.rooms : [];
-    if (!rooms.contains(name)) this.rooms.add(name);
+    rooms = rooms?.isNotEmpty == true ? rooms : [];
+    if (!rooms.contains(name)) rooms.add(name);
     return this;
   }
 
@@ -136,10 +136,10 @@ class Namespace extends EventEmitter {
    * @api private
    */
   add(Client client, query, fn) {
-    _logger.fine('adding socket to nsp ${this.name}');
+    _logger.fine('adding socket to nsp ${name}');
     var socket = Socket(this, client, query);
     var self = this;
-    this.run(socket, (err) {
+    run(socket, (err) {
       // don't use Timer.run() here
       scheduleMicrotask(() {
         if ('open' == client.conn.readyState) {
@@ -172,8 +172,8 @@ class Namespace extends EventEmitter {
    * @api private
    */
   remove(socket) {
-    if (this.sockets.contains(socket)) {
-      this.sockets.remove(socket);
+    if (sockets.contains(socket)) {
+      sockets.remove(socket);
     } else {
       _logger.fine('ignoring remove for ${socket.id}');
     }
@@ -196,12 +196,11 @@ class Namespace extends EventEmitter {
 
       Map packet = {'type': EVENT, 'data': data};
 
-      this
-          .adapter
-          .broadcast(packet, {'rooms': this.rooms, 'flags': this.flags});
+      adapter
+          .broadcast(packet, {'rooms': rooms, 'flags': flags});
 
-      this.rooms = null;
-      this.flags = null;
+      rooms = null;
+      flags = null;
     }
   }
 
@@ -216,7 +215,7 @@ class Namespace extends EventEmitter {
   }
 
   write([args]) {
-    this.emit('message', args);
+    emit('message', args);
     return this;
   }
 
@@ -227,8 +226,8 @@ class Namespace extends EventEmitter {
    * @api public
    */
   clients(fn([_])) {
-    this.adapter.clients(this.rooms, fn);
-    this.rooms = [];
+    adapter.clients(rooms, fn);
+    rooms = [];
     return this;
   }
 
@@ -240,8 +239,8 @@ class Namespace extends EventEmitter {
    * @api public
    */
   compress(compress) {
-    this.flags = this.flags.isEmpty ? this.flags : {};
-    this.flags['compress'] = compress;
+    flags = flags.isEmpty ? flags : {};
+    flags['compress'] = compress;
     return this;
   }
 }

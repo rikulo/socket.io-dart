@@ -30,19 +30,19 @@ class PollingTransport extends Transport {
   Function shouldClose;
   SocketConnect dataReq;
   PollingTransport(connect) : super(connect) {
-    this.closeTimeout = 30 * 1000;
-    this.maxHttpBufferSize = null;
-    this.httpCompression = null;
-    this.name = 'polling';
+    closeTimeout = 30 * 1000;
+    maxHttpBufferSize = null;
+    httpCompression = null;
+    name = 'polling';
   }
 
   onRequest(SocketConnect connect) {
     var res = connect.response;
 
     if ('GET' == connect.request.method) {
-      this.onPollRequest(connect);
+      onPollRequest(connect);
     } else if ('POST' == connect.request.method) {
-      this.onDataRequest(connect);
+      onDataRequest(connect);
     } else {
       res.statusCode = 500;
       res.close();
@@ -61,7 +61,7 @@ class PollingTransport extends Transport {
     if (this.connect != null) {
       _logger.fine('request overlap');
       // assert: this.res, '.req and .res should be (un)set together'
-      this.onError('overlap from client');
+      onError('overlap from client');
       this.connect.response.statusCode = 500;
       this.connect.close();
       return;
@@ -72,7 +72,7 @@ class PollingTransport extends Transport {
     this.connect = connect;
 
     var onClose = () {
-      this.onError('poll connection closed prematurely');
+      onError('poll connection closed prematurely');
     };
 
     var cleanup = () {
@@ -83,13 +83,13 @@ class PollingTransport extends Transport {
     _reqCleanups[connect] = cleanup;
     _reqCloses[connect] = onClose;
 
-    this.writable = true;
-    this.emit('drain');
+    writable = true;
+    emit('drain');
 
     // if we're still writable but had a pending close, trigger an empty send
-    if (this.writable && this.shouldClose != null) {
+    if (writable && shouldClose != null) {
       _logger.fine('triggering empty send to append close packet');
-      this.send([
+      send([
         {'type': 'noop'}
       ]);
     }
@@ -101,9 +101,9 @@ class PollingTransport extends Transport {
    * @api private
    */
   onDataRequest(SocketConnect connect) {
-    if (this.dataReq != null) {
+    if (dataReq != null) {
       // assert: this.dataRes, '.dataReq and .dataRes should be (un)set together'
-      this.onError('data request overlap from client');
+      onError('data request overlap from client');
       connect.response.statusCode = 500;
       connect.close();
       return;
@@ -112,7 +112,7 @@ class PollingTransport extends Transport {
     var isBinary = 'application/octet-stream' ==
         connect.request.headers.value('content-type');
 
-    this.dataReq = connect;
+    dataReq = connect;
 
     dynamic chunks = isBinary ? [0] : '';
     var self = this;
@@ -207,9 +207,9 @@ class PollingTransport extends Transport {
    * @api private
    */
   onClose() {
-    if (this.writable == true) {
+    if (writable == true) {
       // close pending poll request
-      this.send([
+      send([
         {'type': 'noop'}
       ]);
     }
@@ -223,17 +223,17 @@ class PollingTransport extends Transport {
    * @api private
    */
   send(List packets) {
-    this.writable = false;
+    writable = false;
 
-    if (this.shouldClose != null) {
+    if (shouldClose != null) {
       _logger.fine('appending close packet to payload');
       packets.add({'type': 'close'});
-      this.shouldClose();
-      this.shouldClose = null;
+      shouldClose();
+      shouldClose = null;
     }
 
     var self = this;
-    PacketParser.encodePayload(packets, supportsBinary: this.supportsBinary,
+    PacketParser.encodePayload(packets, supportsBinary: supportsBinary,
         callback: (data) {
       var compress = packets.any((packet) {
         var opt = packet['options'];
@@ -252,8 +252,8 @@ class PollingTransport extends Transport {
    */
   write(data, [options]) {
     _logger.fine('writing "$data"');
-    this.doWrite(data, options, () {
-      Function fn = _reqCleanups.remove(this.connect);
+    doWrite(data, options, () {
+      Function fn = _reqCleanups.remove(connect);
       if (fn != null) fn();
     });
   }
@@ -280,7 +280,7 @@ class PollingTransport extends Transport {
       res.statusCode = 200;
 
       res.headers.clear(); // remove all default headers.
-      this.headers(this.connect, headers).forEach((k, v) {
+      this.headers(connect, headers).forEach((k, v) {
         res.headers.set(k, v);
       });
       try {
@@ -303,19 +303,19 @@ class PollingTransport extends Transport {
       callback();
     };
 
-    if (this.httpCompression == null || options['compress'] != true) {
+    if (httpCompression == null || options['compress'] != true) {
       respond(data);
       return;
     }
 
     var len = isString ? utf8.encode(data).length : data.length;
-    if (len < this.httpCompression['threshold']) {
+    if (len < httpCompression['threshold']) {
       respond(data);
       return;
     }
 
     var encodings =
-        this.connect.request.headers.value(HttpHeaders.acceptEncodingHeader);
+        connect.request.headers.value(HttpHeaders.acceptEncodingHeader);
     var hasGzip = encodings.contains('gzip');
     if (!hasGzip && !encodings.contains('deflate')) {
       respond(data);
@@ -348,9 +348,9 @@ class PollingTransport extends Transport {
     var self = this;
     Timer closeTimeoutTimer;
 
-    if (this.dataReq != null) {
+    if (dataReq != null) {
       _logger.fine('aborting ongoing data request');
-      this.dataReq = null;
+      dataReq = null;
     }
 
     var onClose = () {
@@ -358,20 +358,20 @@ class PollingTransport extends Transport {
       if (fn != null) fn();
       self.onClose();
     };
-    if (this.writable == true) {
+    if (writable == true) {
       _logger.fine('transport writable - closing right away');
-      this.send([
+      send([
         {'type': 'close'}
       ]);
       onClose();
-    } else if (this.discarded) {
+    } else if (discarded) {
       _logger.fine('transport discarded - closing right away');
       onClose();
     } else {
       _logger.fine('transport not writable - buffering orderly close');
-      this.shouldClose = onClose;
+      shouldClose = onClose;
       closeTimeoutTimer =
-          Timer(Duration(milliseconds: this.closeTimeout), onClose);
+          Timer(Duration(milliseconds: closeTimeout), onClose);
     }
   }
 
@@ -393,7 +393,7 @@ class PollingTransport extends Transport {
       headers['X-XSS-Protection'] = '0';
     }
 
-    this.emit('headers', headers);
+    emit('headers', headers);
     return headers;
   }
 }

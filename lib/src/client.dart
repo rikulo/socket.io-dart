@@ -36,11 +36,11 @@ class Client {
    * @api private
    */
   Client(Server this.server, Socket this.conn) {
-    this.encoder = Encoder();
-    this.decoder = Decoder();
-    this.id = conn.id;
-    this.request = conn.connect.request;
-    this.setup();
+    encoder = Encoder();
+    decoder = Decoder();
+    id = conn.id;
+    request = conn.connect.request;
+    setup();
   }
 
   /**
@@ -49,10 +49,10 @@ class Client {
    * @api private
    */
   setup() {
-    this.decoder.on('decoded', this.ondecoded);
-    this.conn.on('data', this.ondata);
-    this.conn.on('error', this.onerror);
-    this.conn.on('close', this.onclose);
+    decoder.on('decoded', ondecoded);
+    conn.on('data', ondata);
+    conn.on('error', onerror);
+    conn.on('close', onclose);
   }
 
   /**
@@ -63,13 +63,13 @@ class Client {
    */
   connect(name, [query]) {
     _logger.fine('connecting to namespace $name');
-    if (!this.server.nsps.containsKey(name)) {
-      this.packet(<dynamic, dynamic>{'type': ERROR, 'nsp': name, 'data': 'Invalid namespace'});
+    if (!server.nsps.containsKey(name)) {
+      packet(<dynamic, dynamic>{'type': ERROR, 'nsp': name, 'data': 'Invalid namespace'});
       return;
     }
-    var nsp = this.server.of(name);
-    if ('/' != name && !this.nsps.containsKey('/')) {
-      this.connectBuffer.add(name);
+    var nsp = server.of(name);
+    if ('/' != name && !nsps.containsKey('/')) {
+      connectBuffer.add(name);
       return;
     }
 
@@ -93,12 +93,12 @@ class Client {
   disconnect() {
     // we don't use a for loop because the length of
     // `sockets` changes upon each iteration
-    this.sockets.toList().forEach((socket) {
+    sockets.toList().forEach((socket) {
       socket.disconnect();
     });
-    this.sockets.clear();
+    sockets.clear();
 
-    this.close();
+    close();
   }
 
   /**
@@ -107,11 +107,11 @@ class Client {
    * @api private
    */
   remove(socket) {
-    var i = this.sockets.indexOf(socket);
+    var i = sockets.indexOf(socket);
     if (i >= 0) {
-      var nsp = this.sockets[i].nsp.name;
-      this.sockets.removeAt(i);
-      this.nsps.remove(nsp);
+      var nsp = sockets[i].nsp.name;
+      sockets.removeAt(i);
+      nsps.remove(nsp);
     } else {
       _logger.fine('ignoring remove for ${socket.id}');
     }
@@ -123,10 +123,10 @@ class Client {
    * @api private
    */
   close() {
-    if ('open' == this.conn.readyState) {
+    if ('open' == conn.readyState) {
       _logger.fine('forcing transport close');
-      this.conn.close();
-      this.onclose('forced server close');
+      conn.close();
+      onclose('forced server close');
     }
   }
 
@@ -148,11 +148,11 @@ class Client {
       }
     }
 
-    if ('open' == this.conn.readyState) {
+    if ('open' == conn.readyState) {
       _logger.fine('writing packet $packet');
       if (opts['preEncoded'] != true) {
         // not broadcasting, need to encode
-        this.encoder.encode(packet, (encodedPackets) {
+        encoder.encode(packet, (encodedPackets) {
           // encode, then write results to engine
           writeToEngine(encodedPackets);
         });
@@ -173,10 +173,10 @@ class Client {
   ondata(data) {
     // try/catch is needed for protocol violations (GH-1880)
     try {
-      this.decoder.add(data);
+      decoder.add(data);
     } catch (e, st) {
       _logger.severe(e, st);
-      this.onerror(e);
+      onerror(e);
     }
   }
 
@@ -189,9 +189,9 @@ class Client {
     if (CONNECT == packet['type']) {
       final nsp = packet['nsp'];
       final uri = Uri.parse(nsp);
-      this.connect(uri.path, uri.queryParameters);
+      connect(uri.path, uri.queryParameters);
     } else {
-      var socket = this.nsps[packet['nsp']];
+      var socket = nsps[packet['nsp']];
       if (socket != null) {
         socket.onpacket(packet);
       } else {
@@ -207,10 +207,10 @@ class Client {
    * @api private
    */
   onerror(err) {
-    this.sockets.forEach((socket) {
+    sockets.forEach((socket) {
       socket.onerror(err);
     });
-    this.onclose('client error');
+    onclose('client error');
   }
 
   /**
@@ -223,16 +223,16 @@ class Client {
     _logger.fine('client close with reason $reason');
 
     // ignore a potential subsequent `close` event
-    this.destroy();
+    destroy();
 
     // `nsps` and `sockets` are cleaned up seamlessly
-    if (this.sockets.isNotEmpty) {
-       List.from(this.sockets).forEach((socket) {
+    if (sockets.isNotEmpty) {
+       List.from(sockets).forEach((socket) {
         socket.onclose(reason);
       });
-      this.sockets.clear();
+      sockets.clear();
     }
-    this.decoder.destroy(); // clean up decoder
+    decoder.destroy(); // clean up decoder
   }
 
   /**
@@ -241,9 +241,9 @@ class Client {
    * @api private
    */
   destroy() {
-    this.conn.off('data', this.ondata);
-    this.conn.off('error', this.onerror);
-    this.conn.off('close', this.onclose);
-    this.decoder.off('decoded', this.ondecoded);
+    conn.off('data', ondata);
+    conn.off('error', onerror);
+    conn.off('close', onclose);
+    decoder.off('decoded', ondecoded);
   }
 }

@@ -54,16 +54,16 @@ class Server {
    */
   Server({server: null, Map options}) {
     options = options ?? {};
-    this.nsps = {};
-    this.path(options.containsKey('path') ? options['path'] : '/socket.io');
-    this.serveClient(false != options['serveClient']);
-    this.adapter =
+    nsps = {};
+    path(options.containsKey('path') ? options['path'] : '/socket.io');
+    serveClient(false != options['serveClient']);
+    adapter =
         options.containsKey('adapter') ? options['adapter'] : 'default';
-    this.origins(options.containsKey('origins') ? options['origins'] : '*:*');
-    this.encoder = Encoder();
-    this.sockets = this.of('/');
+    origins(options.containsKey('origins') ? options['origins'] : '*:*');
+    encoder = Encoder();
+    sockets = of('/');
     if (server != null) {
-      this.attach(server, options);
+      attach(server, options);
     }
   }
 
@@ -83,11 +83,11 @@ class Server {
       origin = '*';
     }
 
-    if (!origin.isEmpty && this._origins is Function) {
-      return this._origins(origin, fn);
+    if (!origin.isEmpty && _origins is Function) {
+      return _origins(origin, fn);
     }
 
-    if (this._origins.contains('*:*')) {
+    if (_origins.contains('*:*')) {
       return fn(null, true);
     }
 
@@ -97,9 +97,9 @@ class Server {
         int defaultPort = 'https:' == parts.scheme ? 443 : 80;
         int port = parts.port != null ? parts.port : defaultPort;
         bool ok =
-            this._origins.indexOf(parts.host + ':' + port.toString()) >= 0 ||
-                this._origins.indexOf(parts.host + ':*') >= 0 ||
-                this._origins.indexOf('*:' + port.toString()) >= 0;
+            _origins.indexOf(parts.host + ':' + port.toString()) >= 0 ||
+                _origins.indexOf(parts.host + ':*') >= 0 ||
+                _origins.indexOf('*:' + port.toString()) >= 0;
 
         return fn(null, ok);
       } catch (ex) {}
@@ -117,10 +117,10 @@ class Server {
    */
   serveClient([bool v]) {
     if (v == null) {
-      return this._serveClient;
+      return _serveClient;
     }
 
-    this._serveClient = v;
+    _serveClient = v;
     return this;
   }
 
@@ -131,7 +131,7 @@ class Server {
    */
   set(String key, [val]) {
     if ('authorization' == key && val != null) {
-      this.use((socket, next) {
+      use((socket, next) {
         val(socket.request, (err, authorized) {
           if (err) {
             return next(Exception(err));
@@ -145,11 +145,11 @@ class Server {
         });
       });
     } else if ('origins' == key && val != null) {
-      this.origins(val);
+      origins(val);
     } else if ('resource' == key) {
-      this.path(val);
-    } else if (oldSettings[key] && this.engine[oldSettings[key]]) {
-      this.engine[oldSettings[key]] = val;
+      path(val);
+    } else if (oldSettings[key] && engine[oldSettings[key]]) {
+      engine[oldSettings[key]] = val;
     } else {
       _logger.severe('Option $key is not valid. Please refer to the README.');
     }
@@ -165,8 +165,8 @@ class Server {
    * @api public
    */
   path([String v]) {
-    if (v == null || v.isEmpty) return this._path;
-    this._path = v.replaceFirst(RegExp(r'/\/$/'), '');
+    if (v == null || v.isEmpty) return _path;
+    _path = v.replaceFirst(RegExp(r'/\/$/'), '');
     return this;
   }
 
@@ -177,13 +177,13 @@ class Server {
    * @return {Server|Adapter} self when setting or value when getting
    * @api public
    */
-  String get adapter => this._adapter;
+  String get adapter => _adapter;
 
   void set adapter(String v) {
-    this._adapter = v;
+    _adapter = v;
     if (nsps.isNotEmpty) {
-      this.nsps.forEach((dynamic i, Namespace nsp) {
-        this.nsps[i].initAdapter();
+      nsps.forEach((dynamic i, Namespace nsp) {
+        nsps[i].initAdapter();
       });
     }
   }
@@ -197,9 +197,9 @@ class Server {
    */
 
   origins([String v]) {
-    if (v == null || v.isEmpty) return this._origins;
+    if (v == null || v.isEmpty) return _origins;
 
-    this._origins = v;
+    _origins = v;
     return this;
   }
 
@@ -239,10 +239,10 @@ class Server {
     }
     // set engine.io path to `/socket.io`
     if (!opts.containsKey('path')) {
-      opts['path'] = this.path();
+      opts['path'] = path();
     }
     // set origins verification
-    opts['allowRequest'] = this.checkRequest;
+    opts['allowRequest'] = checkRequest;
 
     if (srv is num) {
       _logger.fine('creating http server and binding to $srv');
@@ -259,44 +259,44 @@ class Server {
 ////                });
 
       var connectPacket = {'type': CONNECT, 'nsp': '/'};
-      this.encoder.encode(connectPacket, (encodedPacket) {
+      encoder.encode(connectPacket, (encodedPacket) {
         // the CONNECT packet will be merged with Engine.IO handshake,
         // to reduce the number of round trips
         opts['initialPacket'] = encodedPacket;
 
         _logger.fine('creating engine.io instance with opts $opts');
         // initialize engine
-        this.engine = Engine.attach(server, opts);
+        engine = Engine.attach(server, opts);
 
         // attach static file serving
 //        if (self._serveClient) self.attachServe(srv);
 
         // Export http server
-        this.httpServer = server;
+        httpServer = server;
 
         // bind to engine events
-        this.bind(this.engine);
+        bind(engine);
       });
 //      });
     } else {
       var connectPacket = {'type': CONNECT, 'nsp': '/'};
-      this.encoder.encode(connectPacket, (encodedPacket) {
+      encoder.encode(connectPacket, (encodedPacket) {
         // the CONNECT packet will be merged with Engine.IO handshake,
         // to reduce the number of round trips
         opts['initialPacket'] = encodedPacket;
 
         _logger.fine('creating engine.io instance with opts $opts');
         // initialize engine
-        this.engine = Engine.attach(srv, opts);
+        engine = Engine.attach(srv, opts);
 
         // attach static file serving
 //        if (self._serveClient) self.attachServe(srv);
 
         // Export http server
-        this.httpServer = srv;
+        httpServer = srv;
 
         // bind to engine events
-        this.bind(this.engine);
+        bind(engine);
       });
     }
 
@@ -363,7 +363,7 @@ class Server {
    */
   bind(engine) {
     this.engine = engine;
-    this.engine.on('connection', this.onconnection);
+    this.engine.on('connection', onconnection);
     return this;
   }
 
@@ -394,13 +394,13 @@ class Server {
       name = '/' + name;
     }
 
-    if (!this.nsps.containsKey(name)) {
+    if (!nsps.containsKey(name)) {
       _logger.fine('initializing namespace $name');
       Namespace nsp = Namespace(this, name);
-      this.nsps[name] = nsp;
+      nsps[name] = nsp;
     }
-    if (fn != null) this.nsps[name].on('connect', fn);
-    return this.nsps[name];
+    if (fn != null) nsps[name].on('connect', fn);
+    return nsps[name];
   }
 
   /**
@@ -409,14 +409,14 @@ class Server {
    * @api public
    */
   close() {
-    this.nsps['/'].sockets.forEach((socket) {
+    nsps['/'].sockets.forEach((socket) {
       socket.onclose();
     });
 
-    this.engine.close();
+    engine.close();
 
-    if (this.httpServer != null) {
-      this.httpServer.stop();
+    if (httpServer != null) {
+      httpServer.stop();
     }
   }
 

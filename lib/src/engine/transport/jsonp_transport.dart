@@ -18,11 +18,11 @@ class JSONPTransport extends PollingTransport {
   String head;
   String foot;
   JSONPTransport(SocketConnect connect) : super(connect) {
-    this.head = '___eio[' +
+    head = '___eio[' +
         (connect.request.uri.queryParameters['j'] ?? '')
             .replaceAll(RegExp('[^0-9]'), '') +
         '](';
-    this.foot = ');';
+    foot = ');';
   }
 
   /**
@@ -62,7 +62,7 @@ class JSONPTransport extends PollingTransport {
         .replaceAll(RegExp(r'\u2029'), '\\u2029');
 
     // prepare response
-    data = this.head + js + this.foot;
+    data = head + js + foot;
 
     super.doWrite(data, options, callback);
   }

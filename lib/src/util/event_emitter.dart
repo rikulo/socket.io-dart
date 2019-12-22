@@ -35,8 +35,8 @@ class EventEmitter {
    * Constructor
    */
   EventEmitter() {
-    this._events = HashMap<String, List<EventHandler>>();
-    this._eventsOnce = HashMap<String, List<EventHandler>>();
+    _events = HashMap<String, List<EventHandler>>();
+    _eventsOnce = HashMap<String, List<EventHandler>>();
   }
 
   /**
@@ -44,7 +44,7 @@ class EventEmitter {
    * to [event] and passes them [data].
    */
   void emit(String event, [dynamic data]) {
-    final list0 = this._events[event];
+    final list0 = _events[event];
     // todo: try to optimize this. Maybe remember the off() handlers and remove later?
     // handler might be off() inside handler; make a copy first
     final list = list0 != null ? List.from(list0) : null;
@@ -52,7 +52,7 @@ class EventEmitter {
       handler(data);
     });
 
-    this._eventsOnce.remove(event)?.forEach((EventHandler handler) {
+    _eventsOnce.remove(event)?.forEach((EventHandler handler) {
       handler(data);
     });
   }
@@ -61,8 +61,8 @@ class EventEmitter {
    * This function binds the [handler] as a listener to the [event]
    */
   void on(String event, EventHandler handler) {
-    this._events.putIfAbsent(event, () => List<EventHandler>());
-    this._events[event].add(handler);
+    _events.putIfAbsent(event, () => List<EventHandler>());
+    _events[event].add(handler);
   }
 
   /**
@@ -71,8 +71,8 @@ class EventEmitter {
    * it is removed.
    */
   void once(String event, EventHandler handler) {
-    this._eventsOnce.putIfAbsent(event, () => List<EventHandler>());
-    this._eventsOnce[event].add(handler);
+    _eventsOnce.putIfAbsent(event, () => List<EventHandler>());
+    _eventsOnce[event].add(handler);
   }
 
   /**
@@ -80,17 +80,17 @@ class EventEmitter {
    */
   void off(String event, [EventHandler handler]) {
     if (handler != null) {
-      this._events[event]?.remove(handler);
-      this._eventsOnce[event]?.remove(handler);
-      if (this._events[event]?.isEmpty == true) {
-        this._events.remove(event);
+      _events[event]?.remove(handler);
+      _eventsOnce[event]?.remove(handler);
+      if (_events[event]?.isEmpty == true) {
+        _events.remove(event);
       }
-      if (this._eventsOnce[event]?.isEmpty == true) {
-        this._eventsOnce.remove(event);
+      if (_eventsOnce[event]?.isEmpty == true) {
+        _eventsOnce.remove(event);
       }
     } else {
-      this._events.remove(event);
-      this._eventsOnce.remove(event);
+      _events.remove(event);
+      _eventsOnce.remove(event);
     }
   }
 
@@ -98,15 +98,15 @@ class EventEmitter {
    * This function unbinds all the handlers for all the events.
    */
   void clearListeners() {
-    this._events = HashMap<String, List<EventHandler>>();
-    this._eventsOnce = HashMap<String, List<EventHandler>>();
+    _events = HashMap<String, List<EventHandler>>();
+    _eventsOnce = HashMap<String, List<EventHandler>>();
   }
 
   /**
    * Returns whether the event has registered.
    */
   bool hasListeners(String event) {
-    return this._events[event]?.isNotEmpty == true ||
-        this._eventsOnce[event]?.isNotEmpty == true;
+    return _events[event]?.isNotEmpty == true ||
+        _eventsOnce[event]?.isNotEmpty == true;
   }
 }

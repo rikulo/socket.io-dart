@@ -21,10 +21,10 @@ class WebSocketTransport extends Transport {
   bool get supportsFraming => true;
   StreamSubscription subscription;
   WebSocketTransport(connect) : super(connect) {
-    this.name = 'websocket';
+    name = 'websocket';
     this.connect = connect;
     subscription = connect.websocket
-        .listen(this.onData, onError: this.onError, onDone: this.onClose);
+        .listen(onData, onError: onError, onDone: onClose);
     writable = true;
   }
 
@@ -46,7 +46,7 @@ class WebSocketTransport extends Transport {
 //      }
 
 //      this.writable = false;
-      this.connect.websocket.add(data);
+      connect.websocket.add(data);
     };
 
 //    function onEnd (err) {
@@ -57,7 +57,7 @@ class WebSocketTransport extends Transport {
     for (var i = 0; i < packets.length; i++) {
       var packet = packets[i];
       PacketParser.encodePacket(packet,
-          supportsBinary: this.supportsBinary,
+          supportsBinary: supportsBinary,
           callback: (_) => send(_, packet));
     }
   }
@@ -73,7 +73,7 @@ class WebSocketTransport extends Transport {
   }
 
   void doClose([fn]) {
-    this.connect.websocket.close();
+    connect.websocket.close();
     if (fn != null) fn();
   }
 }

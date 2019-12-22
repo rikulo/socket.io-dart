@@ -43,9 +43,9 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   Namespace nsp;
   _MemoryStoreAdapter(nsp) {
     this.nsp = nsp;
-    this.rooms = {};
-    this.sids = {};
-    this.encoder = nsp.server.encoder;
+    rooms = {};
+    sids = {};
+    encoder = nsp.server.encoder;
   }
 
   /**
@@ -58,10 +58,10 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
    */
 
   add(String id, String room, [fn([_])]) {
-    this.sids[id] = this.sids[id] ?? {};
-    this.sids[id][room] = true;
-    this.rooms[room] = this.rooms[room] ?? _Room();
-    this.rooms[room].add(id);
+    sids[id] = sids[id] ?? {};
+    sids[id][room] = true;
+    rooms[room] = rooms[room] ?? _Room();
+    rooms[room].add(id);
     if (fn != null) scheduleMicrotask(() => fn(null));
   }
 
@@ -74,11 +74,11 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
    * @api public
    */
   del(String id, String room, [fn([_])]) {
-    this.sids[id] = this.sids[id] ?? {};
-    this.sids[id].remove(room);
-    if (this.rooms.containsKey(room)) {
-      this.rooms[room].del(id);
-      if (this.rooms[room].length == 0) this.rooms.remove(room);
+    sids[id] = sids[id] ?? {};
+    sids[id].remove(room);
+    if (rooms.containsKey(room)) {
+      rooms[room].del(id);
+      if (rooms[room].length == 0) rooms.remove(room);
     }
 
     if (fn != null) scheduleMicrotask(() => fn(null));
@@ -92,16 +92,16 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
    * @api public
    */
   delAll(String id, [fn([_])]) {
-    var rooms = this.sids[id];
+    var rooms = sids[id];
     if (rooms != null) {
       for (var room in rooms.keys) {
-        if (this.rooms.containsKey(room)) {
-          this.rooms[room].del(id);
-          if (this.rooms[room].length == 0) this.rooms.remove(room);
+        if (rooms.containsKey(room)) {
+          rooms[room].del(id);
+          if (rooms[room].length == 0) rooms.remove(room);
         }
       }
     }
-    this.sids.remove(id);
+    sids.remove(id);
 
     if (fn != null) scheduleMicrotask(() => fn(null));
   }
@@ -130,17 +130,17 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     var ids = {};
     var socket;
 
-    packet['nsp'] = this.nsp.name;
-    this.encoder.encode(packet, (encodedPackets) {
+    packet['nsp'] = nsp.name;
+    encoder.encode(packet, (encodedPackets) {
       if (rooms.isNotEmpty) {
         for (var i = 0; i < rooms.length; i++) {
-          var room = this.rooms[rooms[i]];
+          var room = rooms[rooms[i]];
           if (room == null) continue;
           var sockets = room.sockets;
           for (var id in sockets.keys) {
             if (sockets.containsKey(id)) {
               if (ids[id] != null || except.indexOf(id) >= 0) continue;
-              socket = this.nsp.connected[id];
+              socket = nsp.connected[id];
               if (socket != null) {
                 socket.packet(encodedPackets, packetOpts);
                 ids[id] = true;
@@ -149,9 +149,9 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
           }
         }
       } else {
-        for (var id in this.sids.keys) {
+        for (var id in sids.keys) {
           if (except.indexOf(id) >= 0) continue;
-          socket = this.nsp.connected[id];
+          socket = nsp.connected[id];
           if (socket != null) socket.packet(encodedPackets, packetOpts);
         }
       }
@@ -174,13 +174,13 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
 
     if (rooms.isNotEmpty) {
       for (var i = 0; i < rooms.length; i++) {
-        var room = this.rooms[rooms[i]];
+        var room = rooms[rooms[i]];
         if (room == null) continue;
         var sockets = room.sockets;
         for (var id in sockets.keys) {
           if (sockets.containsKey(id)) {
             if (ids[id] != null) continue;
-            socket = this.nsp.connected[id];
+            socket = nsp.connected[id];
             if (socket != null) {
               sids.add(id);
               ids[id] = true;
@@ -190,7 +190,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
       }
     } else {
       for (var id in this.sids.keys) {
-        socket = this.nsp.connected[id];
+        socket = nsp.connected[id];
         if (socket != null) sids.add(id);
       }
     }
@@ -206,7 +206,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
    * @api public
    */
   clientRooms(String id, [fn(err, [_])]) {
-    var rooms = this.sids[id];
+    var rooms = sids[id];
     if (fn != null) scheduleMicrotask(() => fn(null, rooms?.keys));
   }
 }
@@ -220,8 +220,8 @@ class _Room {
   Map<String, bool> sockets;
   int length;
   _Room() {
-    this.sockets = {};
-    this.length = 0;
+    sockets = {};
+    length = 0;
   }
 
   /**
@@ -231,9 +231,9 @@ class _Room {
    * @api private
    */
   add(String id) {
-    if (!this.sockets.containsKey(id)) {
-      this.sockets[id] = true;
-      this.length++;
+    if (!sockets.containsKey(id)) {
+      sockets[id] = true;
+      length++;
     }
   }
 
@@ -244,9 +244,9 @@ class _Room {
    * @api private
    */
   del(String id) {
-    if (this.sockets.containsKey(id)) {
-      this.sockets.remove(id);
-      this.length--;
+    if (sockets.containsKey(id)) {
+      sockets.remove(id);
+      length--;
     }
   }
 }

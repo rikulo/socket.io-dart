@@ -74,12 +74,12 @@ class Socket extends EventEmitter {
   Map data = {};
 
   Socket(this.nsp, this.client, query) {
-    this.server = nsp.server;
-    this.adapter = this.nsp.adapter;
-    this.id = client.id;
-    this.request = client.request;
-    this.conn = client.conn;
-    this.handshake = this.buildHandshake(query);
+    server = nsp.server;
+    adapter = nsp.adapter;
+    id = client.id;
+    request = client.request;
+    conn = client.conn;
+    handshake = buildHandshake(query);
   }
 
   /**
@@ -89,39 +89,39 @@ class Socket extends EventEmitter {
    */
   buildHandshake(query) {
     final buildQuery = () {
-      var requestQuery = this.request.uri.queryParameters;
+      var requestQuery = request.uri.queryParameters;
       //if socket-specific query exist, replace query strings in requestQuery
       return query != null
           ? (Map.from(query)..addAll(requestQuery))
           : requestQuery;
     };
     return {
-      'headers': this.request.headers,
+      'headers': request.headers,
       'time': DateTime.now().toString(),
-      'address': this.conn.remoteAddress,
-      'xdomain': this.request.headers.value('origin') != null,
+      'address': conn.remoteAddress,
+      'xdomain': request.headers.value('origin') != null,
       // TODO  'secure': ! !this.request.connectionInfo.encrypted,
       'issued': DateTime.now().millisecondsSinceEpoch,
-      'url': this.request.uri.path,
+      'url': request.uri.path,
       'query': buildQuery()
     };
   }
 
   Socket get json {
-    this.flags = this.flags ?? {};
-    this.flags['json'] = true;
+    flags = flags ?? {};
+    flags['json'] = true;
     return this;
   }
 
   Socket get volatile {
-    this.flags = this.flags ?? {};
-    this.flags['volatile'] = true;
+    flags = flags ?? {};
+    flags['volatile'] = true;
     return this;
   }
 
   Socket get broadcast {
-    this.flags = this.flags ?? {};
-    this.flags['broadcast'] = true;
+    flags = flags ?? {};
+    flags['broadcast'] = true;
     return this;
   }
 
@@ -150,22 +150,22 @@ class Socket extends EventEmitter {
       var flags = this.flags ?? {};
 
       if (ack != null) {
-        if (this.roomList.isNotEmpty || flags['broadcast'] == true) {
+        if (roomList.isNotEmpty || flags['broadcast'] == true) {
           throw UnsupportedError(
               'Callbacks are not supported when broadcasting');
         }
 
-        this.acks['${this.nsp.ids}'] = ack;
-        packet['id'] = '${this.nsp.ids++}';
+        acks['${nsp.ids}'] = ack;
+        packet['id'] = '${nsp.ids++}';
       }
 
       packet['type'] = binary ? BINARY_EVENT : EVENT;
       packet['data'] = sendData;
 
-      if (this.roomList.isNotEmpty || flags['broadcast'] == true) {
-        this.adapter.broadcast(packet, {
-          'except': [this.id],
-          'rooms': this.roomList,
+      if (roomList.isNotEmpty || flags['broadcast'] == true) {
+        adapter.broadcast(packet, {
+          'except': [id],
+          'rooms': roomList,
           'flags': flags
         });
       } else {
@@ -175,7 +175,7 @@ class Socket extends EventEmitter {
       }
 
 //      // reset flags
-      this.roomList = [];
+      roomList = [];
       this.flags = null;
 //    }
 //    return this;
@@ -190,7 +190,7 @@ class Socket extends EventEmitter {
    * @api public
    */
   to(String name) {
-    if (!this.roomList.contains(name)) this.roomList.add(name);
+    if (!roomList.contains(name)) roomList.add(name);
     return this;
   }
 
@@ -201,11 +201,11 @@ class Socket extends EventEmitter {
    * @api public
    */
   send(_) {
-    this.write(_);
+    write(_);
   }
 
   write(List data) {
-    this.emit('message', data);
+    emit('message', data);
     return this;
   }
 
@@ -219,11 +219,11 @@ class Socket extends EventEmitter {
   packet(packet, [opts]) {
     // ignore preEncoded = true.
     if (packet is Map) {
-      packet['nsp'] = this.nsp.name;
+      packet['nsp'] = nsp.name;
     }
     opts = opts ?? {};
     opts['compress'] = false != opts['compress'];
-    this.client.packet(packet, opts);
+    client.packet(packet, opts);
   }
 
   /**
@@ -236,14 +236,14 @@ class Socket extends EventEmitter {
    */
   join(room, [fn]) {
 //    debug('joining room %s', room);
-    if (this.roomMap.containsKey(room)) {
+    if (roomMap.containsKey(room)) {
       if (fn != null) fn(null);
       return this;
     }
-    this.adapter.add(this.id, room, ([err]) {
+    adapter.add(id, room, ([err]) {
       if (err != null) return fn?.call(err);
 //      _logger.info('joined room %s', room);
-      this.roomMap[room] = room;
+      roomMap[room] = room;
       if (fn != null) fn(null);
     });
     return this;
@@ -259,10 +259,10 @@ class Socket extends EventEmitter {
    */
   leave(room, fn) {
 //    debug('leave room %s', room);
-    this.adapter.del(this.id, room, ([err]) {
+    adapter.del(id, room, ([err]) {
       if (err != null) return fn?.call(err);
 //      _logger.info('left room %s', room);
-      this.roomMap.remove(room);
+      roomMap.remove(room);
       fn?.call(null);
     });
     return this;
@@ -275,8 +275,8 @@ class Socket extends EventEmitter {
    */
 
   leaveAll() {
-    this.adapter.delAll(this.id);
-    this.roomMap = {};
+    adapter.delAll(id);
+    roomMap = {};
   }
 
   /**
@@ -288,9 +288,9 @@ class Socket extends EventEmitter {
 
   onconnect() {
 //    debug('socket connected - writing packet');
-    this.nsp.connected[this.id] = this;
-    this.join(this.id);
-    this.packet(<dynamic, dynamic>{'type': CONNECT});
+    nsp.connected[id] = this;
+    join(id);
+    packet(<dynamic, dynamic>{'type': CONNECT});
   }
 
   /**
@@ -304,27 +304,27 @@ class Socket extends EventEmitter {
 //    debug('got packet %j', packet);
     switch (packet['type']) {
       case EVENT:
-        this.onevent(packet);
+        onevent(packet);
         break;
 
       case BINARY_EVENT:
-        this.onevent(packet);
+        onevent(packet);
         break;
 
       case ACK:
-        this.onack(packet);
+        onack(packet);
         break;
 
       case BINARY_ACK:
-        this.onack(packet);
+        onack(packet);
         break;
 
       case DISCONNECT:
-        this.ondisconnect();
+        ondisconnect();
         break;
 
       case ERROR:
-        this.emit('error', packet['data']);
+        emit('error', packet['data']);
     }
   }
 
@@ -340,7 +340,7 @@ class Socket extends EventEmitter {
 
     if (null != packet['id']) {
 //      debug('attaching ack callback to event');
-      args.add(this.ack(packet['id']));
+      args.add(ack(packet['id']));
     }
 
     // dart doesn't support "String... rest" syntax.
@@ -381,7 +381,7 @@ class Socket extends EventEmitter {
    * @api private
    */
   onack(packet) {
-    Function ack = this.acks.remove(packet['id']);
+    Function ack = acks.remove(packet['id']);
     if (ack is Function) {
 //      debug('calling ack %s with %j', packet.id, packet.data);
       Function.apply(ack, packet['data']);
@@ -397,7 +397,7 @@ class Socket extends EventEmitter {
    */
   ondisconnect() {
 //    debug('got disconnect packet');
-    this.onclose('client namespace disconnect');
+    onclose('client namespace disconnect');
   }
 
   /**
@@ -406,8 +406,8 @@ class Socket extends EventEmitter {
    * @api private
    */
   onerror(err) {
-    if (this.hasListeners('error')) {
-      this.emit('error', err);
+    if (hasListeners('error')) {
+      emit('error', err);
     } else {
 //      console.error('Missing error handler on `socket`.');
 //      console.error(err.stack);
@@ -422,16 +422,16 @@ class Socket extends EventEmitter {
    * @api private
    */
   onclose([reason]) {
-    if (!this.connected) return this;
+    if (!connected) return this;
 //    debug('closing socket - reason %s', reason);
-    this.emit('disconnecting', reason);
-    this.leaveAll();
-    this.nsp.remove(this);
-    this.client.remove(this);
-    this.connected = false;
-    this.disconnected = true;
-    this.nsp.connected.remove(this.id);
-    this.emit('disconnect', reason);
+    emit('disconnecting', reason);
+    leaveAll();
+    nsp.remove(this);
+    client.remove(this);
+    connected = false;
+    disconnected = true;
+    nsp.connected.remove(id);
+    emit('disconnect', reason);
   }
 
   /**
@@ -441,7 +441,7 @@ class Socket extends EventEmitter {
    * @api private
    */
   error(err) {
-    this.packet(<dynamic, dynamic>{'type': ERROR, 'data': err});
+    packet(<dynamic, dynamic>{'type': ERROR, 'data': err});
   }
 
   /**
@@ -453,12 +453,12 @@ class Socket extends EventEmitter {
    */
 
   disconnect([close]) {
-    if (!this.connected) return this;
+    if (!connected) return this;
     if (close == true) {
-      this.client.disconnect();
+      client.disconnect();
     } else {
-      this.packet(<dynamic, dynamic>{'type': DISCONNECT});
-      this.onclose('server namespace disconnect');
+      packet(<dynamic, dynamic>{'type': DISCONNECT});
+      onclose('server namespace disconnect');
     }
     return this;
   }
@@ -471,8 +471,8 @@ class Socket extends EventEmitter {
    * @api public
    */
   compress(compress) {
-    this.flags = this.flags ?? {};
-    this.flags['compress'] = compress;
+    flags = flags ?? {};
+    flags['compress'] = compress;
     return this;
   }
 }

@@ -63,40 +63,40 @@ class Server extends Engine {
 
   Server([Map opts]) {
     clients = {};
-    this.clientsCount = 0;
+    clientsCount = 0;
 
     opts = opts ?? {};
 
-    this.pingTimeout = opts['pingTimeout'] ?? 60000;
-    this.pingInterval = opts['pingInterval'] ?? 25000;
-    this.upgradeTimeout = opts['upgradeTimeout'] ?? 10000;
-    this.maxHttpBufferSize = opts['maxHttpBufferSize'] ?? 10E7;
-    this.transports = ['polling', 'websocket'];
-    this.allowUpgrades = false != opts['allowUpgrades'];
-    this.allowRequest = opts['allowRequest'];
-    this.cookie = opts['cookie'] == false
+    pingTimeout = opts['pingTimeout'] ?? 60000;
+    pingInterval = opts['pingInterval'] ?? 25000;
+    upgradeTimeout = opts['upgradeTimeout'] ?? 10000;
+    maxHttpBufferSize = opts['maxHttpBufferSize'] ?? 10E7;
+    transports = ['polling', 'websocket'];
+    allowUpgrades = false != opts['allowUpgrades'];
+    allowRequest = opts['allowRequest'];
+    cookie = opts['cookie'] == false
         ? false
         : opts['cookie'] ??
             'io'; //false != opts.cookie ? (opts.cookie || 'io') : false;
-    this.cookiePath = opts['cookiePath'] == false
+    cookiePath = opts['cookiePath'] == false
         ? false
         : opts['cookiePath'] ??
             '/'; //false != opts.cookiePath ? (opts.cookiePath || '/') : false;
-    this.cookieHttpOnly = opts['cookieHttpOnly'] != false;
+    cookieHttpOnly = opts['cookieHttpOnly'] != false;
 
     if (!opts.containsKey('perMessageDeflate') ||
         opts['perMessageDeflate'] == true) {
-      this.perMessageDeflate =
+      perMessageDeflate =
           opts['perMessageDeflate'] is Map ? opts['perMessageDeflate'] : {};
-      if (!this.perMessageDeflate.containsKey('threshold'))
-        this.perMessageDeflate['threshold'] = 1024;
+      if (!perMessageDeflate.containsKey('threshold'))
+        perMessageDeflate['threshold'] = 1024;
     }
-    this.httpCompression = opts['httpCompression'] ?? {};
-    if (!this.httpCompression.containsKey('threshold'))
-      this.httpCompression['threshold'] = 1024;
+    httpCompression = opts['httpCompression'] ?? {};
+    if (!httpCompression.containsKey('threshold'))
+      httpCompression['threshold'] = 1024;
 
-    this.initialPacket = opts['initialPacket'];
-    this._init();
+    initialPacket = opts['initialPacket'];
+    _init();
   }
 
   /**
@@ -134,7 +134,7 @@ class Server extends Engine {
    */
 
   List<String> upgrades(transport) {
-    if (!this.allowUpgrades) return null;
+    if (!allowUpgrades) return null;
     return Transports.upgradesTo(transport);
   }
 
@@ -150,7 +150,7 @@ class Server extends Engine {
     // transport check
     var req = connect.request;
     var transport = req.uri.queryParameters['transport'];
-    if (this.transports.indexOf(transport) == -1) {
+    if (transports.indexOf(transport) == -1) {
       _logger.fine('unknown transport "$transport"');
       return fn(ServerErrors.UNKNOWN_TRANSPORT, false);
     }
@@ -158,10 +158,10 @@ class Server extends Engine {
     // sid check
     var sid = req.uri.queryParameters['sid'];
     if (sid != null) {
-      if (!this.clients.containsKey(sid)) {
+      if (!clients.containsKey(sid)) {
         return fn(ServerErrors.UNKNOWN_SID, false);
       }
-      if (!upgrade && this.clients[sid].transport.name != transport) {
+      if (!upgrade && clients[sid].transport.name != transport) {
         _logger.fine('bad request: unexpected transport without upgrade');
         return fn(ServerErrors.BAD_REQUEST, false);
       }
@@ -169,8 +169,8 @@ class Server extends Engine {
       // handshake is GET only
       if ('GET' != req.method)
         return fn(ServerErrors.BAD_HANDSHAKE_METHOD, false);
-      if (this.allowRequest == null) return fn(null, true);
-      return this.allowRequest(req, fn);
+      if (allowRequest == null) return fn(null, true);
+      return allowRequest(req, fn);
     }
 
     fn(null, true);
@@ -184,9 +184,9 @@ class Server extends Engine {
 
   close() {
     _logger.fine('closing all open clients');
-    for (var key in this.clients.keys) {
-      if (this.clients[key] != null) {
-        this.clients[key].close(true);
+    for (var key in clients.keys) {
+      if (clients[key] != null) {
+        clients[key].close(true);
       }
     }
 //  if (this.ws) {
@@ -211,7 +211,7 @@ class Server extends Engine {
 //  req.res = res;
 
     var self = this;
-    this.verify(connect, false, (err, success) {
+    verify(connect, false, (err, success) {
       if (!success) {
         sendErrorMessage(req, err);
         return;
@@ -278,7 +278,7 @@ class Server extends Engine {
    * @api private
    */
   handshake(String transportName, SocketConnect connect) {
-    var id = this.generateId(connect);
+    var id = generateId(connect);
 
     _logger.fine('handshaking client $id');
     var transport;
@@ -286,10 +286,10 @@ class Server extends Engine {
     try {
       transport = Transports.newInstance(transportName, connect);
       if ('polling' == transportName) {
-        transport.maxHttpBufferSize = this.maxHttpBufferSize;
-        transport.httpCompression = this.httpCompression;
+        transport.maxHttpBufferSize = maxHttpBufferSize;
+        transport.httpCompression = httpCompression;
       } else if ('websocket' == transportName) {
-        transport.perMessageDeflate = this.perMessageDeflate;
+        transport.perMessageDeflate = perMessageDeflate;
       }
 
       if (req.uri.hasQuery && req.uri.queryParameters.containsKey('b64')) {
@@ -303,13 +303,13 @@ class Server extends Engine {
     }
     var socket = Socket(id, this, transport, connect);
 
-    if (false != this.cookie) {
+    if (false != cookie) {
       transport.on('headers', (headers) {
-        headers['Set-Cookie'] = '${this.cookie}=${Uri.encodeComponent(id)}' +
-            (this.cookiePath?.isNotEmpty == true
-                ? '; Path=${this.cookiePath}'
+        headers['Set-Cookie'] = '${cookie}=${Uri.encodeComponent(id)}' +
+            (cookiePath?.isNotEmpty == true
+                ? '; Path=${cookiePath}'
                 : '') +
-            (this.cookiePath?.isNotEmpty == true && this.cookieHttpOnly == true
+            (cookiePath?.isNotEmpty == true && cookieHttpOnly == true
                 ? '; HttpOnly'
                 : '');
       });
@@ -317,15 +317,15 @@ class Server extends Engine {
 
     transport.onRequest(connect);
 
-    this.clients[id] = socket;
-    this.clientsCount++;
+    clients[id] = socket;
+    clientsCount++;
 
     socket.once('close', (_) {
-      this.clients.remove(id);
-      this.clientsCount--;
+      clients.remove(id);
+      clientsCount--;
     });
 
-    this.emit('connection', socket);
+    emit('connection', socket);
   }
 
   /**
@@ -336,7 +336,7 @@ class Server extends Engine {
   handleUpgrade(SocketConnect connect) {
 //  this.prepare(req);
 
-    this.verify(connect, true, (err, success) {
+    verify(connect, true, (err, success) {
       if (!success) {
         abortConnection(connect, err);
         return;
@@ -348,7 +348,7 @@ class Server extends Engine {
 
       // delegate to ws
 //  self.ws.handleUpgrade(req, socket, head, function (conn) {
-      this.onWebSocket(connect);
+      onWebSocket(connect);
 //  });
     });
   }
@@ -380,7 +380,7 @@ class Server extends Engine {
 //  req.websocket = socket;
 
     if (id != null) {
-      var client = this.clients[id];
+      var client = clients[id];
       if (client == null) {
         _logger.fine('upgrade attempt for closed client');
         connect.websocket.close();
@@ -400,11 +400,11 @@ class Server extends Engine {
         } else {
           transport.supportsBinary = true;
         }
-        transport.perMessageDeflate = this.perMessageDeflate;
+        transport.perMessageDeflate = perMessageDeflate;
         client.maybeUpgrade(transport);
       }
     } else {
-      this.handshake(connect.request.uri.queryParameters['transport'], connect);
+      handshake(connect.request.uri.queryParameters['transport'], connect);
     }
   }
 
@@ -429,17 +429,17 @@ class Server extends Engine {
 
       _logger.fine('intercepting request for path "$path"');
       if (WebSocketTransformer.isUpgradeRequest(req) &&
-          this.transports.contains('websocket')) {
+          transports.contains('websocket')) {
 //          print('init websocket... ${req.uri}');
         var socket = await WebSocketTransformer.upgrade(req);
         var socketConnect = SocketConnect.fromWebSocket(connect, socket);
         socketConnect.dataset['options'] = options;
-        this.handleUpgrade(socketConnect);
+        handleUpgrade(socketConnect);
         return socketConnect.done;
       } else {
         var socketConnect = SocketConnect(connect);
         socketConnect.dataset['options'] = options;
-        this.handleRequest(socketConnect);
+        handleRequest(socketConnect);
         return socketConnect.done;
       }
     }, preceding: true);

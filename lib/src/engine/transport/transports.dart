@@ -56,8 +56,8 @@ abstract class Transport extends EventEmitter {
   MessageHandler messageHandler;
 
   Transport(connect) {
-    this.readyState = 'open';
-    this.discarded = false;
+    readyState = 'open';
+    discarded = false;
     var options = connect.dataset['options'];
     if (options != null) {
       messageHandler = options.containsKey('messageHandlerFactory')
@@ -67,7 +67,7 @@ abstract class Transport extends EventEmitter {
   }
 
   void discard() {
-    this.discarded = true;
+    discarded = true;
   }
 
   void onRequest(SocketConnect connect) {
@@ -75,37 +75,37 @@ abstract class Transport extends EventEmitter {
   }
 
   void close([closeFn()]) {
-    if ('closed' == this.readyState || 'closing' == this.readyState) return;
-    this.readyState = 'closing';
-    this.doClose(closeFn);
+    if ('closed' == readyState || 'closing' == readyState) return;
+    readyState = 'closing';
+    doClose(closeFn);
   }
 
   void doClose([callback()]);
 
   void onError(msg, [desc]) {
-    this.writable = false;
-    if (this.hasListeners('error')) {
-      this.emit('error', {'msg': msg, 'desc': desc, 'type': 'TransportError'});
+    writable = false;
+    if (hasListeners('error')) {
+      emit('error', {'msg': msg, 'desc': desc, 'type': 'TransportError'});
     } else {
       _logger.fine('ignored transport error $msg ($desc)');
     }
   }
 
   void onPacket(Map packet) {
-    this.emit('packet', packet);
+    emit('packet', packet);
   }
 
   onData(data) {
     if (messageHandler != null) {
       messageHandler.handle(this, data);
     } else {
-      this.onPacket(PacketParser.decodePacket(data));
+      onPacket(PacketParser.decodePacket(data));
     }
   }
 
   void onClose() {
-    this.readyState = 'closed';
-    this.emit('close');
+    readyState = 'closed';
+    emit('close');
   }
 
   void send(List<Map> data);
