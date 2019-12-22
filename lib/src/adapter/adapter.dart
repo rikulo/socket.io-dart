@@ -29,9 +29,9 @@ abstract class Adapter {
 
   static Adapter newInstance(String key, Namespace nsp) {
     if ('default' == key) {
-      return new _MemoryStoreAdapter(nsp);
+      return _MemoryStoreAdapter(nsp);
     }
-    throw new UnimplementedError('not supported other adapter yet.');
+    throw UnimplementedError('not supported other adapter yet.');
   }
 }
 
@@ -60,7 +60,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   add(String id, String room, [fn([_])]) {
     this.sids[id] = this.sids[id] ?? {};
     this.sids[id][room] = true;
-    this.rooms[room] = this.rooms[room] ?? new _Room();
+    this.rooms[room] = this.rooms[room] ?? _Room();
     this.rooms[room].add(id);
     if (fn != null) scheduleMicrotask(() => fn(null));
   }

@@ -31,12 +31,12 @@ class SocketConnect extends HttpConnectWrapper {
 
   Future get done {
     if (_completed == true) {
-      return new Future.value('done');
+      return Future.value('done');
     }
     if (_socket != null)
       return _socket.done;
     else {
-      _done = new Completer();
+      _done = Completer();
       return _done.future;
     }
   }

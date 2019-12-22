@@ -16,7 +16,7 @@ import 'package:socket_io_common/src/engine/parser/parser.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
 
 class WebSocketTransport extends Transport {
-  static Logger _logger = new Logger('socket_io:transport.WebSocketTransport');
+  static Logger _logger = Logger('socket_io:transport.WebSocketTransport');
   bool get handlesUpgrades => true;
   bool get supportsFraming => true;
   StreamSubscription subscription;

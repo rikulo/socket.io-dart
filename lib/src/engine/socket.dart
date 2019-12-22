@@ -25,7 +25,7 @@ import 'package:socket_io/src/util/event_emitter.dart';
  * @api private
  */
 class Socket extends EventEmitter {
-  static final Logger _logger = new Logger("socket_io:engine.Socket");
+  static final Logger _logger = Logger("socket_io:engine.Socket");
   String id;
   Server server;
   Transport transport;
@@ -147,8 +147,8 @@ class Socket extends EventEmitter {
     if (this.pingTimeoutTimer != null) {
       this.pingTimeoutTimer.cancel();
     }
-    this.pingTimeoutTimer = new Timer(
-        new Duration(
+    this.pingTimeoutTimer = Timer(
+        Duration(
             milliseconds: this.server.pingInterval + this.server.pingTimeout),
         () {
       this.onClose('ping timeout');
@@ -199,7 +199,7 @@ class Socket extends EventEmitter {
     Map<String, Function> cleanupFn = {};
     // set transport upgrade timer
     this.upgradeTimeoutTimer =
-        new Timer(new Duration(milliseconds: this.server.upgradeTimeout), () {
+        Timer(Duration(milliseconds: this.server.upgradeTimeout), () {
       _logger.fine('client did not complete upgrade - closing transport');
       cleanupFn['cleanup']();
       if ('open' == transport.readyState) {
@@ -227,7 +227,7 @@ class Socket extends EventEmitter {
           this.checkIntervalTimer.cancel();
         }
         this.checkIntervalTimer =
-            new Timer.periodic(new Duration(milliseconds: 100), (_) => check());
+            Timer.periodic(Duration(milliseconds: 100), (_) => check());
       } else if ('upgrade' == packet['type'] && this.readyState != 'closed') {
         _logger.fine('got upgrade packet - upgrading');
         cleanupFn['cleanup']();

@@ -25,8 +25,7 @@ class PollingTransport extends Transport {
   @override
   bool get supportsFraming => false;
 
-  static final Logger _logger =
-      new Logger('socket_io:transport.PollingTransport');
+  static final Logger _logger = Logger('socket_io:transport.PollingTransport');
   int closeTimeout;
   Function shouldClose;
   SocketConnect dataReq;
@@ -133,9 +132,9 @@ class PollingTransport extends Transport {
         contentLength = utf8.encode(chunks).length;
       } else {
         if (chunks is String) {
-          chunks += new String.fromCharCodes(data);
+          chunks += String.fromCharCodes(data);
         } else {
-          chunks.addAll(new String.fromCharCodes(data)
+          chunks.addAll(String.fromCharCodes(data)
               .split(',')
               .map((s) => int.parse(s))
               .toList());
@@ -292,7 +291,7 @@ class PollingTransport extends Transport {
           if (headers.containsKey(HttpHeaders.contentEncodingHeader)) {
             res.add(data);
           } else {
-            res.write(new String.fromCharCodes(data));
+            res.write(String.fromCharCodes(data));
           }
           connect.close();
         }
@@ -333,7 +332,7 @@ class PollingTransport extends Transport {
     headers[HttpHeaders.contentEncodingHeader] = encoding;
     respond(hasGzip
         ? gzip.encode(utf8.encode(
-            data is List ? new String.fromCharCodes(data as List<int>) : data))
+            data is List ? String.fromCharCodes(data as List<int>) : data))
         : data);
 //    });
   }
@@ -372,7 +371,7 @@ class PollingTransport extends Transport {
       _logger.fine('transport not writable - buffering orderly close');
       this.shouldClose = onClose;
       closeTimeoutTimer =
-          new Timer(new Duration(milliseconds: this.closeTimeout), onClose);
+          Timer(Duration(milliseconds: this.closeTimeout), onClose);
     }
   }
 

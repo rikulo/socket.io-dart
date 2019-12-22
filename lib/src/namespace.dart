@@ -43,7 +43,7 @@ class Namespace extends EventEmitter {
   List rooms = [];
   Map flags = {};
   Adapter adapter;
-  Logger _logger = new Logger('socket_io:Namespace');
+  Logger _logger = Logger('socket_io:Namespace');
 
   /**
    * Namespace constructor.
@@ -137,7 +137,7 @@ class Namespace extends EventEmitter {
    */
   add(Client client, query, fn) {
     _logger.fine('adding socket to nsp ${this.name}');
-    var socket = new Socket(this, client, query);
+    var socket = Socket(this, client, query);
     var self = this;
     this.run(socket, (err) {
       // don't use Timer.run() here

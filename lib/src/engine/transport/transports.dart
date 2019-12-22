@@ -28,21 +28,21 @@ class Transports {
 
   static Transport newInstance(String name, SocketConnect connect) {
     if ('websocket' == name) {
-      return new WebSocketTransport(connect);
+      return  WebSocketTransport(connect);
     } else if ('polling' == name) {
       if (connect.request.uri.queryParameters.containsKey('j')) {
-        return new JSONPTransport(connect);
+        return  JSONPTransport(connect);
       } else {
-        return new XHRTransport(connect);
+        return  XHRTransport(connect);
       }
     } else {
-      throw new UnsupportedError('Unknown transport $name');
+      throw  UnsupportedError('Unknown transport $name');
     }
   }
 }
 
 abstract class Transport extends EventEmitter {
-  static Logger _logger = new Logger('socket_io:transport.Transport');
+  static Logger _logger =  Logger('socket_io:transport.Transport');
   double maxHttpBufferSize;
   Map httpCompression;
   Map perMessageDeflate;

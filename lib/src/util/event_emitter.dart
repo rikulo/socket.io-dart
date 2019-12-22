@@ -35,8 +35,8 @@ class EventEmitter {
    * Constructor
    */
   EventEmitter() {
-    this._events = new HashMap<String, List<EventHandler>>();
-    this._eventsOnce = new HashMap<String, List<EventHandler>>();
+    this._events = HashMap<String, List<EventHandler>>();
+    this._eventsOnce = HashMap<String, List<EventHandler>>();
   }
 
   /**
@@ -47,7 +47,7 @@ class EventEmitter {
     final list0 = this._events[event];
     // todo: try to optimize this. Maybe remember the off() handlers and remove later?
     // handler might be off() inside handler; make a copy first
-    final list = list0 != null ? new List.from(list0) : null;
+    final list = list0 != null ? List.from(list0) : null;
     list?.forEach((handler) {
       handler(data);
     });
@@ -61,7 +61,7 @@ class EventEmitter {
    * This function binds the [handler] as a listener to the [event]
    */
   void on(String event, EventHandler handler) {
-    this._events.putIfAbsent(event, () => new List<EventHandler>());
+    this._events.putIfAbsent(event, () => List<EventHandler>());
     this._events[event].add(handler);
   }
 
@@ -71,7 +71,7 @@ class EventEmitter {
    * it is removed.
    */
   void once(String event, EventHandler handler) {
-    this._eventsOnce.putIfAbsent(event, () => new List<EventHandler>());
+    this._eventsOnce.putIfAbsent(event, () => List<EventHandler>());
     this._eventsOnce[event].add(handler);
   }
 
@@ -98,8 +98,8 @@ class EventEmitter {
    * This function unbinds all the handlers for all the events.
    */
   void clearListeners() {
-    this._events = new HashMap<String, List<EventHandler>>();
-    this._eventsOnce = new HashMap<String, List<EventHandler>>();
+    this._events = HashMap<String, List<EventHandler>>();
+    this._eventsOnce = HashMap<String, List<EventHandler>>();
   }
 
   /**

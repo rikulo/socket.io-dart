@@ -43,7 +43,7 @@ const Map<int, String> ServerErrorMessages = const {
 };
 
 class Server extends Engine {
-  static final Logger _logger = new Logger("socket_io:engine.Server");
+  static final Logger _logger = Logger("socket_io:engine.Server");
   Map clients;
   int clientsCount;
   int pingTimeout;
@@ -59,7 +59,7 @@ class Server extends Engine {
   Map perMessageDeflate;
   Map httpCompression;
   dynamic initialPacket;
-  Uuid _uuid = new Uuid();
+  Uuid _uuid =  Uuid();
 
   Server([Map opts]) {
     clients = {};
@@ -301,7 +301,7 @@ class Server extends Engine {
       sendErrorMessage(req, ServerErrors.BAD_REQUEST);
       return;
     }
-    var socket = new Socket(id, this, transport, connect);
+    var socket = Socket(id, this, transport, connect);
 
     if (false != this.cookie) {
       transport.on('headers', (headers) {
@@ -418,7 +418,7 @@ class Server extends Engine {
   attachTo(StreamServer server, Map options) {
     options = options ?? {};
     var path =
-        (options['path'] ?? '/engine.io').replaceFirst(new RegExp(r"\/$"), '');
+        (options['path'] ?? '/engine.io').replaceFirst(RegExp(r"\/$"), '');
 
     // normalize path
     path += '/';
@@ -432,12 +432,12 @@ class Server extends Engine {
           this.transports.contains('websocket')) {
 //          print('init websocket... ${req.uri}');
         var socket = await WebSocketTransformer.upgrade(req);
-        var socketConnect = new SocketConnect.fromWebSocket(connect, socket);
+        var socketConnect = SocketConnect.fromWebSocket(connect, socket);
         socketConnect.dataset['options'] = options;
         this.handleUpgrade(socketConnect);
         return socketConnect.done;
       } else {
-        var socketConnect = new SocketConnect(connect);
+        var socketConnect = SocketConnect(connect);
         socketConnect.dataset['options'] = options;
         this.handleRequest(socketConnect);
         return socketConnect.done;

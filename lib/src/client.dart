@@ -26,7 +26,7 @@ class Client {
   List sockets = [];
   Map nsps = {};
   List connectBuffer = [];
-  Logger _logger = new Logger('socket_io:Client');
+  Logger _logger = Logger('socket_io:Client');
 
   /**
    * Client constructor.
@@ -36,8 +36,8 @@ class Client {
    * @api private
    */
   Client(Server this.server, Socket this.conn) {
-    this.encoder = new Encoder();
-    this.decoder = new Decoder();
+    this.encoder = Encoder();
+    this.decoder = Decoder();
     this.id = conn.id;
     this.request = conn.connect.request;
     this.setup();
@@ -227,7 +227,7 @@ class Client {
 
     // `nsps` and `sockets` are cleaned up seamlessly
     if (this.sockets.isNotEmpty) {
-      new List.from(this.sockets).forEach((socket) {
+       List.from(this.sockets).forEach((socket) {
         socket.onclose(reason);
       });
       this.sockets.clear();

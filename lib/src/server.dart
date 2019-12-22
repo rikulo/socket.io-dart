@@ -31,7 +31,7 @@ Map oldSettings = {
   "destroy buffer size": "maxHttpBufferSize"
 };
 
-final Logger _logger = new Logger('socket_io:Server');
+final Logger _logger = Logger('socket_io:Server');
 
 class Server {
   // Namespaces
@@ -60,7 +60,7 @@ class Server {
     this.adapter =
         options.containsKey('adapter') ? options['adapter'] : 'default';
     this.origins(options.containsKey('origins') ? options['origins'] : '*:*');
-    this.encoder = new Encoder();
+    this.encoder = Encoder();
     this.sockets = this.of('/');
     if (server != null) {
       this.attach(server, options);
@@ -134,11 +134,11 @@ class Server {
       this.use((socket, next) {
         val(socket.request, (err, authorized) {
           if (err) {
-            return next(new Exception(err));
+            return next(Exception(err));
           }
           ;
           if (!authorized) {
-            return next(new Exception('Not authorized'));
+            return next(Exception('Not authorized'));
           }
 
           next();
@@ -166,7 +166,7 @@ class Server {
    */
   path([String v]) {
     if (v == null || v.isEmpty) return this._path;
-    this._path = v.replaceFirst(new RegExp(r'/\/$/'), '');
+    this._path = v.replaceFirst(RegExp(r'/\/$/'), '');
     return this;
   }
 
@@ -227,7 +227,7 @@ class Server {
     if (srv is Function) {
       String msg = 'You are trying to attach socket.io to an express ' +
           'request handler function. Please pass a http.Server instance.';
-      throw new Exception(msg);
+      throw Exception(msg);
     }
 
     // handle a port as a string
@@ -247,7 +247,7 @@ class Server {
     if (srv is num) {
       _logger.fine('creating http server and binding to $srv');
       int port = srv;
-      StreamServer server = new StreamServer();
+      StreamServer server = StreamServer();
       server.start(port: port);
 //      HttpServer.bind(InternetAddress.ANY_IP_V4, port).then((
 //          HttpServer server) {
@@ -376,7 +376,7 @@ class Server {
    */
   onconnection(conn) {
     _logger.fine('incoming connection with id ${conn.id}');
-    Client client = new Client(this, conn);
+    Client client = Client(this, conn);
     client.connect('/');
     return this;
   }
@@ -396,7 +396,7 @@ class Server {
 
     if (!this.nsps.containsKey(name)) {
       _logger.fine('initializing namespace $name');
-      Namespace nsp = new Namespace(this, name);
+      Namespace nsp = Namespace(this, name);
       this.nsps[name] = nsp;
     }
     if (fn != null) this.nsps[name].on('connect', fn);

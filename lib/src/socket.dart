@@ -92,16 +92,16 @@ class Socket extends EventEmitter {
       var requestQuery = this.request.uri.queryParameters;
       //if socket-specific query exist, replace query strings in requestQuery
       return query != null
-          ? (new Map.from(query)..addAll(requestQuery))
+          ? (Map.from(query)..addAll(requestQuery))
           : requestQuery;
     };
     return {
       'headers': this.request.headers,
-      'time': new DateTime.now().toString(),
+      'time': DateTime.now().toString(),
       'address': this.conn.remoteAddress,
       'xdomain': this.request.headers.value('origin') != null,
       // TODO  'secure': ! !this.request.connectionInfo.encrypted,
-      'issued': new DateTime.now().millisecondsSinceEpoch,
+      'issued': DateTime.now().millisecondsSinceEpoch,
       'url': this.request.uri.path,
       'query': buildQuery()
     };
@@ -151,7 +151,7 @@ class Socket extends EventEmitter {
 
       if (ack != null) {
         if (this.roomList.isNotEmpty || flags['broadcast'] == true) {
-          throw new UnsupportedError(
+          throw UnsupportedError(
               'Callbacks are not supported when broadcasting');
         }
 

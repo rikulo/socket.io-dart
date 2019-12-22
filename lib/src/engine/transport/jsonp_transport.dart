@@ -20,7 +20,7 @@ class JSONPTransport extends PollingTransport {
   JSONPTransport(SocketConnect connect) : super(connect) {
     this.head = '___eio[' +
         (connect.request.uri.queryParameters['j'] ?? '')
-            .replaceAll(new RegExp('[^0-9]'), '') +
+            .replaceAll(RegExp('[^0-9]'), '') +
         '](';
     this.foot = ');';
   }
@@ -38,13 +38,13 @@ class JSONPTransport extends PollingTransport {
     if (data is String) {
       // client will send already escaped newlines as \\\\n and newlines as \\n
       // \\n must be replaced with \n and \\\\n with \\n
-      data = data.replaceAllMapped(new RegExp(r'(\\)?\\n'), (match) {
-        throw new UnimplementedError('Not implemented yet');
+      data = data.replaceAllMapped(RegExp(r'(\\)?\\n'), (match) {
+        throw UnimplementedError('Not implemented yet');
 //        print(match);
 //        match
 //      return slashes ? match : '\n';
       });
-      super.onData(data.replaceAll(new RegExp(r'\\\\n'), '\\n'));
+      super.onData(data.replaceAll(RegExp(r'\\\\n'), '\\n'));
     }
   }
 
@@ -58,8 +58,8 @@ class JSONPTransport extends PollingTransport {
     // see: http://timelessrepo.com/json-isnt-a-javascript-subset
     var js = json
         .encode(data)
-        .replaceAll(new RegExp(r'\u2028'), '\\u2028')
-        .replaceAll(new RegExp(r'\u2029'), '\\u2029');
+        .replaceAll(RegExp(r'\u2028'), '\\u2028')
+        .replaceAll(RegExp(r'\u2029'), '\\u2029');
 
     // prepare response
     data = this.head + js + this.foot;
@@ -68,8 +68,8 @@ class JSONPTransport extends PollingTransport {
   }
 
   static Map parse(String query) {
-    var search = new RegExp('([^&=]+)=?([^&]*)');
-    var result = new Map();
+    var search = RegExp('([^&=]+)=?([^&]*)');
+    var result = Map();
 
     // Get rid off the beginning ? in query strings.
     if (query.startsWith('?')) query = query.substring(1);
