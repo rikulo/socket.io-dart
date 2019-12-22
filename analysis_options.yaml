@@ -2,9 +2,10 @@
 #
 # The commented part below is just for inspiration. Read the guide here:
 #   https://www.dartlang.org/guides/language/analysis-options
+include: package:pedantic/analysis_options.yaml
 
- analyzer:
-   strong-mode: true
+# analyzer:
+#   strong-mode: true
 #   exclude:
 #     - path/to/excluded/files/**
 # linter:
