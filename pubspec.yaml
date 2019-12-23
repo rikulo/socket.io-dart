@@ -3,7 +3,7 @@ description: >
   Port of JS/Node library Socket.io. It enables real-time, bidirectional and 
   event-based communication cross-platform.
 version: 0.9.0+2
-author: jumperchen <jumperchen@potix.com>
+# author: jumperchen <jumperchen@potix.com>
 homepage: https://www.zkoss.org
 
 environment:
