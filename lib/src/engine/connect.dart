@@ -1,15 +1,13 @@
-/**
- * connect.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    06/03/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// connect.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    06/03/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:stream/stream.dart';
 import 'dart:async';
 import 'dart:io';
@@ -31,19 +29,17 @@ class SocketConnect extends HttpConnectWrapper {
 
   Future get done {
     if (_completed == true) {
-      return new Future.value('done');
+      return Future.value('done');
     }
-    if (_socket != null)
+    if (_socket != null) {
       return _socket.done;
-    else {
-      _done = new Completer();
+    } else {
+      _done = Completer();
       return _done.future;
     }
   }
 
-  /**
-   * Closes the current connection.
-   */
+  /// Closes the current connection.
   void close() {
     if (_done != null) {
       _done.complete('done');

@@ -1,15 +1,13 @@
-/**
- * socket.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    22/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// socket.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    22/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'dart:io';
 import 'package:socket_io/src/adapter/adapter.dart';
 import 'package:socket_io/src/client.dart';
@@ -17,17 +15,13 @@ import 'package:socket_io_common/src/parser/parser.dart';
 import 'package:socket_io/src/namespace.dart';
 import 'package:socket_io/src/server.dart';
 import 'package:socket_io/src/util/event_emitter.dart';
-/**
- * Module exports.
- */
+/// Module exports.
 //
 //module.exports = exports = Socket;
 
-/**
- * Blacklisted events.
- *
- * @api public
- */
+/// Blacklisted events.
+///
+/// @api public
 
 List events = [
   'error',
@@ -37,14 +31,12 @@ List events = [
   'removeListener'
 ];
 
-/**
- * Flags.
- *
- * @api private
- */
+/// Flags.
+///
+/// @api private
 List flags = ['json', 'volatile', 'broadcast'];
 
-const List EVENTS = const [
+const List EVENTS = [
   'error',
   'connect',
   'disconnect',
@@ -74,57 +66,56 @@ class Socket extends EventEmitter {
   Map data = {};
 
   Socket(this.nsp, this.client, query) {
-    this.server = nsp.server;
-    this.adapter = this.nsp.adapter;
-    this.id = client.id;
-    this.request = client.request;
-    this.conn = client.conn;
-    this.handshake = this.buildHandshake(query);
+    server = nsp.server;
+    adapter = nsp.adapter;
+    id = client.id;
+    request = client.request;
+    conn = client.conn;
+    handshake = buildHandshake(query);
   }
 
-  /**
-   * Builds the `handshake` BC object
-   *
-   * @api private
-   */
-  buildHandshake(query) {
+  /// Builds the `handshake` BC object
+  ///
+  /// @api private
+  Map buildHandshake(query) {
     final buildQuery = () {
-      var requestQuery = this.request.uri.queryParameters;
+      var requestQuery = request.uri.queryParameters;
       //if socket-specific query exist, replace query strings in requestQuery
       return query != null
-          ? (new Map.from(query)..addAll(requestQuery))
+          ? (Map.from(query)..addAll(requestQuery))
           : requestQuery;
     };
     return {
-      'headers': this.request.headers,
-      'time': new DateTime.now().toString(),
-      'address': this.conn.remoteAddress,
-      'xdomain': this.request.headers.value('origin') != null,
+      'headers': request.headers,
+      'time': DateTime.now().toString(),
+      'address': conn.remoteAddress,
+      'xdomain': request.headers.value('origin') != null,
       // TODO  'secure': ! !this.request.connectionInfo.encrypted,
-      'issued': new DateTime.now().millisecondsSinceEpoch,
-      'url': this.request.uri.path,
+      'issued': DateTime.now().millisecondsSinceEpoch,
+      'url': request.uri.path,
       'query': buildQuery()
     };
   }
 
   Socket get json {
-    this.flags = this.flags ?? {};
-    this.flags['json'] = true;
+    flags = flags ?? {};
+    flags['json'] = true;
     return this;
   }
 
   Socket get volatile {
-    this.flags = this.flags ?? {};
-    this.flags['volatile'] = true;
+    flags = flags ?? {};
+    flags['volatile'] = true;
     return this;
   }
 
   Socket get broadcast {
-    this.flags = this.flags ?? {};
-    this.flags['broadcast'] = true;
+    flags = flags ?? {};
+    flags['broadcast'] = true;
     return this;
   }
 
+  @override
   void emit(String event, [data]) {
     emitWithAck(event, data);
   }
@@ -133,39 +124,37 @@ class Socket extends EventEmitter {
     emitWithAck(event, data, binary: true);
   }
 
-  /**
-   * Emits to this client.
-   *
-   * @return {Socket} self
-   * @api public
-   */
+  /// Emits to this client.
+  ///
+  /// @return {Socket} self
+  /// @api public
   void emitWithAck(String event, dynamic data,
       {Function ack, bool binary = false}) {
     if (EVENTS.contains(event)) {
       super.emit(event, data);
     } else {
       var packet = {};
-      List sendData = data == null ? [event] : [event, data];
+      var sendData = data == null ? [event] : [event, data];
 
       var flags = this.flags ?? {};
 
       if (ack != null) {
-        if (this.roomList.isNotEmpty || flags['broadcast'] == true) {
-          throw new UnsupportedError(
+        if (roomList.isNotEmpty || flags['broadcast'] == true) {
+          throw UnsupportedError(
               'Callbacks are not supported when broadcasting');
         }
 
-        this.acks['${this.nsp.ids}'] = ack;
-        packet['id'] = '${this.nsp.ids++}';
+        acks['${nsp.ids}'] = ack;
+        packet['id'] = '${nsp.ids++}';
       }
 
       packet['type'] = binary ? BINARY_EVENT : EVENT;
       packet['data'] = sendData;
 
-      if (this.roomList.isNotEmpty || flags['broadcast'] == true) {
-        this.adapter.broadcast(packet, {
-          'except': [this.id],
-          'rooms': this.roomList,
+      if (roomList.isNotEmpty || flags['broadcast'] == true) {
+        adapter.broadcast(packet, {
+          'except': [id],
+          'rooms': roomList,
           'flags': flags
         });
       } else {
@@ -175,172 +164,154 @@ class Socket extends EventEmitter {
       }
 
 //      // reset flags
-      this.roomList = [];
+      roomList = [];
       this.flags = null;
 //    }
 //    return this;
     }
   }
 
-  /**
-   * Targets a room when broadcasting.
-   *
-   * @param {String} name
-   * @return {Socket} self
-   * @api public
-   */
-  to(String name) {
-    if (!this.roomList.contains(name)) this.roomList.add(name);
+  /// Targets a room when broadcasting.
+  ///
+  /// @param {String} name
+  /// @return {Socket} self
+  /// @api public
+  Socket to(String name) {
+    if (!roomList.contains(name)) roomList.add(name);
     return this;
   }
 
-  /**
-   * Sends a `message` event.
-   *
-   * @return {Socket} self
-   * @api public
-   */
-  send(_) {
-    this.write(_);
+  /// Sends a `message` event.
+  ///
+  /// @return {Socket} self
+  /// @api public
+  void send(_) {
+    write(_);
   }
 
-  write(List data) {
-    this.emit('message', data);
+  Socket write(List data) {
+    emit('message', data);
     return this;
   }
 
-  /**
-   * Writes a packet.
-   *
-   * @param {Object} packet object
-   * @param {Object} options
-   * @api private
-   */
-  packet(packet, [opts]) {
+  /// Writes a packet.
+  ///
+  /// @param {Object} packet object
+  /// @param {Object} options
+  /// @api private
+  void packet(packet, [opts]) {
     // ignore preEncoded = true.
     if (packet is Map) {
-      packet['nsp'] = this.nsp.name;
+      packet['nsp'] = nsp.name;
     }
     opts = opts ?? {};
     opts['compress'] = false != opts['compress'];
-    this.client.packet(packet, opts);
+    client.packet(packet, opts);
   }
 
-  /**
-   * Joins a room.
-   *
-   * @param {String} room
-   * @param {Function} optional, callback
-   * @return {Socket} self
-   * @api private
-   */
-  join(room, [fn]) {
+  /// Joins a room.
+  ///
+  /// @param {String} room
+  /// @param {Function} optional, callback
+  /// @return {Socket} self
+  /// @api private
+  Socket join(room, [fn]) {
 //    debug('joining room %s', room);
-    if (this.roomMap.containsKey(room)) {
+    if (roomMap.containsKey(room)) {
       if (fn != null) fn(null);
       return this;
     }
-    this.adapter.add(this.id, room, ([err]) {
+    adapter.add(id, room, ([err]) {
       if (err != null) return fn?.call(err);
 //      _logger.info('joined room %s', room);
-      this.roomMap[room] = room;
+      roomMap[room] = room;
       if (fn != null) fn(null);
     });
     return this;
   }
 
-  /**
-   * Leaves a room.
-   *
-   * @param {String} room
-   * @param {Function} optional, callback
-   * @return {Socket} self
-   * @api private
-   */
-  leave(room, fn) {
+  /// Leaves a room.
+  ///
+  /// @param {String} room
+  /// @param {Function} optional, callback
+  /// @return {Socket} self
+  /// @api private
+  Socket leave(room, fn) {
 //    debug('leave room %s', room);
-    this.adapter.del(this.id, room, ([err]) {
+    adapter.del(id, room, ([err]) {
       if (err != null) return fn?.call(err);
 //      _logger.info('left room %s', room);
-      this.roomMap.remove(room);
+      roomMap.remove(room);
       fn?.call(null);
     });
     return this;
   }
 
-  /**
-   * Leave all rooms.
-   *
-   * @api private
-   */
+  /// Leave all rooms.
+  ///
+  /// @api private
 
-  leaveAll() {
-    this.adapter.delAll(this.id);
-    this.roomMap = {};
+  void leaveAll() {
+    adapter.delAll(id);
+    roomMap = {};
   }
 
-  /**
-   * Called by `Namespace` upon succesful
-   * middleware execution (ie: authorization).
-   *
-   * @api private
-   */
+  /// Called by `Namespace` upon succesful
+  /// middleware execution (ie: authorization).
+  ///
+  /// @api private
 
-  onconnect() {
+  void onconnect() {
 //    debug('socket connected - writing packet');
-    this.nsp.connected[this.id] = this;
-    this.join(this.id);
-    this.packet(<dynamic, dynamic>{'type': CONNECT});
+    nsp.connected[id] = this;
+    join(id);
+    packet(<dynamic, dynamic>{'type': CONNECT});
   }
 
-  /**
-   * Called with each packet. Called by `Client`.
-   *
-   * @param {Object} packet
-   * @api private
-   */
+  /// Called with each packet. Called by `Client`.
+  ///
+  /// @param {Object} packet
+  /// @api private
 
-  onpacket(packet) {
+  void onpacket(packet) {
 //    debug('got packet %j', packet);
     switch (packet['type']) {
       case EVENT:
-        this.onevent(packet);
+        onevent(packet);
         break;
 
       case BINARY_EVENT:
-        this.onevent(packet);
+        onevent(packet);
         break;
 
       case ACK:
-        this.onack(packet);
+        onack(packet);
         break;
 
       case BINARY_ACK:
-        this.onack(packet);
+        onack(packet);
         break;
 
       case DISCONNECT:
-        this.ondisconnect();
+        ondisconnect();
         break;
 
       case ERROR:
-        this.emit('error', packet['data']);
+        emit('error', packet['data']);
     }
   }
 
-  /**
-   * Called upon event packet.
-   *
-   * @param {Object} packet object
-   * @api private
-   */
-  onevent(packet) {
+  /// Called upon event packet.
+  ///
+  /// @param {Object} packet object
+  /// @api private
+  void onevent(packet) {
     List args = packet['data'] ?? [];
 //    debug('emitting event %j', args);
 
     if (null != packet['id']) {
 //      debug('attaching ack callback to event');
-      args.add(this.ack(packet['id']));
+      args.add(ack(packet['id']));
     }
 
     // dart doesn't support "String... rest" syntax.
@@ -351,12 +322,10 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Produces an ack callback to emit with an event.
-   *
-   * @param {Number} packet id
-   * @api private
-   */
+  /// Produces an ack callback to emit with an event.
+  ///
+  /// @param {Number} packet id
+  /// @api private
   Function ack(id) {
     var sent = false;
     return (_) {
@@ -375,13 +344,11 @@ class Socket extends EventEmitter {
     };
   }
 
-  /**
-   * Called upon ack packet.
-   *
-   * @api private
-   */
-  onack(packet) {
-    Function ack = this.acks.remove(packet['id']);
+  /// Called upon ack packet.
+  ///
+  /// @api private
+  void onack(packet) {
+    Function ack = acks.remove(packet['id']);
     if (ack is Function) {
 //      debug('calling ack %s with %j', packet.id, packet.data);
       Function.apply(ack, packet['data']);
@@ -390,89 +357,77 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Called upon client disconnect packet.
-   *
-   * @api private
-   */
-  ondisconnect() {
+  /// Called upon client disconnect packet.
+  ///
+  /// @api private
+  void ondisconnect() {
 //    debug('got disconnect packet');
-    this.onclose('client namespace disconnect');
+    onclose('client namespace disconnect');
   }
 
-  /**
-   * Handles a client error.
-   *
-   * @api private
-   */
-  onerror(err) {
-    if (this.hasListeners('error')) {
-      this.emit('error', err);
+  /// Handles a client error.
+  ///
+  /// @api private
+  void onerror(err) {
+    if (hasListeners('error')) {
+      emit('error', err);
     } else {
 //      console.error('Missing error handler on `socket`.');
 //      console.error(err.stack);
     }
   }
 
-  /**
-   * Called upon closing. Called by `Client`.
-   *
-   * @param {String} reason
-   * @param {Error} optional error object
-   * @api private
-   */
-  onclose([reason]) {
-    if (!this.connected) return this;
+  /// Called upon closing. Called by `Client`.
+  ///
+  /// @param {String} reason
+  /// @param {Error} optional error object
+  /// @api private
+  dynamic onclose([reason]) {
+    if (!connected) return this;
 //    debug('closing socket - reason %s', reason);
-    this.emit('disconnecting', reason);
-    this.leaveAll();
-    this.nsp.remove(this);
-    this.client.remove(this);
-    this.connected = false;
-    this.disconnected = true;
-    this.nsp.connected.remove(this.id);
-    this.emit('disconnect', reason);
+    emit('disconnecting', reason);
+    leaveAll();
+    nsp.remove(this);
+    client.remove(this);
+    connected = false;
+    disconnected = true;
+    nsp.connected.remove(id);
+    emit('disconnect', reason);
   }
 
-  /**
-   * Produces an `error` packet.
-   *
-   * @param {Object} error object
-   * @api private
-   */
-  error(err) {
-    this.packet(<dynamic, dynamic>{'type': ERROR, 'data': err});
+  /// Produces an `error` packet.
+  ///
+  /// @param {Object} error object
+  /// @api private
+  void error(err) {
+    packet(<dynamic, dynamic>{'type': ERROR, 'data': err});
   }
 
-  /**
-   * Disconnects this client.
-   *
-   * @param {Boolean} if `true`, closes the underlying connection
-   * @return {Socket} self
-   * @api public
-   */
+  /// Disconnects this client.
+  ///
+  /// @param {Boolean} if `true`, closes the underlying connection
+  /// @return {Socket} self
+  /// @api public
 
-  disconnect([close]) {
-    if (!this.connected) return this;
+  Socket disconnect([close]) {
+    if (!connected) return this;
     if (close == true) {
-      this.client.disconnect();
+      client.disconnect();
     } else {
-      this.packet(<dynamic, dynamic>{'type': DISCONNECT});
-      this.onclose('server namespace disconnect');
+      packet(<dynamic, dynamic>{'type': DISCONNECT});
+      onclose('server namespace disconnect');
     }
     return this;
   }
 
-  /**
-   * Sets the compress flag.
-   *
-   * @param {Boolean} if `true`, compresses the sending data
-   * @return {Socket} self
-   * @api public
-   */
-  compress(compress) {
-    this.flags = this.flags ?? {};
-    this.flags['compress'] = compress;
+  /// Sets the compress flag.
+  ///
+  /// @param {Boolean} if `true`, compresses the sending data
+  /// @return {Socket} self
+  /// @api public
+  Socket compress(compress) {
+    flags = flags ?? {};
+    flags['compress'] = compress;
     return this;
   }
 }

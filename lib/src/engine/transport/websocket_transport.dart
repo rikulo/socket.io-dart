@@ -1,33 +1,35 @@
 import 'dart:async';
-/**
- * websocket_transport.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    22/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// websocket_transport.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    22/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:logging/logging.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
 import 'package:socket_io/src/engine/transport/transports.dart';
 
 class WebSocketTransport extends Transport {
-  static Logger _logger = new Logger('socket_io:transport.WebSocketTransport');
+  static final Logger _logger =
+      Logger('socket_io:transport.WebSocketTransport');
+  @override
   bool get handlesUpgrades => true;
+  @override
   bool get supportsFraming => true;
   StreamSubscription subscription;
   WebSocketTransport(connect) : super(connect) {
-    this.name = 'websocket';
+    name = 'websocket';
     this.connect = connect;
-    subscription = connect.websocket
-        .listen(this.onData, onError: this.onError, onDone: this.onClose);
+    subscription =
+        connect.websocket.listen(onData, onError: onError, onDone: onClose);
     writable = true;
   }
 
+  @override
   void send(List<Map> packets) {
     var send = (data, Map packet) {
       _logger.fine('writing "$data"');
@@ -46,7 +48,7 @@ class WebSocketTransport extends Transport {
 //      }
 
 //      this.writable = false;
-      this.connect.websocket.add(data);
+      connect.websocket.add(data);
     };
 
 //    function onEnd (err) {
@@ -57,11 +59,11 @@ class WebSocketTransport extends Transport {
     for (var i = 0; i < packets.length; i++) {
       var packet = packets[i];
       PacketParser.encodePacket(packet,
-          supportsBinary: this.supportsBinary,
-          callback: (_) => send(_, packet));
+          supportsBinary: supportsBinary, callback: (_) => send(_, packet));
     }
   }
 
+  @override
   void onClose() {
     super.onClose();
 
@@ -72,8 +74,9 @@ class WebSocketTransport extends Transport {
     }
   }
 
+  @override
   void doClose([fn]) {
-    this.connect.websocket.close();
+    connect.websocket.close();
     if (fn != null) fn();
   }
 }

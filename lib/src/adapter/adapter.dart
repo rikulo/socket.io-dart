@@ -1,15 +1,13 @@
-/**
- * adapter.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    16/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// adapter.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    16/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'dart:async';
 import 'package:socket_io/src/namespace.dart';
 import 'package:socket_io_common/src/parser/parser.dart';
@@ -20,104 +18,103 @@ abstract class Adapter {
   Map<String, _Room> rooms;
   Map<String, Map> sids;
 
-  add(String id, String room, [fn([_])]);
-  del(String id, String room, [fn([_])]);
-  delAll(String id, [fn([_])]);
-  broadcast(Map packet, [Map opts]);
-  clients(List rooms, [fn([_])]);
-  clientRooms(String id, [fn(err, [_])]);
+  void add(String id, String room, [dynamic Function([dynamic]) fn]);
+  void del(String id, String room, [dynamic Function([dynamic]) fn]);
+  void delAll(String id, [dynamic Function([dynamic]) fn]);
+  void broadcast(Map packet, [Map opts]);
+  void clients(List rooms, [dynamic Function([dynamic]) fn]);
+  void clientRooms(String id, [dynamic Function(dynamic, [dynamic]) fn]);
 
   static Adapter newInstance(String key, Namespace nsp) {
     if ('default' == key) {
-      return new _MemoryStoreAdapter(nsp);
+      return _MemoryStoreAdapter(nsp);
     }
-    throw new UnimplementedError('not supported other adapter yet.');
+    throw UnimplementedError('not supported other adapter yet.');
   }
 }
 
 class _MemoryStoreAdapter extends EventEmitter implements Adapter {
+  @override
   Map nsps = {};
+  @override
   Map<String, _Room> rooms;
+  @override
   Map<String, Map> sids;
   Encoder encoder;
   Namespace nsp;
   _MemoryStoreAdapter(nsp) {
     this.nsp = nsp;
-    this.rooms = {};
-    this.sids = {};
-    this.encoder = nsp.server.encoder;
+    rooms = {};
+    sids = {};
+    encoder = nsp.server.encoder;
   }
 
-  /**
-   * Adds a socket to a room.
-   *
-   * @param {String} socket id
-   * @param {String} room name
-   * @param {Function} callback
-   * @api public
-   */
+  /// Adds a socket to a room.
+  ///
+  /// @param {String} socket id
+  /// @param {String} room name
+  /// @param {Function} callback
+  /// @api public
 
-  add(String id, String room, [fn([_])]) {
-    this.sids[id] = this.sids[id] ?? {};
-    this.sids[id][room] = true;
-    this.rooms[room] = this.rooms[room] ?? new _Room();
-    this.rooms[room].add(id);
+  @override
+  void add(String id, String room, [dynamic Function([dynamic]) fn]) {
+    sids[id] = sids[id] ?? {};
+    sids[id][room] = true;
+    rooms[room] = rooms[room] ?? _Room();
+    rooms[room].add(id);
     if (fn != null) scheduleMicrotask(() => fn(null));
   }
 
-  /**
-   * Removes a socket from a room.
-   *
-   * @param {String} socket id
-   * @param {String} room name
-   * @param {Function} callback
-   * @api public
-   */
-  del(String id, String room, [fn([_])]) {
-    this.sids[id] = this.sids[id] ?? {};
-    this.sids[id].remove(room);
-    if (this.rooms.containsKey(room)) {
-      this.rooms[room].del(id);
-      if (this.rooms[room].length == 0) this.rooms.remove(room);
+  /// Removes a socket from a room.
+  ///
+  /// @param {String} socket id
+  /// @param {String} room name
+  /// @param {Function} callback
+  /// @api public
+  @override
+  void del(String id, String room, [dynamic Function([dynamic]) fn]) {
+    sids[id] = sids[id] ?? {};
+    sids[id].remove(room);
+    if (rooms.containsKey(room)) {
+      rooms[room].del(id);
+      if (rooms[room].length == 0) rooms.remove(room);
     }
 
     if (fn != null) scheduleMicrotask(() => fn(null));
   }
 
-  /**
-   * Removes a socket from all rooms it's joined.
-   *
-   * @param {String} socket id
-   * @param {Function} callback
-   * @api public
-   */
-  delAll(String id, [fn([_])]) {
-    var rooms = this.sids[id];
+  /// Removes a socket from all rooms it's joined.
+  ///
+  /// @param {String} socket id
+  /// @param {Function} callback
+  /// @api public
+  @override
+  void delAll(String id, [dynamic Function([dynamic]) fn]) {
+    var rooms = sids[id];
     if (rooms != null) {
       for (var room in rooms.keys) {
-        if (this.rooms.containsKey(room)) {
-          this.rooms[room].del(id);
-          if (this.rooms[room].length == 0) this.rooms.remove(room);
+        if (rooms.containsKey(room)) {
+          rooms[room].del(id);
+          if (rooms[room].length == 0) rooms.remove(room);
         }
       }
     }
-    this.sids.remove(id);
+    sids.remove(id);
 
     if (fn != null) scheduleMicrotask(() => fn(null));
   }
 
-  /**
-   * Broadcasts a packet.
-   *
-   * Options:
-   *  - `flags` {Object} flags for this packet
-   *  - `except` {Array} sids that should be excluded
-   *  - `rooms` {Array} list of rooms to broadcast to
-   *
-   * @param {Object} packet object
-   * @api public
-   */
-  broadcast(Map packet, [Map opts]) {
+  /// Broadcasts a packet.
+  ///
+  /// Options:
+  ///  - `flags` {Object} flags for this packet
+  ///  - `except` {Array} sids that should be excluded
+  ///  - `rooms` {Array} list of rooms to broadcast to
+  ///
+  /// @param {Object} packet object
+  /// @api public
+  @override
+  void broadcast(Map packet, [Map opts]) {
     opts = opts ?? {};
     List rooms = opts['rooms'] ?? [];
     List except = opts['except'] ?? [];
@@ -130,17 +127,17 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     var ids = {};
     var socket;
 
-    packet['nsp'] = this.nsp.name;
-    this.encoder.encode(packet, (encodedPackets) {
+    packet['nsp'] = nsp.name;
+    encoder.encode(packet, (encodedPackets) {
       if (rooms.isNotEmpty) {
         for (var i = 0; i < rooms.length; i++) {
-          var room = this.rooms[rooms[i]];
+          var room = rooms[rooms[i]];
           if (room == null) continue;
           var sockets = room.sockets;
           for (var id in sockets.keys) {
             if (sockets.containsKey(id)) {
-              if (ids[id] != null || except.indexOf(id) >= 0) continue;
-              socket = this.nsp.connected[id];
+              if (ids[id] != null || except.contains(id)) continue;
+              socket = nsp.connected[id];
               if (socket != null) {
                 socket.packet(encodedPackets, packetOpts);
                 ids[id] = true;
@@ -149,23 +146,22 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
           }
         }
       } else {
-        for (var id in this.sids.keys) {
-          if (except.indexOf(id) >= 0) continue;
-          socket = this.nsp.connected[id];
+        for (var id in sids.keys) {
+          if (except.contains(id)) continue;
+          socket = nsp.connected[id];
           if (socket != null) socket.packet(encodedPackets, packetOpts);
         }
       }
     });
   }
 
-  /**
-   * Gets a list of clients by sid.
-   *
-   * @param {Array} explicit set of rooms to check.
-   * @param {Function} callback
-   * @api public
-   */
-  clients(List rooms, [fn([_])]) {
+  /// Gets a list of clients by sid.
+  ///
+  /// @param {Array} explicit set of rooms to check.
+  /// @param {Function} callback
+  /// @api public
+  @override
+  void clients(List rooms, [dynamic Function([dynamic]) fn]) {
     rooms = rooms ?? [];
 
     var ids = {};
@@ -174,13 +170,13 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
 
     if (rooms.isNotEmpty) {
       for (var i = 0; i < rooms.length; i++) {
-        var room = this.rooms[rooms[i]];
+        var room = rooms[rooms[i]];
         if (room == null) continue;
         var sockets = room.sockets;
         for (var id in sockets.keys) {
           if (sockets.containsKey(id)) {
             if (ids[id] != null) continue;
-            socket = this.nsp.connected[id];
+            socket = nsp.connected[id];
             if (socket != null) {
               sids.add(id);
               ids[id] = true;
@@ -190,7 +186,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
       }
     } else {
       for (var id in this.sids.keys) {
-        socket = this.nsp.connected[id];
+        socket = nsp.connected[id];
         if (socket != null) sids.add(id);
       }
     }
@@ -198,55 +194,48 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     if (fn != null) scheduleMicrotask(() => fn(sids));
   }
 
-  /**
-   * Gets the list of rooms a given client has joined.
-   *
-   * @param {String} socket id
-   * @param {Function} callback
-   * @api public
-   */
-  clientRooms(String id, [fn(err, [_])]) {
-    var rooms = this.sids[id];
+  /// Gets the list of rooms a given client has joined.
+  ///
+  /// @param {String} socket id
+  /// @param {Function} callback
+  /// @api public
+  @override
+  void clientRooms(String id, [dynamic Function(dynamic, [dynamic]) fn]) {
+    var rooms = sids[id];
     if (fn != null) scheduleMicrotask(() => fn(null, rooms?.keys));
   }
 }
-/**
-   * Room constructor.
-   *
-   * @api private
-   */
 
+/// Room constructor.
+///
+/// @api private
 class _Room {
   Map<String, bool> sockets;
   int length;
   _Room() {
-    this.sockets = {};
-    this.length = 0;
+    sockets = {};
+    length = 0;
   }
 
-  /**
-   * Adds a socket to a room.
-   *
-   * @param {String} socket id
-   * @api private
-   */
-  add(String id) {
-    if (!this.sockets.containsKey(id)) {
-      this.sockets[id] = true;
-      this.length++;
+  /// Adds a socket to a room.
+  ///
+  /// @param {String} socket id
+  /// @api private
+  void add(String id) {
+    if (!sockets.containsKey(id)) {
+      sockets[id] = true;
+      length++;
     }
   }
 
-  /**
-   * Removes a socket from a room.
-   *
-   * @param {String} socket id
-   * @api private
-   */
-  del(String id) {
-    if (this.sockets.containsKey(id)) {
-      this.sockets.remove(id);
-      this.length--;
+  /// Removes a socket from a room.
+  ///
+  /// @param {String} socket id
+  /// @api private
+  void del(String id) {
+    if (sockets.containsKey(id)) {
+      sockets.remove(id);
+      length--;
     }
   }
 }

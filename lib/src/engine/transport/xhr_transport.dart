@@ -1,33 +1,29 @@
-/**
- * xhr_transport.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    22/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
-import 'dart:io';
+/// xhr_transport.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    22/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:socket_io/src/engine/connect.dart';
 import 'package:socket_io/src/engine/transport/polling_transport.dart';
 
 class XHRTransport extends PollingTransport {
   XHRTransport(SocketConnect connect) : super(connect);
 
-  /**
-   * Overrides `onRequest` to handle `OPTIONS`..
-   *
-   * @param {http.IncomingMessage}
-   * @api private
-   */
-  onRequest(SocketConnect connect) {
-    HttpRequest req = connect.request;
+  /// Overrides `onRequest` to handle `OPTIONS`..
+  ///
+  /// @param {http.IncomingMessage}
+  /// @api private
+  @override
+  void onRequest(SocketConnect connect) {
+    var req = connect.request;
     if ('OPTIONS' == req.method) {
       var res = req.response;
-      Map headers = this.headers(connect);
+      var headers = this.headers(connect);
       headers['Access-Control-Allow-Headers'] = 'Content-Type';
       headers.forEach((key, value) {
         res.headers.set(key, value);
@@ -40,14 +36,13 @@ class XHRTransport extends PollingTransport {
     }
   }
 
-  /**
-   * Returns headers for a response.
-   *
-   * @param {http.IncomingMessage} request
-   * @param {Object} extra headers
-   * @api private
-   */
-  headers(SocketConnect connect, [Map headers]) {
+  /// Returns headers for a response.
+  ///
+  /// @param {http.IncomingMessage} request
+  /// @param {Object} extra headers
+  /// @api private
+  @override
+  Map headers(SocketConnect connect, [Map headers]) {
     headers = headers ?? {};
     var req = connect.request;
     if (req.headers.value('origin') != null) {
