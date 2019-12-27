@@ -88,3 +88,4 @@ If you are new to Git or GitHub, please read [this guide](https://help.github.co
 
 ## Contributors
 * Thanks [@felangel](https://github.com/felangel) for https://github.com/rikulo/socket.io-dart/issues/7
+* Thanks [@ThinkDigitalSoftware](https://github.com/ThinkDigitalSoftware) for https://github.com/rikulo/socket.io-dart/pull/15

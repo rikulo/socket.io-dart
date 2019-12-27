@@ -87,7 +87,7 @@ class Namespace extends EventEmitter {
       if (err) return fn(err);
 
       // if no middleware left, summon callback
-      if (fns.length < index + 1) return fn(null);
+      if (fns.length <= index + 1) return fn(null);
 
       // go on to next
       run0(index + 1, fns, socket, fn);
@@ -189,12 +189,13 @@ class Namespace extends EventEmitter {
   ///
   /// @return {Namespace} self
   /// @api public
-  void send([args]) {
-    write(args);
+  Namespace send([args]) {
+    return write(args);
   }
 
-  void write([args]) {
+  Namespace write([args]) {
     emit('message', args);
+    return this;
   }
 
   /// Gets a list of clients.
@@ -213,10 +214,12 @@ class Namespace extends EventEmitter {
   /// Sets the compress flag.
   ///
   /// @param {Boolean} if `true`, compresses the sending data
+  /// @return {Namespace} self
   /// @api public
-  void compress(compress) {
+  Namespace compress(compress) {
     flags = flags.isEmpty ? flags : {};
     flags['compress'] = compress;
+    return this;
   }
 }
 
