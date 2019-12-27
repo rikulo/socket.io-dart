@@ -1,15 +1,13 @@
-/**
- * client.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *    22/02/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// client.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///    22/02/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:logging/logging.dart';
 
 import 'package:socket_io/src/engine/socket.dart';
@@ -57,17 +55,17 @@ class Client {
   /// @api private
   void connect(String name, [query]) {
     _logger.fine('connecting to namespace $name');
-    if (!this.server.nsps.containsKey(name)) {
-      this.packet(<dynamic, dynamic>{
+    if (!server.nsps.containsKey(name)) {
+      packet(<dynamic, dynamic>{
         'type': ERROR,
         'nsp': name,
         'data': 'Invalid namespace'
       });
       return;
     }
-    var nsp = this.server.of(name);
-    if ('/' != name && !this.nsps.containsKey('/')) {
-      this.connectBuffer.add(name);
+    var nsp = server.of(name);
+    if ('/' != name && !nsps.containsKey('/')) {
+      connectBuffer.add(name);
       return;
     }
 
@@ -76,81 +74,73 @@ class Client {
       self.sockets.add(socket);
       self.nsps[nsp.name] = socket;
 
-      if ('/' == nsp.name && self.connectBuffer.length > 0) {
+      if ('/' == nsp.name && self.connectBuffer.isNotEmpty) {
         self.connectBuffer.forEach(self.connect);
         self.connectBuffer = [];
       }
     });
   }
 
-  /**
-   * Disconnects from all namespaces and closes transport.
-   *
-   * @api private
-   */
-  disconnect() {
+  /// Disconnects from all namespaces and closes transport.
+  ///
+  /// @api private
+  void disconnect() {
     // we don't use a for loop because the length of
     // `sockets` changes upon each iteration
-    this.sockets.toList().forEach((socket) {
+    sockets.toList().forEach((socket) {
       socket.disconnect();
     });
-    this.sockets.clear();
+    sockets.clear();
 
-    this.close();
+    close();
   }
 
-  /**
-   * Removes a socket. Called by each `Socket`.
-   *
-   * @api private
-   */
-  remove(socket) {
-    var i = this.sockets.indexOf(socket);
+  /// Removes a socket. Called by each `Socket`.
+  ///
+  /// @api private
+  void remove(socket) {
+    var i = sockets.indexOf(socket);
     if (i >= 0) {
-      var nsp = this.sockets[i].nsp.name;
-      this.sockets.removeAt(i);
-      this.nsps.remove(nsp);
+      var nsp = sockets[i].nsp.name;
+      sockets.removeAt(i);
+      nsps.remove(nsp);
     } else {
       _logger.fine('ignoring remove for ${socket.id}');
     }
   }
 
-  /**
-   * Closes the underlying connection.
-   *
-   * @api private
-   */
-  close() {
-    if ('open' == this.conn.readyState) {
+  /// Closes the underlying connection.
+  ///
+  /// @api private
+  void close() {
+    if ('open' == conn.readyState) {
       _logger.fine('forcing transport close');
-      this.conn.close();
-      this.onclose('forced server close');
+      conn.close();
+      onclose('forced server close');
     }
   }
 
-  /**
-   * Writes a packet to the transport.
-   *
-   * @param {Object} packet object
-   * @param {Object} options
-   * @api private
-   */
-  packet(packet, [Map opts]) {
+  /// Writes a packet to the transport.
+  ///
+  /// @param {Object} packet object
+  /// @param {Object} options
+  /// @api private
+  void packet(packet, [Map opts]) {
     var self = this;
     opts = opts ?? {};
     // this writes to the actual connection
-    writeToEngine(encodedPackets) {
+    void writeToEngine(encodedPackets) {
       if (opts['volatile'] != null && !self.conn.transport.writable) return;
       for (var i = 0; i < encodedPackets.length; i++) {
         self.conn.write(encodedPackets[i], {'compress': opts['compress']});
       }
     }
 
-    if ('open' == this.conn.readyState) {
+    if ('open' == conn.readyState) {
       _logger.fine('writing packet $packet');
       if (opts['preEncoded'] != true) {
         // not broadcasting, need to encode
-        this.encoder.encode(packet, (encodedPackets) {
+        encoder.encode(packet, (encodedPackets) {
           // encode, then write results to engine
           writeToEngine(encodedPackets);
         });
@@ -163,33 +153,29 @@ class Client {
     }
   }
 
-  /**
-   * Called with incoming transport data.
-   *
-   * @api private
-   */
-  ondata(data) {
+  /// Called with incoming transport data.
+  ///
+  /// @api private
+  void ondata(data) {
     // try/catch is needed for protocol violations (GH-1880)
     try {
-      this.decoder.add(data);
+      decoder.add(data);
     } catch (e, st) {
       _logger.severe(e, st);
-      this.onerror(e);
+      onerror(e);
     }
   }
 
-  /**
-   * Called when parser fully decodes a packet.
-   *
-   * @api private
-   */
-  ondecoded(packet) {
+  /// Called when parser fully decodes a packet.
+  ///
+  /// @api private
+  void ondecoded(packet) {
     if (CONNECT == packet['type']) {
       final nsp = packet['nsp'];
       final uri = Uri.parse(nsp);
-      this.connect(uri.path, uri.queryParameters);
+      connect(uri.path, uri.queryParameters);
     } else {
-      var socket = this.nsps[packet['nsp']];
+      var socket = nsps[packet['nsp']];
       if (socket != null) {
         socket.onpacket(packet);
       } else {
@@ -198,50 +184,44 @@ class Client {
     }
   }
 
-  /**
-   * Handles an error.
-   *
-   * @param {Objcet} error object
-   * @api private
-   */
-  onerror(err) {
-    this.sockets.forEach((socket) {
+  /// Handles an error.
+  ///
+  /// @param {Objcet} error object
+  /// @api private
+  void onerror(err) {
+    sockets.forEach((socket) {
       socket.onerror(err);
     });
-    this.onclose('client error');
+    onclose('client error');
   }
 
-  /**
-   * Called upon transport close.
-   *
-   * @param {String} reason
-   * @api private
-   */
-  onclose(reason) {
+  /// Called upon transport close.
+  ///
+  /// @param {String} reason
+  /// @api private
+  void onclose(reason) {
     _logger.fine('client close with reason $reason');
 
     // ignore a potential subsequent `close` event
-    this.destroy();
+    destroy();
 
     // `nsps` and `sockets` are cleaned up seamlessly
-    if (this.sockets.isNotEmpty) {
-      List.from(this.sockets).forEach((socket) {
+    if (sockets.isNotEmpty) {
+      List.from(sockets).forEach((socket) {
         socket.onclose(reason);
       });
-      this.sockets.clear();
+      sockets.clear();
     }
-    this.decoder.destroy(); // clean up decoder
+    decoder.destroy(); // clean up decoder
   }
 
-  /**
-   * Cleans up event listeners.
-   *
-   * @api private
-   */
-  destroy() {
-    this.conn.off('data', this.ondata);
-    this.conn.off('error', this.onerror);
-    this.conn.off('close', this.onclose);
-    this.decoder.off('decoded', this.ondecoded);
+  /// Cleans up event listeners.
+  ///
+  /// @api private
+  void destroy() {
+    conn.off('data', ondata);
+    conn.off('error', onerror);
+    conn.off('close', onclose);
+    decoder.off('decoded', ondecoded);
   }
 }

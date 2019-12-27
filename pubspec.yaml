@@ -1,7 +1,9 @@
 name: socket_io
-description: Dartlang port of socket.io
-version: 0.9.1
-author: jumperchen <jumperchen@potix.com>
+description: >
+  Port of JS/Node library Socket.io. It enables real-time, bidirectional and 
+  event-based communication cross-platform.
+version: 0.9.1+1
+# author: jumperchen <jumperchen@potix.com>
 homepage: https://www.zkoss.org
 repository: https://github.com/rikulo/socket.io-dart
 issue_tracker: https://github.com/rikulo/socket.io-dart/issues
@@ -10,10 +12,10 @@ environment:
   sdk: '>=2.0.0 <3.0.0'
 
 dependencies:
-  stream: any
-  socket_io_common: any
-  uuid: any
-
+  stream: ^2.2.1+1
+  socket_io_common: ^0.9.0+5
+  uuid: ^2.0.4
+  logging: ^0.11.3+2
 dev_dependencies:
   test: ">=1.3.0 <2.0.0"
   pedantic: ^1.9.0
