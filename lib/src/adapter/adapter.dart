@@ -93,9 +93,9 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     var rooms = sids[id];
     if (rooms != null) {
       for (var room in rooms.keys) {
-        if (rooms.containsKey(room)) {
-          rooms[room].del(id);
-          if (rooms[room].length == 0) rooms.remove(room);
+        if (this.rooms.containsKey(room)) {
+          this.rooms[room].del(id);
+          if (this.rooms[room].length == 0) this.rooms.remove(room);
         }
       }
     }
