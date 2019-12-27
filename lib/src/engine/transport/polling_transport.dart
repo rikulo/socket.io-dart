@@ -189,6 +189,7 @@ class PollingTransport extends Transport {
         }
 
         self.onPacket(packet);
+        return true;
       };
 
       PacketParser.decodePayload(data, callback: callback);

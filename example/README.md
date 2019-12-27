@@ -68,25 +68,3 @@ Within each Namespace, you can define arbitrary channels, called Rooms, that soc
 ## Adapters support
 
 *  Default socket.io in-memory adapter class. Refers to [socket.io-adapter](https://github.com/socketio/socket.io-adapter)
-
-## Notes to Contributors
-
-### Fork socket.io-dart
-
-If you'd like to contribute back to the core, you can [fork this repository](https://help.github.com/articles/fork-a-repo) and send us a pull request, when it is ready.
-
-If you are new to Git or GitHub, please read [this guide](https://help.github.com/) first.
-
-## Who Uses
-
-* [Quire](https://quire.io) - a simple, collaborative, multi-level task management tool.
-* [KEIKAI](https://keikai.io/) - a web spreadsheet for Big Data.
-
-## Socket.io Dart Client
-
-* [socket.io-client-dart](https://github.com/rikulo/socket.io-client-dart)
-
-## Contributors
-* Thanks [@felangel](https://github.com/felangel) for https://github.com/rikulo/socket.io-dart/issues/7
-* Thanks [@ThinkDigitalSoftware](https://github.com/ThinkDigitalSoftware) for https://github.com/rikulo/socket.io-dart/pull/15
-* Thanks [@guilhermecaldas](https://github.com/guilhermecaldas) for https://github.com/rikulo/socket.io-dart/pull/16

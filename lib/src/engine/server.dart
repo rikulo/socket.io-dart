@@ -287,7 +287,7 @@ class Server extends Engine {
     }
     var socket = Socket(id, this, transport, connect);
 
-    if (false != cookie) {
+    if (cookie?.isNotEmpty == true) {
       transport.on('headers', (headers) {
         headers['Set-Cookie'] = '${cookie}=${Uri.encodeComponent(id)}' +
             (cookiePath?.isNotEmpty == true ? '; Path=${cookiePath}' : '') +
@@ -373,6 +373,7 @@ class Server extends Engine {
         var req = connect.request;
         var transport = Transports.newInstance(
             req.uri.queryParameters['transport'], connect);
+        // ignore: unrelated_type_equality_checks
         if (req.uri.queryParameters['b64'] == true) {
           transport.supportsBinary = false;
         } else {

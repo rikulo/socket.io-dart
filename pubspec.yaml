@@ -2,8 +2,8 @@ name: socket_io
 description: >
   Port of JS/Node library Socket.io. It enables real-time, bidirectional and 
   event-based communication cross-platform.
-version: 0.9.1+1
-# author: jumperchen <jumperchen@potix.com>
+version: 0.9.1
+author: jumperchen <jumperchen@potix.com>
 homepage: https://www.zkoss.org
 repository: https://github.com/rikulo/socket.io-dart
 issue_tracker: https://github.com/rikulo/socket.io-dart/issues

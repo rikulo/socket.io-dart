@@ -79,7 +79,7 @@ class Namespace extends EventEmitter {
   }
 
   //TODO: Figure out return type for this method
-  static run0(int index, List<Function> fns, Socket socket, Function fn) {
+  static Object run0(int index, List<Function> fns, Socket socket, Function fn) {
     return fns[index](socket, (err) {
       // upon error, short-circuit
       if (err) return fn(err);
@@ -88,7 +88,7 @@ class Namespace extends EventEmitter {
       if (fns.length <= index + 1) return fn(null);
 
       // go on to next
-      run0(index + 1, fns, socket, fn);
+      return run0(index + 1, fns, socket, fn);
     });
   }
 
@@ -169,7 +169,7 @@ class Namespace extends EventEmitter {
       // @todo check how to handle it with Dart
       // if (hasBin(args)) { parserType = ParserType.binaryEvent; } // binary
 
-      var data = arg == null ? [ev] : [ev, arg];
+      // ignore: omit_local_variable_types
       List data = argument == null ? [event] : [event, argument];
 
       final packet = {'type': EVENT, 'data': data};
@@ -201,6 +201,7 @@ class Namespace extends EventEmitter {
   ///
   /// TODO: Fix this description or code. Add type parameters to [fn([_])]
   ///
+  // ignore: use_function_type_syntax_for_parameters
   Namespace clients(fn([_])) {
     adapter.clients(rooms, fn);
     rooms = [];
