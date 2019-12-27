@@ -389,7 +389,7 @@ class Server {
    * @api public
    */
 
-  of(name, [fn]) {
+  Namespace of(name, [fn]) {
     if (name.toString()[0] != '/') {
       name = '/' + name;
     }
@@ -408,7 +408,7 @@ class Server {
    *
    * @api public
    */
-  close() {
+  void close() {
     this.nsps['/'].sockets.forEach((socket) {
       socket.onclose();
     });
