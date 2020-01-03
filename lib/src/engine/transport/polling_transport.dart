@@ -260,7 +260,7 @@ class PollingTransport extends Transport {
     var contentType =
         isString ? 'text/plain; charset=UTF-8' : 'application/octet-stream';
 
-    final headers = {'Content-Type': contentType};
+    final headers = <String, dynamic>{'Content-Type': contentType};
 
     var respond = (data) {
       headers[HttpHeaders.contentLengthHeader] =
