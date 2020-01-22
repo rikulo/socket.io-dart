@@ -131,7 +131,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
     encoder.encode(packet, (encodedPackets) {
       if (rooms.isNotEmpty) {
         for (var i = 0; i < rooms.length; i++) {
-          var room = rooms[rooms[i]];
+          var room = this.rooms[rooms[i]];
           if (room == null) continue;
           var sockets = room.sockets;
           for (var id in sockets.keys) {
@@ -170,7 +170,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
 
     if (rooms.isNotEmpty) {
       for (var i = 0; i < rooms.length; i++) {
-        var room = rooms[rooms[i]];
+        var room = this.rooms[rooms[i]];
         if (room == null) continue;
         var sockets = room.sockets;
         for (var id in sockets.keys) {
