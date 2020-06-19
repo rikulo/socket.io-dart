@@ -1,3 +1,9 @@
+## 0.9.4
+
+**Bug Fix:**
+
+* [#23](https://github.com/rikulo/socket.io-dart/issues/23) [BUG] Calling close on Server raises ConcurrentModificationError
+
 ## 0.9.3
 
 **Bug Fix:**

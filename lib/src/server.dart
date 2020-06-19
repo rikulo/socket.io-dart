@@ -371,7 +371,7 @@ class Server {
   ///
   /// @api public
   void close() {
-    nsps['/'].sockets.forEach((socket) {
+    nsps['/'].sockets.toList(growable: false).forEach((socket) {
       socket.onclose();
     });
 

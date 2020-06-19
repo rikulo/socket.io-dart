@@ -176,7 +176,7 @@ class Server extends Engine {
   @override
   void close() {
     _logger.fine('closing all open clients');
-    for (var key in clients.keys) {
+    for (var key in clients.keys.toList(growable: false)) {
       if (clients[key] != null) {
         clients[key].close(true);
       }
