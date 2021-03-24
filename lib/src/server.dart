@@ -165,7 +165,7 @@ class Server {
     _adapter = v;
     if (nsps.isNotEmpty) {
       nsps.forEach((dynamic i, Namespace nsp) {
-        nsps[i].initAdapter();
+        nsp.initAdapter();
       });
     }
   }
@@ -189,7 +189,7 @@ class Server {
   /// @param {Object} options passed to engine.io
   /// @return {Server} self
   /// @api public
-  void listen(srv, [Map opts]) {
+  void listen(srv, [Map opts = const {}]) {
     attach(srv, opts);
   }
 
@@ -199,7 +199,7 @@ class Server {
   /// @param {Object} options passed to engine.io
   /// @return {Server} self
   /// @api public
-  Server attach(srv, [Map opts]) {
+  Server attach(srv, [Map opts = const {}]) {
     if (srv is Function) {
       var msg = 'You are trying to attach socket.io to an express '
           'request handler function. Please pass a http.Server instance.';
@@ -210,7 +210,6 @@ class Server {
     if (srv is String && int.parse(srv.toString()).toString() == srv) {
       srv = int.parse(srv.toString());
     }
-    opts ??= {};
     // set engine.io path to `/socket.io`
     if (!opts.containsKey('path')) {
       opts['path'] = path();
@@ -218,9 +217,9 @@ class Server {
     // set origins verification
     opts['allowRequest'] = checkRequest;
 
-    if (srv is num) {
+    if (srv is int) {
       _logger.fine('creating http server and binding to $srv');
-      int port = srv;
+      final port = srv;
       var server = StreamServer();
       server.start(port: port);
 //      HttpServer.bind(InternetAddress.ANY_IP_V4, port).then((
@@ -329,9 +328,9 @@ class Server {
   /// @param {engine.Server} engine.io (or compatible) server
   /// @return {Server} self
   /// @api public
-  Server bind(engine) {
+  Server bind(Engine engine) {
     this.engine = engine;
-    this.engine.on('connection', onconnection);
+    engine.on('connection', onconnection);
     return this;
   }
 
@@ -353,7 +352,7 @@ class Server {
   /// @param {Function} optional, nsp `connection` ev handler
   /// @api public
 
-  Namespace of(name, [fn]) {
+  Namespace/*!*/ of(name, [fn]) {
     if (name.toString()[0] != '/') {
       name = '/' + name;
     }

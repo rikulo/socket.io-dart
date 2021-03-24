@@ -127,7 +127,7 @@ class Server extends Engine {
   /// @return {Array}
   /// @api public
 
-  List<String> upgrades(transport) {
+  List<String> upgrades(String transport) {
     if (!allowUpgrades) return null;
     return Transports.upgradesTo(transport);
   }
@@ -138,7 +138,7 @@ class Server extends Engine {
   /// @return {Boolean} whether the request is valid
   /// @api private
 
-  void verify(SocketConnect connect, bool upgrade, fn) {
+  void verify(SocketConnect connect, bool upgrade, void Function(int, bool) fn ) {
     // transport check
     var req = connect.request;
     var transport = req.uri.queryParameters['transport'];
@@ -289,8 +289,8 @@ class Server extends Engine {
 
     if (cookie?.isNotEmpty == true) {
       transport.on('headers', (headers) {
-        headers['Set-Cookie'] = '${cookie}=${Uri.encodeComponent(id)}' +
-            (cookiePath?.isNotEmpty == true ? '; Path=${cookiePath}' : '') +
+        headers['Set-Cookie'] = '$cookie=${Uri.encodeComponent(id)}' +
+            (cookiePath?.isNotEmpty == true ? '; Path=$cookiePath' : '') +
             (cookiePath?.isNotEmpty == true && cookieHttpOnly == true
                 ? '; HttpOnly'
                 : '');
