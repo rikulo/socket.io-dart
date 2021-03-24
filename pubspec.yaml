@@ -13,7 +13,7 @@ environment:
 
 dependencies:
   stream: ^3.0.0
-  socket_io_common: '>=2.0.0-0 <  3.0.0'
+  socket_io_common: '^1.0.0-nullsafety.1'
   uuid: ^3.0.2
   logging: ^1.0.0
 
