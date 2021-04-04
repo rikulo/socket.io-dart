@@ -47,12 +47,12 @@ class Server {
   /// @param {Object} options
   /// @api public
   Server({server, Map? options}) {
-    options = options ?? {};
+    final loptions = options ?? {};
     nsps = {};
-    path(options.containsKey('path') ? options['path'] : '/socket.io');
-    serveClient(false != options['serveClient']);
-    adapter = options.containsKey('adapter') ? options['adapter'] : 'default';
-    origins(options.containsKey('origins') ? options['origins'] : '*:*');
+    path(loptions.containsKey('path') ? loptions['path'] : '/socket.io');
+    serveClient(false != loptions['serveClient']);
+    adapter = loptions.containsKey('adapter') ? loptions['adapter'] : 'default';
+    origins(loptions.containsKey('origins') ? loptions['origins'] : '*:*');
     encoder = Encoder();
     sockets = of('/');
     if (server != null) {
@@ -188,7 +188,7 @@ class Server {
   /// @param {Object} options passed to engine.io
   /// @return {Server} self
   /// @api public
-  void listen(srv, [Map opts = const {}]) {
+  void listen(srv, [Map? opts]) {
     attach(srv, opts);
   }
 
@@ -198,7 +198,8 @@ class Server {
   /// @param {Object} options passed to engine.io
   /// @return {Server} self
   /// @api public
-  Server attach(srv, [Map opts = const {}]) {
+  Server attach(srv, [Map? opts]) {
+    final lopts = opts ?? {};
     if (srv is Function) {
       var msg = 'You are trying to attach socket.io to an express '
           'request handler function. Please pass a http.Server instance.';
@@ -210,11 +211,11 @@ class Server {
       srv = int.parse(srv.toString());
     }
     // set engine.io path to `/socket.io`
-    if (!opts.containsKey('path')) {
-      opts['path'] = path();
+    if (!lopts.containsKey('path')) {
+      lopts['path'] = path();
     }
     // set origins verification
-    opts['allowRequest'] = checkRequest;
+    lopts['allowRequest'] = checkRequest;
 
     if (srv is int) {
       _logger.fine('creating http server and binding to $srv');
@@ -234,7 +235,7 @@ class Server {
       encoder.encode(connectPacket, (encodedPacket) {
         // the CONNECT packet will be merged with Engine.IO handshake,
         // to reduce the number of round trips
-        opts['initialPacket'] = encodedPacket;
+        lopts['initialPacket'] = encodedPacket;
 
         _logger.fine('creating engine.io instance with opts $opts');
         // initialize engine
@@ -255,7 +256,7 @@ class Server {
       encoder.encode(connectPacket, (encodedPacket) {
         // the CONNECT packet will be merged with Engine.IO handshake,
         // to reduce the number of round trips
-        opts['initialPacket'] = encodedPacket;
+        lopts['initialPacket'] = encodedPacket;
 
         _logger.fine('creating engine.io instance with opts $opts');
         // initialize engine
