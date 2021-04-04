@@ -1,4 +1,5 @@
 import 'dart:async';
+
 /// websocket_transport.dart
 ///
 /// Purpose:
@@ -20,7 +21,7 @@ class WebSocketTransport extends Transport {
   bool get handlesUpgrades => true;
   @override
   bool get supportsFraming => true;
-  StreamSubscription subscription;
+  StreamSubscription? subscription;
   WebSocketTransport(connect) : super(connect) {
     name = 'websocket';
     this.connect = connect;
@@ -48,7 +49,7 @@ class WebSocketTransport extends Transport {
 //      }
 
 //      this.writable = false;
-      connect.websocket.add(data);
+      connect?.websocket?.add(data);
     };
 
 //    function onEnd (err) {
@@ -69,14 +70,14 @@ class WebSocketTransport extends Transport {
 
     // workaround for https://github.com/dart-lang/sdk/issues/27414
     if (subscription != null) {
-      subscription.cancel();
+      subscription?.cancel();
       subscription = null;
     }
   }
 
   @override
   void doClose([fn]) {
-    connect.websocket.close();
+    connect?.websocket?.close();
     if (fn != null) fn();
   }
 }

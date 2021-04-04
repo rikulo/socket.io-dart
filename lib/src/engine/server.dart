@@ -40,29 +40,25 @@ const Map<int, String> ServerErrorMessages = {
 
 class Server extends Engine {
   static final Logger _logger = Logger('socket_io:engine.Server');
-  Map clients;
-  int clientsCount;
-  int pingTimeout;
-  int pingInterval;
-  int upgradeTimeout;
-  double maxHttpBufferSize;
-  List<String> transports;
-  bool allowUpgrades;
-  Function allowRequest;
-  String cookie;
-  String cookiePath;
-  bool cookieHttpOnly;
-  Map perMessageDeflate;
-  Map httpCompression;
+  Map clients = {};
+  int clientsCount = 0;
+  late int pingTimeout;
+  late int pingInterval;
+  late int upgradeTimeout;
+  double? maxHttpBufferSize;
+  late List<String> transports;
+  late bool allowUpgrades;
+  Function? allowRequest;
+  String? cookie;
+  String? cookiePath;
+  bool? cookieHttpOnly;
+  late Map perMessageDeflate;
+  late Map httpCompression;
   dynamic initialPacket;
   final Uuid _uuid = Uuid();
 
-  Server([Map opts]) {
-    clients = {};
-    clientsCount = 0;
-
+  Server([Map? opts]) {
     opts = opts ?? {};
-
     pingTimeout = opts['pingTimeout'] ?? 60000;
     pingInterval = opts['pingInterval'] ?? 25000;
     upgradeTimeout = opts['upgradeTimeout'] ?? 10000;
@@ -71,11 +67,11 @@ class Server extends Engine {
     allowUpgrades = false != opts['allowUpgrades'];
     allowRequest = opts['allowRequest'];
     cookie = opts['cookie'] == false
-        ? false
+        ? false as String?
         : opts['cookie'] ??
             'io'; //false != opts.cookie ? (opts.cookie || 'io') : false;
     cookiePath = opts['cookiePath'] == false
-        ? false
+        ? false as String?
         : opts['cookiePath'] ??
             '/'; //false != opts.cookiePath ? (opts.cookiePath || '/') : false;
     cookieHttpOnly = opts['cookieHttpOnly'] != false;
@@ -127,7 +123,7 @@ class Server extends Engine {
   /// @return {Array}
   /// @api public
 
-  List<String> upgrades(String transport) {
+  List<String>? upgrades(String transport) {
     if (!allowUpgrades) return null;
     return Transports.upgradesTo(transport);
   }
@@ -138,7 +134,8 @@ class Server extends Engine {
   /// @return {Boolean} whether the request is valid
   /// @api private
 
-  void verify(SocketConnect connect, bool upgrade, void Function(int, bool) fn ) {
+  void verify(
+      SocketConnect connect, bool upgrade, void Function(int?, bool) fn) {
     // transport check
     var req = connect.request;
     var transport = req.uri.queryParameters['transport'];
@@ -163,7 +160,7 @@ class Server extends Engine {
         return fn(ServerErrors.BAD_HANDSHAKE_METHOD, false);
       }
       if (allowRequest == null) return fn(null, true);
-      return allowRequest(req, fn);
+      return allowRequest!(req, fn);
     }
 
     fn(null, true);
@@ -200,7 +197,7 @@ class Server extends Engine {
 //  this.prepare(req);
 //  req.res = res;
 
-    var self = this;
+    final self = this;
     verify(connect, false, (err, success) {
       if (!success) {
         sendErrorMessage(req, err);
@@ -212,7 +209,7 @@ class Server extends Engine {
         self.clients[req.uri.queryParameters['sid']].transport
             .onRequest(connect);
       } else {
-        self.handshake(req.uri.queryParameters['transport'], connect);
+        self.handshake(req.uri.queryParameters['transport']!, connect);
       }
     });
   }
@@ -238,7 +235,7 @@ class Server extends Engine {
     if (req.headers.value('origin') != null) {
       res.headers.add('Access-Control-Allow-Credentials', 'true');
       res.headers
-          .add('Access-Control-Allow-Origin', req.headers.value('origin'));
+          .add('Access-Control-Allow-Origin', req.headers.value('origin')!);
     } else {
       res.headers.add('Access-Control-Allow-Origin', '*');
     }
@@ -361,18 +358,18 @@ class Server extends Engine {
       var client = clients[id];
       if (client == null) {
         _logger.fine('upgrade attempt for closed client');
-        connect.websocket.close();
+        connect.websocket?.close();
       } else if (client.upgrading == true) {
         _logger.fine('transport has already been trying to upgrade');
-        connect.websocket.close();
+        connect.websocket?.close();
       } else if (client.upgraded == true) {
         _logger.fine('transport had already been upgraded');
-        connect.websocket.close();
+        connect.websocket?.close();
       } else {
         _logger.fine('upgrading existing transport');
         var req = connect.request;
         var transport = Transports.newInstance(
-            req.uri.queryParameters['transport'], connect);
+            req.uri.queryParameters['transport']!, connect);
         // ignore: unrelated_type_equality_checks
         if (req.uri.queryParameters['b64'] == true) {
           transport.supportsBinary = false;
@@ -383,7 +380,7 @@ class Server extends Engine {
         client.maybeUpgrade(transport);
       }
     } else {
-      handshake(connect.request.uri.queryParameters['transport'], connect);
+      handshake(connect.request.uri.queryParameters['transport']!, connect);
     }
   }
 
@@ -392,7 +389,7 @@ class Server extends Engine {
   /// @param {http.Server} server
   /// @param {Object} options
   /// @api public
-  void attachTo(StreamServer server, Map options) {
+  void attachTo(StreamServer server, Map? options) {
     options = options ?? {};
     var path =
         (options['path'] ?? '/engine.io').replaceFirst(RegExp(r'\/$'), '');
@@ -429,7 +426,7 @@ class Server extends Engine {
   /// @api private
 
   static void abortConnection(SocketConnect connect, code) {
-    var socket = connect.websocket;
+    var socket = connect.websocket!;
     if (socket.readyState == HttpStatus.ok) {
       var message = ServerErrorMessages.containsKey(code)
           ? ServerErrorMessages[code]

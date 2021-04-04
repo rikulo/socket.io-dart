@@ -11,15 +11,15 @@
 import 'dart:collection' show HashMap;
 
 /// Handler type for handling the event emitted by an [EventEmitter].
-typedef EventHandler<T> = dynamic Function(T data);
+typedef EventHandler<T> = dynamic Function(T? data);
 
 /// Generic event emitting and handling.
 class EventEmitter {
   /// Mapping of events to a list of event handlers
-  Map<String, List<EventHandler>> _events;
+  late Map<String, List<EventHandler>> _events;
 
   /// Mapping of events to a list of one-time event handlers
-  Map<String, List<EventHandler>> _eventsOnce;
+  late Map<String, List<EventHandler>> _eventsOnce;
 
   /// Constructor
   EventEmitter() {
@@ -46,7 +46,7 @@ class EventEmitter {
   /// This function binds the [handler] as a listener to the [event]
   void on(String event, EventHandler handler) {
     _events.putIfAbsent(event, () => <EventHandler>[]);
-    _events[event].add(handler);
+    _events[event]?.add(handler);
   }
 
   /// This function binds the [handler] as a listener to the first
@@ -54,11 +54,11 @@ class EventEmitter {
   /// it is removed.
   void once(String event, EventHandler handler) {
     _eventsOnce.putIfAbsent(event, () => <EventHandler>[]);
-    _eventsOnce[event].add(handler);
+    _eventsOnce[event]?.add(handler);
   }
 
   /// This function attempts to unbind the [handler] from the [event]
-  void off(String event, [EventHandler handler]) {
+  void off(String event, [EventHandler? handler]) {
     if (handler != null) {
       _events[event]?.remove(handler);
       _eventsOnce[event]?.remove(handler);

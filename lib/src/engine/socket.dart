@@ -25,30 +25,22 @@ class Socket extends EventEmitter {
   String id;
   Server server;
   Transport transport;
-  bool upgrading;
-  bool upgraded;
-  String readyState;
-  List<Map> writeBuffer;
-  List<Function> packetsFn;
-  List<Function> sentCallbackFn;
-  List cleanupFn;
+  bool upgrading = false;
+  bool upgraded = false;
+  String readyState = 'opening';
+  List<Map> writeBuffer = [];
+  List<Function> packetsFn = [];
+  List<Function> sentCallbackFn = [];
+  List cleanupFn = [];
   SocketConnect connect;
-  InternetAddress remoteAddress;
-  Timer checkIntervalTimer;
-  Timer upgradeTimeoutTimer;
-  Timer pingTimeoutTimer;
+  InternetAddress? remoteAddress;
+  Timer? checkIntervalTimer;
+  Timer? upgradeTimeoutTimer;
+  Timer? pingTimeoutTimer;
 
   Socket(this.id, this.server, this.transport, this.connect) {
-    upgrading = false;
-    upgraded = false;
-    readyState = 'opening';
-    writeBuffer = [];
-    packetsFn = [];
-    sentCallbackFn = [];
-    cleanupFn = [];
-
     // Cache IP since it might not be in the req later
-    remoteAddress = connect.request.connectionInfo.remoteAddress;
+    remoteAddress = connect.request.connectionInfo!.remoteAddress;
 
     checkIntervalTimer = null;
     upgradeTimeoutTimer = null;
@@ -132,9 +124,7 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   void setPingTimeout() {
-    if (pingTimeoutTimer != null) {
-      pingTimeoutTimer.cancel();
-    }
+    pingTimeoutTimer?.cancel();
     pingTimeoutTimer = Timer(
         Duration(milliseconds: server.pingInterval + server.pingTimeout), () {
       onClose('ping timeout');
@@ -205,9 +195,7 @@ class Socket extends EventEmitter {
           {'type': 'pong', 'data': 'probe'}
         ]);
         emit('upgrading', transport);
-        if (checkIntervalTimer != null) {
-          checkIntervalTimer.cancel();
-        }
+        checkIntervalTimer?.cancel();
         checkIntervalTimer =
             Timer.periodic(Duration(milliseconds: 100), (_) => check());
       } else if ('upgrade' == packet['type'] && readyState != 'closed') {
@@ -326,6 +314,7 @@ class Socket extends EventEmitter {
           _logger.fine('executing send callback');
           seqFn(transport);
         }
+
         /// else if (Array.isArray(seqFn)) {
         /// _logger.fine('executing batch send callback');
         /// for (var l = seqFn.length, i = 0; i < l; i++) {
@@ -414,7 +403,7 @@ class Socket extends EventEmitter {
   /// @api private
   List<dynamic> getAvailableUpgrades() {
     var availableUpgrades = [];
-    var allUpgrades = server.upgrades(transport.name);
+    var allUpgrades = server.upgrades(transport.name!)!;
     for (var i = 0, l = allUpgrades.length; i < l; ++i) {
       var upg = allUpgrades[i];
       if (server.transports.contains(upg)) {

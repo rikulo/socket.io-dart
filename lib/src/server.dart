@@ -31,22 +31,22 @@ final Logger _logger = Logger('socket_io:Server');
 
 class Server {
   // Namespaces
-  Map<String, Namespace> nsps;
-  Namespace sockets;
+  late Map<String, Namespace> nsps;
+  late Namespace sockets;
   dynamic _origins;
-  bool _serveClient;
-  String _path;
-  String _adapter;
-  StreamServer httpServer;
-  Engine engine;
-  Encoder encoder;
+  bool? _serveClient;
+  String? _path;
+  String? _adapter;
+  StreamServer? httpServer;
+  late Engine engine;
+  late Encoder encoder;
 
   /// Server constructor.
   ///
   /// @param {http.Server|Number|Object} http server, port or options
   /// @param {Object} options
   /// @api public
-  Server({server, Map options}) {
+  Server({server, Map? options}) {
     options = options ?? {};
     nsps = {};
     path(options.containsKey('path') ? options['path'] : '/socket.io');
@@ -64,7 +64,7 @@ class Server {
   ///
   /// @param {http.IncomingMessage} request
   /// @param {Function} callback to be called with the result: `fn(err, success)`
-  void checkRequest(HttpRequest req, [Function fn]) {
+  void checkRequest(HttpRequest req, [Function? fn]) {
     var origin = req.headers.value('origin') ?? req.headers.value('referer');
 
     // file:// URLs produce a null Origin which can't be authorized via echo-back
@@ -77,25 +77,24 @@ class Server {
     }
 
     if (_origins.contains('*:*')) {
-      return fn(null, true);
+      return fn!(null, true);
     }
 
     if (origin.isNotEmpty) {
       try {
         var parts = Uri.parse(origin);
-        var defaultPort = 'https:' == parts.scheme ? 443 : 80;
-        var port = parts.port ?? defaultPort;
+        var port = parts.port;
         var ok = _origins.indexOf(parts.host + ':' + port.toString()) >= 0 ||
             _origins.indexOf(parts.host + ':*') >= 0 ||
             _origins.indexOf('*:' + port.toString()) >= 0;
 
-        return fn(null, ok);
+        return fn!(null, ok);
       } catch (ex) {
         print(ex);
       }
     }
 
-    fn(null, false);
+    fn!(null, false);
   }
 
   /// Sets/gets whether client code is being served.
@@ -103,7 +102,7 @@ class Server {
   /// @param {Boolean} whether to serve client code
   /// @return {Server|Boolean} self when setting or value when getting
   /// @api public
-  dynamic serveClient([bool v]) {
+  dynamic serveClient([bool? v]) {
     if (v == null) {
       return _serveClient;
     }
@@ -148,7 +147,7 @@ class Server {
   /// @param {String} pathname
   /// @return {Server|String} self when setting or value when getting
   /// @api public
-  dynamic path([String v]) {
+  dynamic path([String? v]) {
     if (v == null || v.isEmpty) return _path;
     _path = v.replaceFirst(RegExp(r'/\/$/'), '');
     return this;
@@ -159,9 +158,9 @@ class Server {
   /// @param {Adapter} pathname
   /// @return {Server|Adapter} self when setting or value when getting
   /// @api public
-  String get adapter => _adapter;
+  String? get adapter => _adapter;
 
-  set adapter(String v) {
+  set adapter(String? v) {
     _adapter = v;
     if (nsps.isNotEmpty) {
       nsps.forEach((dynamic i, Namespace nsp) {
@@ -176,7 +175,7 @@ class Server {
   /// @return {Server|Adapter} self when setting or value when getting
   /// @api public
 
-  dynamic origins([String v]) {
+  dynamic origins([String? v]) {
     if (v == null || v.isEmpty) return _origins;
 
     _origins = v;
@@ -352,7 +351,7 @@ class Server {
   /// @param {Function} optional, nsp `connection` ev handler
   /// @api public
 
-  Namespace/*!*/ of(name, [fn]) {
+  Namespace of(name, [fn]) {
     if (name.toString()[0] != '/') {
       name = '/' + name;
     }
@@ -362,22 +361,22 @@ class Server {
       var nsp = Namespace(this, name);
       nsps[name] = nsp;
     }
-    if (fn != null) nsps[name].on('connect', fn);
-    return nsps[name];
+    if (fn != null) nsps[name]!.on('connect', fn);
+    return nsps[name]!;
   }
 
   /// Closes server connection
   ///
   /// @api public
   void close() {
-    nsps['/'].sockets.toList(growable: false).forEach((socket) {
+    nsps['/']!.sockets.toList(growable: false).forEach((socket) {
       socket.onclose();
     });
 
     engine.close();
 
     if (httpServer != null) {
-      httpServer.stop();
+      httpServer!.stop();
     }
   }
 

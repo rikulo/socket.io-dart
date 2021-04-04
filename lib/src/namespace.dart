@@ -34,9 +34,9 @@ class Namespace extends EventEmitter {
   Map<String, Socket> connected = {};
   List<Function> fns = [];
   int ids = 0;
-  List rooms = [];
+  List<String> rooms = [];
   Map flags = {};
-  Adapter adapter;
+  Adapter? adapter;
   final Logger _logger = Logger('socket_io:Namespace');
 
   /// Namespace constructor.
@@ -79,7 +79,8 @@ class Namespace extends EventEmitter {
   }
 
   //TODO: Figure out return type for this method
-  static Object run0(int index, List<Function> fns, Socket socket, Function fn) {
+  static Object? run0(
+      int index, List<Function> fns, Socket socket, Function fn) {
     return fns[index](socket, (err) {
       // upon error, short-circuit
       if (err) return fn(err);
@@ -107,7 +108,7 @@ class Namespace extends EventEmitter {
   /// @return {Namespace} self
   /// @api public
   Namespace to(String name) {
-    rooms = rooms?.isNotEmpty == true ? rooms : [];
+    rooms = rooms.isNotEmpty == true ? rooms : [];
     if (!rooms.contains(name)) rooms.add(name);
     return this;
   }
@@ -116,10 +117,10 @@ class Namespace extends EventEmitter {
   ///
   /// @return {Socket}
   /// @api private
-  Socket add(Client client, query, Function fn) {
-    _logger.fine('adding socket to nsp ${name}');
+  Socket add(Client client, query, Function? fn) {
+    _logger.fine('adding socket to nsp $name');
     var socket = Socket(this, client, query);
-    var self = this;
+    final self = this;
     run(socket, (err) {
       // don't use Timer.run() here
       scheduleMicrotask(() {
@@ -174,10 +175,10 @@ class Namespace extends EventEmitter {
 
       final packet = {'type': EVENT, 'data': data};
 
-      adapter.broadcast(packet, {'rooms': rooms, 'flags': flags});
+      adapter!.broadcast(packet, {'rooms': rooms, 'flags': flags});
 
-      rooms = null;
-      flags = null;
+      rooms = [];
+      flags = {};
     }
   }
 
@@ -203,7 +204,7 @@ class Namespace extends EventEmitter {
   ///
   // ignore: use_function_type_syntax_for_parameters
   Namespace clients(fn([_])) {
-    adapter.clients(rooms, fn);
+    adapter?.clients(rooms, fn);
     rooms = [];
     return this;
   }
@@ -213,7 +214,7 @@ class Namespace extends EventEmitter {
   /// @param {Boolean} if `true`, compresses the sending data
   /// @return {Namespace} self
   /// @api public
-  Namespace compress(compress) {
+  Namespace compress(bool compress) {
     flags = flags.isEmpty ? flags : {};
     flags['compress'] = compress;
     return this;

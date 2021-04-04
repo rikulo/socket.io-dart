@@ -13,8 +13,8 @@ import 'package:socket_io/src/engine/connect.dart';
 import 'package:socket_io/src/engine/transport/polling_transport.dart';
 
 class JSONPTransport extends PollingTransport {
-  String head;
-  String foot;
+  late String head;
+  late String foot;
   JSONPTransport(SocketConnect connect) : super(connect) {
     head = '___eio[' +
         (connect.request.uri.queryParameters['j'] ?? '')
@@ -35,7 +35,7 @@ class JSONPTransport extends PollingTransport {
     if (data is String) {
       // client will send already escaped newlines as \\\\n and newlines as \\n
       // \\n must be replaced with \n and \\\\n with \\n
-      data = data.replaceAllMapped(RegExp(r'(\\)?\\n'), (match) {
+      data = data.replaceAllMapped(RegExp(r'(\\)?\\n'), (dynamic match) {
         throw UnimplementedError('Not implemented yet');
 //        print(match);
 //        match
@@ -75,7 +75,7 @@ class JSONPTransport extends PollingTransport {
 
     // Go through all the matches and build the result map.
     for (Match match in search.allMatches(query)) {
-      result[decode(match.group(1))] = decode(match.group(2));
+      result[decode(match.group(1)!)] = decode(match.group(2)!);
     }
 
     return result;

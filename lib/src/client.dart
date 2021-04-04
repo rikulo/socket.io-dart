@@ -19,8 +19,8 @@ class Client {
   Socket conn;
   dynamic id;
   dynamic request;
-  Encoder encoder;
-  Decoder decoder;
+  late Encoder encoder;
+  late Decoder decoder;
   List sockets = [];
   Map nsps = {};
   List<String> connectBuffer = [];
@@ -69,7 +69,7 @@ class Client {
       return;
     }
 
-    var self = this;
+    final self = this;
     nsp.add(this, query, (socket) {
       self.sockets.add(socket);
       self.nsps[nsp.name] = socket;
@@ -125,12 +125,12 @@ class Client {
   /// @param {Object} packet object
   /// @param {Object} options
   /// @api private
-  void packet(packet, [Map opts]) {
-    var self = this;
+  void packet(packet, [Map? opts]) {
+    final self = this;
     opts = opts ?? {};
     // this writes to the actual connection
     void writeToEngine(encodedPackets) {
-      if (opts['volatile'] != null && !self.conn.transport.writable) return;
+      if (opts!['volatile'] != null && !self.conn.transport.writable!) return;
       for (var i = 0; i < encodedPackets.length; i++) {
         self.conn.write(encodedPackets[i], {'compress': opts['compress']});
       }
