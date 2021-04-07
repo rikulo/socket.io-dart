@@ -45,13 +45,13 @@ class Server extends Engine {
   late int pingTimeout;
   late int pingInterval;
   late int upgradeTimeout;
-  double? maxHttpBufferSize;
+  late double maxHttpBufferSize;
   late List<String> transports;
   late bool allowUpgrades;
   Function? allowRequest;
-  String? cookie;
-  String? cookiePath;
-  bool? cookieHttpOnly;
+  late String cookie;
+  late String cookiePath;
+  late bool cookieHttpOnly;
   late Map perMessageDeflate;
   late Map httpCompression;
   dynamic initialPacket;
@@ -284,11 +284,11 @@ class Server extends Engine {
     }
     var socket = Socket(id, this, transport, connect);
 
-    if (cookie?.isNotEmpty == true) {
+    if (cookie.isNotEmpty == true) {
       transport.on('headers', (headers) {
         headers['Set-Cookie'] = '$cookie=${Uri.encodeComponent(id)}' +
-            (cookiePath?.isNotEmpty == true ? '; Path=$cookiePath' : '') +
-            (cookiePath?.isNotEmpty == true && cookieHttpOnly == true
+            (cookiePath.isNotEmpty == true ? '; Path=$cookiePath' : '') +
+            (cookiePath.isNotEmpty == true && cookieHttpOnly == true
                 ? '; HttpOnly'
                 : '');
       });

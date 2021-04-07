@@ -17,7 +17,7 @@ import 'package:socket_io/src/server.dart';
 class Client {
   Server server;
   Socket conn;
-  dynamic id;
+  late String id;
   dynamic request;
   late Encoder encoder;
   late Decoder decoder;

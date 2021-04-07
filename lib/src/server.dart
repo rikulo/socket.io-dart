@@ -36,7 +36,7 @@ class Server {
   dynamic _origins;
   bool? _serveClient;
   String? _path;
-  String? _adapter;
+  late String _adapter;
   StreamServer? httpServer;
   late Engine engine;
   late Encoder encoder;
@@ -77,7 +77,7 @@ class Server {
     }
 
     if (_origins.contains('*:*')) {
-      return fn!(null, true);
+      return fn?.call(null, true);
     }
 
     if (origin.isNotEmpty) {
@@ -88,7 +88,7 @@ class Server {
             _origins.indexOf(parts.host + ':*') >= 0 ||
             _origins.indexOf('*:' + port.toString()) >= 0;
 
-        return fn!(null, ok);
+        return fn?.call(null, ok);
       } catch (ex) {
         print(ex);
       }
@@ -158,9 +158,9 @@ class Server {
   /// @param {Adapter} pathname
   /// @return {Server|Adapter} self when setting or value when getting
   /// @api public
-  String? get adapter => _adapter;
+  String get adapter => _adapter;
 
-  set adapter(String? v) {
+  set adapter(String v) {
     _adapter = v;
     if (nsps.isNotEmpty) {
       nsps.forEach((dynamic i, Namespace nsp) {

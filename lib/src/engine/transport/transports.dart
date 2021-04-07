@@ -47,9 +47,9 @@ abstract class Transport extends EventEmitter {
   Map? perMessageDeflate;
   bool? supportsBinary;
   String? sid;
-  String? name;
+  late String name;
   bool? writable;
-  String? readyState;
+  late String readyState;
   late bool discarded;
   SocketConnect? connect;
   MessageHandler? messageHandler;

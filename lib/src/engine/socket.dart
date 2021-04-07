@@ -40,7 +40,7 @@ class Socket extends EventEmitter {
 
   Socket(this.id, this.server, this.transport, this.connect) {
     // Cache IP since it might not be in the req later
-    remoteAddress = connect.request.connectionInfo!.remoteAddress;
+    remoteAddress = connect.request.connectionInfo?.remoteAddress;
 
     checkIntervalTimer = null;
     upgradeTimeoutTimer = null;
@@ -403,7 +403,7 @@ class Socket extends EventEmitter {
   /// @api private
   List<dynamic> getAvailableUpgrades() {
     var availableUpgrades = [];
-    var allUpgrades = server.upgrades(transport.name!)!;
+    var allUpgrades = server.upgrades(transport.name) ?? [];
     for (var i = 0, l = allUpgrades.length; i < l; ++i) {
       var upg = allUpgrades[i];
       if (server.transports.contains(upg)) {

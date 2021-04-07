@@ -84,7 +84,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {Function} callback
   /// @api public
   @override
-  void delAll(String? id, [dynamic Function([dynamic])? fn]) {
+  void delAll(String id, [dynamic Function([dynamic])? fn]) {
     var rooms = sids[id];
     if (rooms != null) {
       for (var room in rooms.keys) {
@@ -223,7 +223,7 @@ class _Room {
   ///
   /// @param {String} socket id
   /// @api private
-  void del(String? id) {
+  void del(String id) {
     if (sockets.containsKey(id)) {
       sockets.remove(id);
       length--;

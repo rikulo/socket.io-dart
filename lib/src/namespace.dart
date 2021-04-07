@@ -36,7 +36,7 @@ class Namespace extends EventEmitter {
   int ids = 0;
   List<String> rooms = [];
   Map flags = {};
-  Adapter? adapter;
+  late Adapter adapter;
   final Logger _logger = Logger('socket_io:Namespace');
 
   /// Namespace constructor.
@@ -175,7 +175,7 @@ class Namespace extends EventEmitter {
 
       final packet = {'type': EVENT, 'data': data};
 
-      adapter!.broadcast(packet, {'rooms': rooms, 'flags': flags});
+      adapter.broadcast(packet, {'rooms': rooms, 'flags': flags});
 
       rooms = [];
       flags = {};
@@ -204,7 +204,7 @@ class Namespace extends EventEmitter {
   ///
   // ignore: use_function_type_syntax_for_parameters
   Namespace clients(fn([_])) {
-    adapter?.clients(rooms, fn);
+    adapter.clients(rooms, fn);
     rooms = [];
     return this;
   }

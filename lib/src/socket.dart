@@ -8,7 +8,6 @@
 ///    22/02/2017, Created by jumperchen
 ///
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
-import 'dart:io';
 import 'package:socket_io/src/adapter/adapter.dart';
 import 'package:socket_io/src/client.dart';
 import 'package:socket_io_common/src/parser/parser.dart';
@@ -51,16 +50,16 @@ class Socket extends EventEmitter {
   Namespace nsp;
   Client client;
   late Server server;
-  Adapter? adapter;
+  late Adapter adapter;
   late String id;
-  late HttpRequest request;
+  dynamic request;
   var conn;
   Map roomMap = {};
   List roomList = [];
   Map acks = {};
   bool connected = true;
   bool disconnected = false;
-  Map? handshake;
+  late Map handshake;
   Map<String, bool> flags = {};
 
   // a data store for each socket.
@@ -150,7 +149,7 @@ class Socket extends EventEmitter {
       packet['data'] = sendData;
 
       if (roomList.isNotEmpty || flags['broadcast'] == true) {
-        adapter!.broadcast(packet, {
+        adapter.broadcast(packet, {
           'except': [id],
           'rooms': roomList,
           'flags': flags
@@ -219,7 +218,7 @@ class Socket extends EventEmitter {
       if (fn != null) fn(null);
       return this;
     }
-    adapter!.add(id, room, ([err]) {
+    adapter.add(id, room, ([err]) {
       if (err != null) return fn?.call(err);
 //      _logger.info('joined room %s', room);
       roomMap[room] = room;
@@ -236,7 +235,7 @@ class Socket extends EventEmitter {
   /// @api private
   Socket leave(room, fn) {
 //    debug('leave room %s', room);
-    adapter!.del(id, room, ([err]) {
+    adapter.del(id, room, ([err]) {
       if (err != null) return fn?.call(err);
 //      _logger.info('left room %s', room);
       roomMap.remove(room);
@@ -250,7 +249,7 @@ class Socket extends EventEmitter {
   /// @api private
 
   void leaveAll() {
-    adapter!.delAll(id);
+    adapter.delAll(id);
     roomMap = {};
   }
 
