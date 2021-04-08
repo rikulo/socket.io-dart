@@ -15,6 +15,7 @@ import 'package:socket_io_common/src/parser/parser.dart';
 import 'package:socket_io/src/namespace.dart';
 import 'package:socket_io/src/server.dart';
 import 'package:socket_io/src/util/event_emitter.dart';
+
 /// Module exports.
 //
 //module.exports = exports = Socket;
@@ -49,18 +50,18 @@ class Socket extends EventEmitter {
   // ignore: undefined_class
   Namespace nsp;
   Client client;
-  Server server;
-  Adapter adapter;
-  String id;
-  HttpRequest request;
+  late Server server;
+  late Adapter adapter;
+  late String id;
+  late HttpRequest request;
   var conn;
   Map roomMap = {};
   List roomList = [];
   Map acks = {};
   bool connected = true;
   bool disconnected = false;
-  Map handshake;
-  Map<String, bool> flags;
+  Map? handshake;
+  Map<String, bool>? flags;
 
   // a data store for each socket.
   Map data = {};
@@ -99,19 +100,19 @@ class Socket extends EventEmitter {
 
   Socket get json {
     flags = flags ?? {};
-    flags['json'] = true;
+    flags!['json'] = true;
     return this;
   }
 
   Socket get volatile {
     flags = flags ?? {};
-    flags['volatile'] = true;
+    flags!['volatile'] = true;
     return this;
   }
 
   Socket get broadcast {
     flags = flags ?? {};
-    flags['broadcast'] = true;
+    flags!['broadcast'] = true;
     return this;
   }
 
@@ -129,7 +130,7 @@ class Socket extends EventEmitter {
   /// @return {Socket} self
   /// @api public
   void emitWithAck(String event, dynamic data,
-      {Function ack, bool binary = false}) {
+      {Function? ack, bool binary = false}) {
     if (EVENTS.contains(event)) {
       super.emit(event, data);
     } else {
@@ -427,7 +428,7 @@ class Socket extends EventEmitter {
   /// @api public
   Socket compress(compress) {
     flags = flags ?? {};
-    flags['compress'] = compress;
+    flags!['compress'] = compress;
     return this;
   }
 }

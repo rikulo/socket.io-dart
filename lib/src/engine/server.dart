@@ -40,34 +40,30 @@ const Map<int, String> ServerErrorMessages = {
 
 class Server extends Engine {
   static final Logger _logger = Logger('socket_io:engine.Server');
-  Map clients;
-  int clientsCount;
-  int pingTimeout;
-  int pingInterval;
-  int upgradeTimeout;
-  double maxHttpBufferSize;
-  List<String> transports;
-  bool allowUpgrades;
-  Function allowRequest;
-  String cookie;
-  String cookiePath;
-  bool cookieHttpOnly;
-  Map perMessageDeflate;
-  Map httpCompression;
-  dynamic initialPacket;
+  Map clients = {};
+  int clientsCount = 0;
+  late int pingTimeout;
+  late int pingInterval;
+  late int upgradeTimeout;
+  late double maxHttpBufferSize;
+  List<String> transports = ['polling', 'websocket'];
+  late bool allowUpgrades;
+  Function? allowRequest;
+  late dynamic cookie;
+  late dynamic cookiePath;
+  late bool cookieHttpOnly;
+  late Map perMessageDeflate;
+  late Map httpCompression;
+  dynamic? initialPacket;
   final Uuid _uuid = Uuid();
 
-  Server([Map opts]) {
-    clients = {};
-    clientsCount = 0;
-
+  Server([Map? opts]) {
     opts = opts ?? {};
 
     pingTimeout = opts['pingTimeout'] ?? 60000;
     pingInterval = opts['pingInterval'] ?? 25000;
     upgradeTimeout = opts['upgradeTimeout'] ?? 10000;
     maxHttpBufferSize = opts['maxHttpBufferSize'] ?? 10E7;
-    transports = ['polling', 'websocket'];
     allowUpgrades = false != opts['allowUpgrades'];
     allowRequest = opts['allowRequest'];
     cookie = opts['cookie'] == false
@@ -127,8 +123,8 @@ class Server extends Engine {
   /// @return {Array}
   /// @api public
 
-  List<String> upgrades(transport) {
-    if (!allowUpgrades) return null;
+  List<String> upgrades(String transport) {
+    if (!allowUpgrades) return List.empty();
     return Transports.upgradesTo(transport);
   }
 
@@ -163,7 +159,7 @@ class Server extends Engine {
         return fn(ServerErrors.BAD_HANDSHAKE_METHOD, false);
       }
       if (allowRequest == null) return fn(null, true);
-      return allowRequest(req, fn);
+      return allowRequest!(req, fn);
     }
 
     fn(null, true);
@@ -212,7 +208,7 @@ class Server extends Engine {
         self.clients[req.uri.queryParameters['sid']].transport
             .onRequest(connect);
       } else {
-        self.handshake(req.uri.queryParameters['transport'], connect);
+        self.handshake(req.uri.queryParameters['transport'] as String, connect);
       }
     });
   }
@@ -238,7 +234,7 @@ class Server extends Engine {
     if (req.headers.value('origin') != null) {
       res.headers.add('Access-Control-Allow-Credentials', 'true');
       res.headers
-          .add('Access-Control-Allow-Origin', req.headers.value('origin'));
+          .add('Access-Control-Allow-Origin', req.headers.value('origin')!);
     } else {
       res.headers.add('Access-Control-Allow-Origin', '*');
     }
@@ -289,8 +285,8 @@ class Server extends Engine {
 
     if (cookie?.isNotEmpty == true) {
       transport.on('headers', (headers) {
-        headers['Set-Cookie'] = '${cookie}=${Uri.encodeComponent(id)}' +
-            (cookiePath?.isNotEmpty == true ? '; Path=${cookiePath}' : '') +
+        headers['Set-Cookie'] = '$cookie=${Uri.encodeComponent(id)}' +
+            (cookiePath?.isNotEmpty == true ? '; Path=$cookiePath' : '') +
             (cookiePath?.isNotEmpty == true && cookieHttpOnly == true
                 ? '; HttpOnly'
                 : '');
@@ -361,18 +357,18 @@ class Server extends Engine {
       var client = clients[id];
       if (client == null) {
         _logger.fine('upgrade attempt for closed client');
-        connect.websocket.close();
+        connect.websocket?.close();
       } else if (client.upgrading == true) {
         _logger.fine('transport has already been trying to upgrade');
-        connect.websocket.close();
+        connect.websocket?.close();
       } else if (client.upgraded == true) {
         _logger.fine('transport had already been upgraded');
-        connect.websocket.close();
+        connect.websocket?.close();
       } else {
         _logger.fine('upgrading existing transport');
         var req = connect.request;
         var transport = Transports.newInstance(
-            req.uri.queryParameters['transport'], connect);
+            req.uri.queryParameters['transport'] as String, connect);
         // ignore: unrelated_type_equality_checks
         if (req.uri.queryParameters['b64'] == true) {
           transport.supportsBinary = false;
@@ -383,7 +379,8 @@ class Server extends Engine {
         client.maybeUpgrade(transport);
       }
     } else {
-      handshake(connect.request.uri.queryParameters['transport'], connect);
+      handshake(
+          connect.request.uri.queryParameters['transport'] as String, connect);
     }
   }
 
@@ -392,7 +389,7 @@ class Server extends Engine {
   /// @param {http.Server} server
   /// @param {Object} options
   /// @api public
-  void attachTo(StreamServer server, Map options) {
+  void attachTo(StreamServer server, Map? options) {
     options = options ?? {};
     var path =
         (options['path'] ?? '/engine.io').replaceFirst(RegExp(r'\/$'), '');
@@ -430,18 +427,18 @@ class Server extends Engine {
 
   static void abortConnection(SocketConnect connect, code) {
     var socket = connect.websocket;
-    if (socket.readyState == HttpStatus.ok) {
+    if (socket?.readyState == HttpStatus.ok) {
       var message = ServerErrorMessages.containsKey(code)
           ? ServerErrorMessages[code]
           : code;
       var length = utf8.encode(message).length;
-      socket.add('HTTP/1.1 400 Bad Request\r\n'
+      socket!.add('HTTP/1.1 400 Bad Request\r\n'
               'Connection: close\r\n'
               'Content-type: text/html\r\n'
               'Content-Length: $length\r\n'
               '\r\n' +
           message);
     }
-    socket.close();
+    socket?.close();
   }
 }

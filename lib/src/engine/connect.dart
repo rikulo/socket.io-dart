@@ -13,9 +13,9 @@ import 'dart:async';
 import 'dart:io';
 
 class SocketConnect extends HttpConnectWrapper {
-  WebSocket _socket;
-  Completer _done;
-  bool _completed;
+  WebSocket? _socket;
+  Completer? _done;
+  bool? _completed;
   SocketConnect(HttpConnect origin) : super(origin);
 
   SocketConnect.fromWebSocket(HttpConnect origin, WebSocket socket)
@@ -25,26 +25,26 @@ class SocketConnect extends HttpConnectWrapper {
 
   bool isUpgradeRequest() => _socket != null;
 
-  WebSocket get websocket => _socket;
+  WebSocket? get websocket => _socket;
 
   Future get done {
     if (_completed == true) {
       return Future.value('done');
     }
     if (_socket != null) {
-      return _socket.done;
+      return _socket!.done;
     } else {
       _done = Completer();
-      return _done.future;
+      return _done!.future;
     }
   }
 
   /// Closes the current connection.
   void close() {
     if (_done != null) {
-      _done.complete('done');
+      _done!.complete('done');
     } else if (_socket != null) {
-      _socket.close();
+      _socket!.close();
     } else {
       _completed = true;
     }

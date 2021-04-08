@@ -24,11 +24,10 @@ class PollingTransport extends Transport {
   bool get supportsFraming => false;
 
   static final Logger _logger = Logger('socket_io:transport.PollingTransport');
-  int closeTimeout;
-  Function shouldClose;
-  SocketConnect dataReq;
+  int closeTimeout = 30 * 1000;
+  Function? shouldClose;
+  SocketConnect? dataReq;
   PollingTransport(connect) : super(connect) {
-    closeTimeout = 30 * 1000;
     maxHttpBufferSize = null;
     httpCompression = null;
     name = 'polling';
@@ -59,8 +58,8 @@ class PollingTransport extends Transport {
       _logger.fine('request overlap');
       // assert: this.res, '.req and .res should be (un)set together'
       onError('overlap from client');
-      this.connect.response.statusCode = 500;
-      this.connect.close();
+      this.connect!.response.statusCode = 500;
+      this.connect!.close();
       return;
     }
 
@@ -84,7 +83,7 @@ class PollingTransport extends Transport {
     emit('drain');
 
     // if we're still writable but had a pending close, trigger an empty send
-    if (writable && shouldClose != null) {
+    if (writable == true && shouldClose != null) {
       _logger.fine('triggering empty send to append close packet');
       send([
         {'type': 'noop'}
@@ -111,7 +110,7 @@ class PollingTransport extends Transport {
 
     dynamic chunks = isBinary ? [0] : '';
     var self = this;
-    StreamSubscription subscription;
+    StreamSubscription? subscription;
     var cleanup = () {
       chunks = isBinary ? [0] : '';
       if (subscription != null) {
@@ -178,7 +177,7 @@ class PollingTransport extends Transport {
   void onData(data) {
     _logger.fine('received "$data"');
     if (messageHandler != null) {
-      messageHandler.handle(this, data);
+      messageHandler!.handle(this, data);
     } else {
       var self = this;
       var callback = (packet, [foo, bar]) {
@@ -221,12 +220,12 @@ class PollingTransport extends Transport {
     if (shouldClose != null) {
       _logger.fine('appending close packet to payload');
       packets.add({'type': 'close'});
-      shouldClose();
+      shouldClose!();
       shouldClose = null;
     }
 
     var self = this;
-    PacketParser.encodePayload(packets, supportsBinary: supportsBinary,
+    PacketParser.encodePayload(packets, supportsBinary: supportsBinary == true,
         callback: (data) {
       var compress = packets.any((packet) {
         var opt = packet['options'];
@@ -265,24 +264,24 @@ class PollingTransport extends Transport {
     var respond = (data) {
       headers[HttpHeaders.contentLengthHeader] =
           data is String ? utf8.encode(data).length : data.length;
-      var res = self.connect.response;
+      var res = self.connect!.response;
       res.statusCode = 200;
 
       res.headers.clear(); // remove all default headers.
-      this.headers(connect, headers).forEach((k, v) {
+      this.headers(connect!, headers).forEach((k, v) {
         res.headers.set(k, v);
       });
       try {
         if (data is String) {
           res.write(data);
-          connect.close();
+          connect!.close();
         } else {
           if (headers.containsKey(HttpHeaders.contentEncodingHeader)) {
             res.add(data);
           } else {
             res.write(String.fromCharCodes(data));
           }
-          connect.close();
+          connect!.close();
         }
       } catch (e) {
         var fn = _reqCloses.remove(connect);
@@ -298,14 +297,14 @@ class PollingTransport extends Transport {
     }
 
     var len = isString ? utf8.encode(data).length : data.length;
-    if (len < httpCompression['threshold']) {
+    if (len < httpCompression?['threshold']) {
       respond(data);
       return;
     }
 
     var encodings =
-        connect.request.headers.value(HttpHeaders.acceptEncodingHeader);
-    var hasGzip = encodings.contains('gzip');
+        connect!.request.headers.value(HttpHeaders.acceptEncodingHeader);
+    var hasGzip = encodings!.contains('gzip');
     if (!hasGzip && !encodings.contains('deflate')) {
       respond(data);
       return;
@@ -330,11 +329,11 @@ class PollingTransport extends Transport {
   ///
   /// @api private
   @override
-  void doClose([dynamic Function() fn]) {
+  void doClose([dynamic Function()? fn]) {
     _logger.fine('closing');
 
     var self = this;
-    Timer closeTimeoutTimer;
+    Timer? closeTimeoutTimer;
 
     if (dataReq != null) {
       _logger.fine('aborting ongoing data request');
@@ -367,7 +366,7 @@ class PollingTransport extends Transport {
   /// @param {http.IncomingMessage} request
   /// @param {Object} extra headers
   /// @api private
-  Map headers(SocketConnect connect, [Map headers]) {
+  Map headers(SocketConnect connect, [Map? headers]) {
     headers = headers ?? {};
 
     // prevent XSS warnings on IE

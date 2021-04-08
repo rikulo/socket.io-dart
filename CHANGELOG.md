@@ -1,3 +1,10 @@
+## 1.0.0
+
+**New Feature:**
+
+* [#33](https://github.com/rikulo/socket.io-dart/issues/33) Null safety
+
+
 ## 0.9.4
 
 **Bug Fix:**

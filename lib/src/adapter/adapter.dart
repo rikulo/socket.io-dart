@@ -15,14 +15,14 @@ import 'package:socket_io/src/util/event_emitter.dart';
 
 abstract class Adapter {
   Map nsps = {};
-  Map<String, _Room> rooms;
-  Map<String, Map> sids;
+  Map<String, _Room> rooms = {};
+  Map<String, Map> sids = {};
 
   void add(String id, String room, [dynamic Function([dynamic]) fn]);
   void del(String id, String room, [dynamic Function([dynamic]) fn]);
   void delAll(String id, [dynamic Function([dynamic]) fn]);
   void broadcast(Map packet, [Map opts]);
-  void clients(List rooms, [dynamic Function([dynamic]) fn]);
+  void clients([List<String> rooms, dynamic Function([dynamic]) fn]);
   void clientRooms(String id, [dynamic Function(dynamic, [dynamic]) fn]);
 
   static Adapter newInstance(String key, Namespace nsp) {
@@ -37,15 +37,15 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   @override
   Map nsps = {};
   @override
-  Map<String, _Room> rooms;
+  Map<String, _Room> rooms = {};
+
   @override
-  Map<String, Map> sids;
-  Encoder encoder;
-  Namespace nsp;
-  _MemoryStoreAdapter(nsp) {
+  Map<String, Map> sids = {};
+  late Encoder encoder;
+  late Namespace nsp;
+
+  _MemoryStoreAdapter(Namespace nsp) {
     this.nsp = nsp;
-    rooms = {};
-    sids = {};
     encoder = nsp.server.encoder;
   }
 
@@ -57,11 +57,11 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @api public
 
   @override
-  void add(String id, String room, [dynamic Function([dynamic]) fn]) {
+  void add(String id, String room, [dynamic Function([dynamic])? fn]) {
     sids[id] = sids[id] ?? {};
-    sids[id][room] = true;
+    sids[id]![room] = true;
     rooms[room] = rooms[room] ?? _Room();
-    rooms[room].add(id);
+    rooms[room]!.add(id);
     if (fn != null) scheduleMicrotask(() => fn(null));
   }
 
@@ -72,12 +72,12 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {Function} callback
   /// @api public
   @override
-  void del(String id, String room, [dynamic Function([dynamic]) fn]) {
+  void del(String id, String room, [dynamic Function([dynamic])? fn]) {
     sids[id] = sids[id] ?? {};
-    sids[id].remove(room);
+    sids[id]!.remove(room);
     if (rooms.containsKey(room)) {
-      rooms[room].del(id);
-      if (rooms[room].length == 0) rooms.remove(room);
+      rooms[room]!.del(id);
+      if (rooms[room]!.length == 0) rooms.remove(room);
     }
 
     if (fn != null) scheduleMicrotask(() => fn(null));
@@ -89,13 +89,13 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {Function} callback
   /// @api public
   @override
-  void delAll(String id, [dynamic Function([dynamic]) fn]) {
+  void delAll(String id, [dynamic Function([dynamic])? fn]) {
     var rooms = sids[id];
     if (rooms != null) {
       for (var room in rooms.keys) {
         if (this.rooms.containsKey(room)) {
-          this.rooms[room].del(id);
-          if (this.rooms[room].length == 0) this.rooms.remove(room);
+          this.rooms[room]!.del(id);
+          if (this.rooms[room]!.length == 0) this.rooms.remove(room);
         }
       }
     }
@@ -114,7 +114,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {Object} packet object
   /// @api public
   @override
-  void broadcast(Map packet, [Map opts]) {
+  void broadcast(Map packet, [Map? opts]) {
     opts = opts ?? {};
     List rooms = opts['rooms'] ?? [];
     List except = opts['except'] ?? [];
@@ -161,9 +161,8 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {Function} callback
   /// @api public
   @override
-  void clients(List rooms, [dynamic Function([dynamic]) fn]) {
-    rooms = rooms ?? [];
-
+  void clients(
+      [List<String> rooms = const [], dynamic Function([dynamic])? fn]) {
     var ids = {};
     var sids = [];
     var socket;
@@ -200,7 +199,7 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
   /// @param {Function} callback
   /// @api public
   @override
-  void clientRooms(String id, [dynamic Function(dynamic, [dynamic]) fn]) {
+  void clientRooms(String id, [dynamic Function(dynamic, [dynamic])? fn]) {
     var rooms = sids[id];
     if (fn != null) scheduleMicrotask(() => fn(null, rooms?.keys));
   }
@@ -210,12 +209,8 @@ class _MemoryStoreAdapter extends EventEmitter implements Adapter {
 ///
 /// @api private
 class _Room {
-  Map<String, bool> sockets;
-  int length;
-  _Room() {
-    sockets = {};
-    length = 0;
-  }
+  Map<String, bool> sockets = {};
+  int length = 0;
 
   /// Adds a socket to a room.
   ///

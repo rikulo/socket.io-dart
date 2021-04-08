@@ -31,29 +31,27 @@ final Logger _logger = Logger('socket_io:Server');
 
 class Server {
   // Namespaces
-  Map<String, Namespace> nsps;
-  Namespace sockets;
-  dynamic _origins;
-  bool _serveClient;
-  String _path;
-  String _adapter;
-  StreamServer httpServer;
-  Engine engine;
-  Encoder encoder;
+  Map<String, Namespace> nsps = {};
+  late Namespace sockets;
+  dynamic? _origins;
+  bool? _serveClient;
+  String? _path;
+  String _adapter = 'default';
+  StreamServer? httpServer;
+  Engine? engine;
+  Encoder encoder = Encoder();
 
   /// Server constructor.
   ///
   /// @param {http.Server|Number|Object} http server, port or options
   /// @param {Object} options
   /// @api public
-  Server({server, Map options}) {
-    options = options ?? {};
-    nsps = {};
+  Server({server, Map? options}) {
+    options ??= {};
     path(options.containsKey('path') ? options['path'] : '/socket.io');
     serveClient(false != options['serveClient']);
     adapter = options.containsKey('adapter') ? options['adapter'] : 'default';
     origins(options.containsKey('origins') ? options['origins'] : '*:*');
-    encoder = Encoder();
     sockets = of('/');
     if (server != null) {
       attach(server, options);
@@ -64,7 +62,7 @@ class Server {
   ///
   /// @param {http.IncomingMessage} request
   /// @param {Function} callback to be called with the result: `fn(err, success)`
-  void checkRequest(HttpRequest req, [Function fn]) {
+  void checkRequest(HttpRequest req, [Function? fn]) {
     var origin = req.headers.value('origin') ?? req.headers.value('referer');
 
     // file:// URLs produce a null Origin which can't be authorized via echo-back
@@ -77,25 +75,24 @@ class Server {
     }
 
     if (_origins.contains('*:*')) {
-      return fn(null, true);
+      return fn!(null, true);
     }
 
     if (origin.isNotEmpty) {
       try {
         var parts = Uri.parse(origin);
-        var defaultPort = 'https:' == parts.scheme ? 443 : 80;
-        var port = parts.port ?? defaultPort;
+        var port = parts.port;
         var ok = _origins.indexOf(parts.host + ':' + port.toString()) >= 0 ||
             _origins.indexOf(parts.host + ':*') >= 0 ||
             _origins.indexOf('*:' + port.toString()) >= 0;
 
-        return fn(null, ok);
+        return fn!(null, ok);
       } catch (ex) {
         print(ex);
       }
     }
 
-    fn(null, false);
+    fn!(null, false);
   }
 
   /// Sets/gets whether client code is being served.
@@ -103,7 +100,7 @@ class Server {
   /// @param {Boolean} whether to serve client code
   /// @return {Server|Boolean} self when setting or value when getting
   /// @api public
-  dynamic serveClient([bool v]) {
+  dynamic serveClient([bool? v]) {
     if (v == null) {
       return _serveClient;
     }
@@ -134,8 +131,8 @@ class Server {
       origins(val);
     } else if ('resource' == key) {
       path(val);
-    } else if (oldSettings[key] && engine[oldSettings[key]]) {
-      engine[oldSettings[key]] = val;
+    } else if (oldSettings[key] && engine![oldSettings[key]]) {
+      engine![oldSettings[key]] = val;
     } else {
       _logger.severe('Option $key is not valid. Please refer to the README.');
     }
@@ -148,7 +145,7 @@ class Server {
   /// @param {String} pathname
   /// @return {Server|String} self when setting or value when getting
   /// @api public
-  dynamic path([String v]) {
+  dynamic path([String? v]) {
     if (v == null || v.isEmpty) return _path;
     _path = v.replaceFirst(RegExp(r'/\/$/'), '');
     return this;
@@ -164,8 +161,8 @@ class Server {
   set adapter(String v) {
     _adapter = v;
     if (nsps.isNotEmpty) {
-      nsps.forEach((dynamic i, Namespace nsp) {
-        nsps[i].initAdapter();
+      nsps.forEach((String i, Namespace nsp) {
+        nsp.initAdapter();
       });
     }
   }
@@ -176,7 +173,7 @@ class Server {
   /// @return {Server|Adapter} self when setting or value when getting
   /// @api public
 
-  dynamic origins([String v]) {
+  dynamic origins([String? v]) {
     if (v == null || v.isEmpty) return _origins;
 
     _origins = v;
@@ -189,7 +186,7 @@ class Server {
   /// @param {Object} options passed to engine.io
   /// @return {Server} self
   /// @api public
-  void listen(srv, [Map opts]) {
+  void listen(srv, [Map? opts]) {
     attach(srv, opts);
   }
 
@@ -199,7 +196,7 @@ class Server {
   /// @param {Object} options passed to engine.io
   /// @return {Server} self
   /// @api public
-  Server attach(srv, [Map opts]) {
+  Server attach(dynamic srv, [Map? opts]) {
     if (srv is Function) {
       var msg = 'You are trying to attach socket.io to an express '
           'request handler function. Please pass a http.Server instance.';
@@ -210,7 +207,9 @@ class Server {
     if (srv is String && int.parse(srv.toString()).toString() == srv) {
       srv = int.parse(srv.toString());
     }
+
     opts ??= {};
+
     // set engine.io path to `/socket.io`
     if (!opts.containsKey('path')) {
       opts['path'] = path();
@@ -220,7 +219,7 @@ class Server {
 
     if (srv is num) {
       _logger.fine('creating http server and binding to $srv');
-      int port = srv;
+      var port = srv.toInt();
       var server = StreamServer();
       server.start(port: port);
 //      HttpServer.bind(InternetAddress.ANY_IP_V4, port).then((
@@ -236,7 +235,7 @@ class Server {
       encoder.encode(connectPacket, (encodedPacket) {
         // the CONNECT packet will be merged with Engine.IO handshake,
         // to reduce the number of round trips
-        opts['initialPacket'] = encodedPacket;
+        opts!['initialPacket'] = encodedPacket;
 
         _logger.fine('creating engine.io instance with opts $opts');
         // initialize engine
@@ -249,7 +248,7 @@ class Server {
         httpServer = server;
 
         // bind to engine events
-        bind(engine);
+        bind(engine!);
       });
 //      });
     } else {
@@ -257,7 +256,7 @@ class Server {
       encoder.encode(connectPacket, (encodedPacket) {
         // the CONNECT packet will be merged with Engine.IO handshake,
         // to reduce the number of round trips
-        opts['initialPacket'] = encodedPacket;
+        opts!['initialPacket'] = encodedPacket;
 
         _logger.fine('creating engine.io instance with opts $opts');
         // initialize engine
@@ -270,7 +269,7 @@ class Server {
         httpServer = srv;
 
         // bind to engine events
-        bind(engine);
+        bind(engine!);
       });
     }
 
@@ -329,9 +328,9 @@ class Server {
   /// @param {engine.Server} engine.io (or compatible) server
   /// @return {Server} self
   /// @api public
-  Server bind(engine) {
+  Server bind(Engine engine) {
     this.engine = engine;
-    this.engine.on('connection', onconnection);
+    this.engine!.on('connection', onconnection);
     return this;
   }
 
@@ -363,22 +362,22 @@ class Server {
       var nsp = Namespace(this, name);
       nsps[name] = nsp;
     }
-    if (fn != null) nsps[name].on('connect', fn);
-    return nsps[name];
+    if (fn != null) nsps[name]!.on('connect', fn);
+    return nsps[name]!;
   }
 
   /// Closes server connection
   ///
   /// @api public
   void close() {
-    nsps['/'].sockets.toList(growable: false).forEach((socket) {
+    nsps['/']!.sockets.toList(growable: false).forEach((socket) {
       socket.onclose();
     });
 
-    engine.close();
+    engine?.close();
 
     if (httpServer != null) {
-      httpServer.stop();
+      httpServer!.stop();
     }
   }
 

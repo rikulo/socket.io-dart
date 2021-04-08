@@ -41,21 +41,19 @@ class Transports {
 
 abstract class Transport extends EventEmitter {
   static final Logger _logger = Logger('socket_io:transport.Transport');
-  double maxHttpBufferSize;
-  Map httpCompression;
-  Map perMessageDeflate;
-  bool supportsBinary;
-  String sid;
-  String name;
-  bool writable;
-  String readyState;
-  bool discarded;
-  SocketConnect connect;
-  MessageHandler messageHandler;
+  double? maxHttpBufferSize;
+  Map? httpCompression;
+  Map? perMessageDeflate;
+  bool? supportsBinary;
+  String? sid;
+  String? name;
+  bool? writable;
+  String readyState = 'open';
+  bool discarded = false;
+  SocketConnect? connect;
+  MessageHandler? messageHandler;
 
   Transport(connect) {
-    readyState = 'open';
-    discarded = false;
     var options = connect.dataset['options'];
     if (options != null) {
       messageHandler = options.containsKey('messageHandlerFactory')
@@ -72,13 +70,13 @@ abstract class Transport extends EventEmitter {
     this.connect = connect;
   }
 
-  void close([dynamic Function() closeFn]) {
+  void close([dynamic Function()? closeFn]) {
     if ('closed' == readyState || 'closing' == readyState) return;
     readyState = 'closing';
     doClose(closeFn);
   }
 
-  void doClose([dynamic Function() callback]);
+  void doClose([dynamic Function()? callback]);
 
   void onError(msg, [desc]) {
     writable = false;
@@ -95,9 +93,9 @@ abstract class Transport extends EventEmitter {
 
   void onData(data) {
     if (messageHandler != null) {
-      messageHandler.handle(this, data);
+      messageHandler!.handle(this, data);
     } else {
-      onPacket(PacketParser.decodePacket(data));
+      onPacket(PacketParser.decodePacket(data, utf8decode: true));
     }
   }
 

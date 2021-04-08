@@ -19,8 +19,8 @@ class Client {
   Socket conn;
   dynamic id;
   dynamic request;
-  Encoder encoder;
-  Decoder decoder;
+  Encoder encoder = Encoder();
+  Decoder decoder = Decoder();
   List sockets = [];
   Map nsps = {};
   List<String> connectBuffer = [];
@@ -31,11 +31,9 @@ class Client {
   /// @param {Server} server instance
   /// @param {Socket} connection
   /// @api private
-  Client(this.server, this.conn) {
-    encoder = Encoder();
-    decoder = Decoder();
-    id = conn.id;
-    request = conn.connect.request;
+  Client(this.server, this.conn)
+      : id = conn.id,
+        request = conn.connect.request {
     setup();
   }
 
@@ -125,12 +123,13 @@ class Client {
   /// @param {Object} packet object
   /// @param {Object} options
   /// @api private
-  void packet(packet, [Map opts]) {
+  void packet(packet, [Map? opts]) {
     var self = this;
-    opts = opts ?? {};
+    opts ??= {};
     // this writes to the actual connection
     void writeToEngine(encodedPackets) {
-      if (opts['volatile'] != null && !self.conn.transport.writable) return;
+      if (opts!['volatile'] != null && self.conn.transport.writable != true)
+        return;
       for (var i = 0; i < encodedPackets.length; i++) {
         self.conn.write(encodedPackets[i], {'compress': opts['compress']});
       }
