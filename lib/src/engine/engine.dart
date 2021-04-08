@@ -24,7 +24,7 @@ class Engine extends EventEmitter {
   ///
   /// If the key was already in the map, its associated value is changed.
   /// Otherwise the key-value pair is added to the map.
-  void operator []=(String? key, dynamic value) {}
+  void operator []=(String key, dynamic value) {}
 //  init() {}
 //  upgrades() {}
 //  verify() {}

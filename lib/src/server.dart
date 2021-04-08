@@ -352,7 +352,7 @@ class Server {
   /// @param {Function} optional, nsp `connection` ev handler
   /// @api public
 
-  Namespace of(name, [fn]) {
+  Namespace of(String name, [fn]) {
     if (name.toString()[0] != '/') {
       name = '/' + name;
     }

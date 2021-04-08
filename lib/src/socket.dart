@@ -212,7 +212,7 @@ class Socket extends EventEmitter {
   /// @param {Function} optional, callback
   /// @return {Socket} self
   /// @api private
-  Socket join(room, [fn]) {
+  Socket join(String room, [fn]) {
 //    debug('joining room %s', room);
     if (roomMap.containsKey(room)) {
       if (fn != null) fn(null);
@@ -233,7 +233,7 @@ class Socket extends EventEmitter {
   /// @param {Function} optional, callback
   /// @return {Socket} self
   /// @api private
-  Socket leave(room, fn) {
+  Socket leave(String room, fn) {
 //    debug('leave room %s', room);
     adapter.del(id, room, ([err]) {
       if (err != null) return fn?.call(err);
@@ -270,7 +270,7 @@ class Socket extends EventEmitter {
   /// @param {Object} packet
   /// @api private
 
-  void onpacket(packet) {
+  void onpacket(Map<String, dynamic> packet) {
 //    debug('got packet %j', packet);
     switch (packet['type']) {
       case EVENT:
@@ -323,7 +323,7 @@ class Socket extends EventEmitter {
   ///
   /// @param {Number} packet id
   /// @api private
-  Function ack(id) {
+  Function ack(int id) {
     var sent = false;
     return (_) {
       // prevent double callbacks
@@ -379,7 +379,7 @@ class Socket extends EventEmitter {
   /// @param {String} reason
   /// @param {Error} optional error object
   /// @api private
-  dynamic onclose([reason]) {
+  dynamic onclose([String? reason]) {
     if (!connected) return this;
 //    debug('closing socket - reason %s', reason);
     emit('disconnecting', reason);

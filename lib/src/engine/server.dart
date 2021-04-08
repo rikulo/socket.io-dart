@@ -67,11 +67,11 @@ class Server extends Engine {
     allowUpgrades = false != opts['allowUpgrades'];
     allowRequest = opts['allowRequest'];
     cookie = opts['cookie'] == false
-        ? false as String?
+        ? 'false'
         : opts['cookie'] ??
             'io'; //false != opts.cookie ? (opts.cookie || 'io') : false;
     cookiePath = opts['cookiePath'] == false
-        ? false as String?
+        ? 'false'
         : opts['cookiePath'] ??
             '/'; //false != opts.cookiePath ? (opts.cookiePath || '/') : false;
     cookieHttpOnly = opts['cookieHttpOnly'] != false;

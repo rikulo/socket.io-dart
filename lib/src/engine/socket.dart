@@ -340,7 +340,7 @@ class Socket extends EventEmitter {
   /// @param {Function} callback
   /// @return {Socket} for chaining
   /// @api public
-  void send(data, options, [callback]) => write(data, options, callback);
+  void send(String data, options, [callback]) => write(data, options, callback);
   Socket write(data, options, [callback]) {
     sendPacket('message', data: data, options: options, callback: callback);
     return this;
@@ -352,7 +352,7 @@ class Socket extends EventEmitter {
   /// @param {String} optional, data
   /// @param {Object} options
   /// @api private
-  void sendPacket(type, {data, options, callback}) {
+  void sendPacket(String type, {String? data, options, callback}) {
     options = options ?? {};
     options['compress'] = false != options['compress'];
 
@@ -419,7 +419,7 @@ class Socket extends EventEmitter {
   /// @return {Socket} for chaining
   /// @api public
 
-  void close([discard = false]) {
+  void close([bool discard = false]) {
     if ('open' != readyState) return;
     readyState = 'closing';
 
@@ -435,7 +435,7 @@ class Socket extends EventEmitter {
   ///
   /// @param {Boolean} discard
   /// @api private
-  void closeTransport(discard) {
+  void closeTransport(bool discard) {
     if (discard == true) transport.discard();
     transport.close(() => onClose('forced close'));
   }
