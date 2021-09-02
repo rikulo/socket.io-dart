@@ -40,6 +40,24 @@ class Server {
   StreamServer? httpServer;
   Engine? engine;
   Encoder encoder = Encoder();
+  Future<bool>? _ready;
+
+  /// Server is ready
+  ///
+  /// @return a Future that resolves to true whenever the server is ready
+  /// @api public
+  Future<bool> get ready => _ready ?? Future.value(false);
+
+  /// Server's port
+  ///
+  /// @return the port number where the server is listening
+  /// @api public
+  int? get port {
+    if (httpServer == null || httpServer!.channels.isEmpty) {
+      return null;
+    }
+    return httpServer!.channels[0].port;
+  }
 
   /// Server constructor.
   ///
@@ -54,8 +72,13 @@ class Server {
     origins(options.containsKey('origins') ? options['origins'] : '*:*');
     sockets = of('/');
     if (server != null) {
-      attach(server, options);
+      _ready = Future(() async {
+        await attach(server, options);
+        return true;
+      });
     }
+
+    _ready = Future.value(true);
   }
 
   /// Server request verification function, that checks for allowed origins
@@ -172,7 +195,6 @@ class Server {
   /// @param {String} origins
   /// @return {Server|Adapter} self when setting or value when getting
   /// @api public
-
   dynamic origins([String? v]) {
     if (v == null || v.isEmpty) return _origins;
 
@@ -186,8 +208,8 @@ class Server {
   /// @param {Object} options passed to engine.io
   /// @return {Server} self
   /// @api public
-  void listen(srv, [Map? opts]) {
-    attach(srv, opts);
+  Future<void> listen(srv, [Map? opts]) async {
+    await attach(srv, opts);
   }
 
   /// Attaches socket.io to a server or port.
@@ -196,7 +218,7 @@ class Server {
   /// @param {Object} options passed to engine.io
   /// @return {Server} self
   /// @api public
-  Server attach(dynamic srv, [Map? opts]) {
+  Future<Server> attach(dynamic srv, [Map? opts]) async {
     if (srv is Function) {
       var msg = 'You are trying to attach socket.io to an express '
           'request handler function. Please pass a http.Server instance.';
@@ -221,7 +243,7 @@ class Server {
       _logger.fine('creating http server and binding to $srv');
       var port = srv.toInt();
       var server = StreamServer();
-      server.start(port: port);
+      await server.start(port: port);
 //      HttpServer.bind(InternetAddress.ANY_IP_V4, port).then((
 //          HttpServer server) {
 //        this.httpServer = server;
@@ -351,7 +373,6 @@ class Server {
   /// @param {String} nsp name
   /// @param {Function} optional, nsp `connection` ev handler
   /// @api public
-
   Namespace of(name, [fn]) {
     if (name.toString()[0] != '/') {
       name = '/' + name;
@@ -368,8 +389,9 @@ class Server {
 
   /// Closes server connection
   ///
+  /// @return a Future that resolves when the httpServer is closed
   /// @api public
-  void close() {
+  Future<void> close() async {
     nsps['/']!.sockets.toList(growable: false).forEach((socket) {
       socket.onclose();
     });
@@ -377,8 +399,10 @@ class Server {
     engine?.close();
 
     if (httpServer != null) {
-      httpServer!.stop();
+      await httpServer!.stop();
     }
+
+    _ready = null;
   }
 
   // redirect to sockets method
