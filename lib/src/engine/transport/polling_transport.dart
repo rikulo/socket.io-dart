@@ -265,28 +265,34 @@ class PollingTransport extends Transport {
       headers[HttpHeaders.contentLengthHeader] =
           data is String ? utf8.encode(data).length : data.length;
       var res = self.connect!.response;
-      res.statusCode = 200;
 
-      res.headers.clear(); // remove all default headers.
-      this.headers(connect!, headers).forEach((k, v) {
-        res.headers.set(k, v);
-      });
-      try {
-        if (data is String) {
-          res.write(data);
-          connect!.close();
-        } else {
-          if (headers.containsKey(HttpHeaders.contentEncodingHeader)) {
-            res.add(data);
+      // If the status code is 101 (aka upgrade), then
+      // we assume the WebSocket transport has already
+      // sent the response and closed the socket
+      if (res.statusCode != 101) {
+        res.statusCode = 200;
+
+        res.headers.clear(); // remove all default headers.
+        this.headers(connect!, headers).forEach((k, v) {
+          res.headers.set(k, v);
+        });
+        try {
+          if (data is String) {
+            res.write(data);
+            connect!.close();
           } else {
-            res.write(String.fromCharCodes(data));
+            if (headers.containsKey(HttpHeaders.contentEncodingHeader)) {
+              res.add(data);
+            } else {
+              res.write(String.fromCharCodes(data));
+            }
+            connect!.close();
           }
-          connect!.close();
+        } catch (e) {
+          var fn = _reqCloses.remove(connect);
+          if (fn != null) fn();
+          rethrow;
         }
-      } catch (e) {
-        var fn = _reqCloses.remove(connect);
-        if (fn != null) fn();
-        rethrow;
       }
       callback();
     };
