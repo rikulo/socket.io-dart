@@ -31,7 +31,7 @@ void main() {
           client.emit('fromServer', 'ok');
         });
       });
-      io.listen(3000);
+      await io.listen(3000);
     });
   });
 }

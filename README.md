@@ -92,3 +92,5 @@ If you are new to Git or GitHub, please read [this guide](https://help.github.co
 * Thanks [@guilhermecaldas](https://github.com/guilhermecaldas) for https://github.com/rikulo/socket.io-dart/pull/16
 * Thanks [@jodinathan](https://github.com/jodinathan) for https://github.com/rikulo/socket.io-dart/pull/17
 * Thanks [@jodinathan](https://github.com/jodinathan) for https://github.com/rikulo/socket.io-dart/pull/18
+* Thanks [@nicobritos](https://github.com/nicobritos) for https://github.com/rikulo/socket.io-dart/pull/46
+* Thanks [@nicobritos](https://github.com/nicobritos) for https://github.com/rikulo/socket.io-dart/pull/47

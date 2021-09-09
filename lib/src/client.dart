@@ -128,8 +128,9 @@ class Client {
     opts ??= {};
     // this writes to the actual connection
     void writeToEngine(encodedPackets) {
-      if (opts!['volatile'] != null && self.conn.transport.writable != true)
+      if (opts!['volatile'] != null && self.conn.transport.writable != true) {
         return;
+      }
       for (var i = 0; i < encodedPackets.length; i++) {
         self.conn.write(encodedPackets[i], {'compress': opts['compress']});
       }

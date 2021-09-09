@@ -34,7 +34,7 @@ class Server {
   // Namespaces
   Map<String, Namespace> nsps = {};
   late Namespace sockets;
-  dynamic? _origins;
+  dynamic _origins;
   bool? _serveClient;
   String? _path;
   String _adapter = 'default';

@@ -1,3 +1,13 @@
+## 1.0.1
+
+**Bug Fix:**
+
+* [#45](https://github.com/rikulo/socket.io-dart/issues/45) [BUG] Calling close on Server raises ConcurrentModificationError
+
+**New Feature:**
+
+* [#47](https://github.com/rikulo/socket.io-dart/pull/47) Added Future to start and stop server
+
 ## 1.0.0
 
 **New Feature:**

@@ -54,7 +54,7 @@ class Server extends Engine {
   late bool cookieHttpOnly;
   late Map perMessageDeflate;
   late Map httpCompression;
-  dynamic? initialPacket;
+  dynamic initialPacket;
   final Uuid _uuid = Uuid();
 
   Server([Map? opts]) {
