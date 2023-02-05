@@ -42,6 +42,7 @@ class Server {
   Engine? engine;
   Encoder encoder = Encoder();
   Future<bool>? _ready;
+  String? address;
 
   /// Server is ready
   ///
@@ -65,7 +66,7 @@ class Server {
   /// @param {http.Server|Number|Object} http server, port or options
   /// @param {Object} options
   /// @api public
-  Server({server, Map? options}) {
+  Server({server, Map? options, this.address}) {
     options ??= {};
     path(options.containsKey('path') ? options['path'] : '/socket.io');
     serveClient(false != options['serveClient']);
@@ -244,15 +245,13 @@ class Server {
       _logger.fine('creating http server and binding to $srv');
       var port = srv.toInt();
       var server = StreamServer();
-      await server.start(port: port);
-//      HttpServer.bind(InternetAddress.ANY_IP_V4, port).then((
-//          HttpServer server) {
-//        this.httpServer = server;
-////                server.listen((HttpRequest request) {
-////                    HttpResponse response = request.response;
-////                    response.statusCode = HttpStatus.NOT_FOUND;
-////                    response.close();
-////                });
+      if(opts.containsKey('securityContext')){
+        SecurityContext securityContext = opts['securityContext'];
+        await server.startSecure(securityContext,port: port, address: address,);
+      }
+      else{
+        await server.start(port: port, address: address,);
+      }
 
       var completer = Completer();
       var connectPacket = {'type': CONNECT, 'nsp': '/'};
